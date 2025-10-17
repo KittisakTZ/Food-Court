@@ -2,7 +2,7 @@ import axios from "axios";
 import { appConfig } from "@/configs/app.config";
 
 const mainApi = axios.create({
-  baseURL: appConfig.baseApi,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   withCredentials: true,
   validateStatus: (status) => {

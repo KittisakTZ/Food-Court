@@ -9,3 +9,12 @@ export type AuthResponse = {
     responseObject: TypeAuth;
     statusCode: number;
 };
+
+export type UserAuthResponse = {
+    id: string;
+    username: string;
+    email: string | null;
+    role: 'ADMIN' | 'SELLER' | 'BUYER';
+    createdAt: string;
+    updatedAt: string;
+};

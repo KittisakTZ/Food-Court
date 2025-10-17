@@ -1,3 +1,5 @@
 export default function HomeFeature() {
-  return <div></div>;
+  return <div>
+    Home Feature
+  </div>;
 }

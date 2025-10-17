@@ -1,6 +1,7 @@
+// @/pages/login/index.tsx
 import { useEffect, useState } from "react";
 import { postLogin, getAuthStatus } from "@/services/auth.service";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import Link
 
 export default function LoginFeature() {
   const [username, setUsername] = useState("");
@@ -8,45 +9,48 @@ export default function LoginFeature() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getAuthStatus()
-      .then((response) => {
-        if (response.statusCode === 200 && response.message === "User authenticated successfully") {
-          navigate("/");
+    // ตรวจสอบสถานะ login เมื่อ component โหลด
+    const checkAuth = async () => {
+      try {
+        const response = await getAuthStatus();
+        if (response.statusCode === 200) {
+          navigate("/"); // ถ้า login อยู่แล้ว ให้ไปหน้าหลัก
         }
-      })
-      .catch((error) => {
-        console.error("Error checking authentication status:", error.message);
-      });
-  }, []);
+      } catch (error) {
+        // ไม่ต้องทำอะไร ถ้าเช็คไม่ผ่าน (เช่น token ไม่มี) ก็อยู่หน้า login ต่อไป
+        console.log("Not authenticated");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
-  const handleLogin = (event: React.FormEvent) => {
+  const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!username) return alert("Please enter a username.");
-    if (!password) return alert("Please enter a password.");
+    if (!username || !password) return alert("Please enter username and password.");
 
     try {
-      postLogin({ username, password }).then((response) => {
-        if (response.statusCode === 200) {
-          navigate("/");
-        } else {
-          alert(response.message || "Unexpected error occurred");
-        }
-      });
-    } catch (error) {
-      // console.error("Error logging in:", error.response?.data || error.message);
-      alert("Failed to log in. Please try again.");
+      const response = await postLogin({ username, password });
+      if (response.statusCode === 200) {
+        navigate("/");
+      } else {
+        // แสดงข้อความจาก Backend โดยตรง
+        alert(response.message || "An unexpected error occurred");
+      }
+    } catch (error: any) {
+      console.error("Error logging in:", error);
+      // แสดงข้อความ error จาก response ของ API ที่ล้มเหลว
+      alert(error.response?.data?.message || "Failed to log in. Please check your credentials.");
     }
   };
 
   return (
-    // <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100">
     <div className="flex items-center justify-center min-h-screen bg-[url('/images/bg-login.jpg')] bg-cover bg-center bg-no-repeat">
       <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border border-gray-200 animate-fade-in">
         <div className="flex justify-center mb-6">
           <img
             src="/images/logo.png"
             alt="logo-main-website"
-            className="h-12 transition-opacity duration-300 hover:opacity-70 cursor-pointer"
+            className="h-12"
           />
         </div>
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">Login</h2>
@@ -84,6 +88,14 @@ export default function LoginFeature() {
             Login
           </button>
         </form>
+
+        {/* เพิ่ม Link ไปหน้า Register */}
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Don't have an account?{" "}
+          <Link to="/register" className="font-medium text-blue-600 hover:underline">
+            Sign up now
+          </Link>
+        </p>
 
       </div>
     </div>
