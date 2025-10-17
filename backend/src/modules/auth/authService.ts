@@ -1,55 +1,35 @@
-import { Response } from 'express';
+// @modules/auth/authService.ts
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseStatus, ServiceResponse } from '@common/models/serviceResponse';
 import { authRepository } from '@modules/auth/authRepository';
-import { TypePayloadAuth } from '@modules/auth/authModel';
+import { UserPayload } from '@modules/auth/authModel';
 import bcrypt from 'bcrypt';
 import { jwtGenerator } from '@common/utils/jwtGenerator';
 
 export const authService = {
-
-    login: async (payload: TypePayloadAuth , res: Response) => {
-        try{
-            const checkEmployee = await authRepository.findByUsername(payload.username);
-            if(!checkEmployee){
+    register: async (payload: UserPayload) => {
+        try {
+            const existingUser = await authRepository.findByUsername(payload.username);
+            if (existingUser) {
                 return new ServiceResponse(
                     ResponseStatus.Failed,
-                    "The username or password is incorrect.",
+                    "Username already exists.",
                     null,
-                    StatusCodes.BAD_REQUEST
-                )
+                    StatusCodes.CONFLICT
+                );
             }
-            const password = payload.password;
-            const passwordDB = checkEmployee.password;
 
-            const inValidPassword = await bcrypt.compare(password, passwordDB);
-            if(!inValidPassword){
-                return new ServiceResponse(
-                    ResponseStatus.Failed,
-                    "The username or password is incorrect.",
-                    null,
-                    StatusCodes.BAD_REQUEST
-                )
-            }
-            const uuid = checkEmployee.employee_id;
+            const newUser = await authRepository.createUser(payload);
 
-            const dataPayload = {
-                uuid: uuid,
-            }
-            const token = await jwtGenerator.generate(dataPayload);
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV !== 'production',
-                maxAge:  (10 * 60 * 60 * 1000)
-            });
             return new ServiceResponse(
                 ResponseStatus.Success,
-                "User authenticated successfully.",
+                "User registered successfully.",
                 null,
-                StatusCodes.OK
-            )
-        }catch (ex) {
-            const errorMessage = "Error create user : " + (ex as Error).message;
+                StatusCodes.CREATED
+            );
+        } catch (ex) {
+            const errorMessage = "Error registering user: " + (ex as Error).message;
             return new ServiceResponse(
                 ResponseStatus.Failed,
                 errorMessage,
@@ -58,14 +38,68 @@ export const authService = {
             );
         }
     },
+
+    login: async (payload: UserPayload, res: Response) => {
+        try {
+            const user = await authRepository.findByUsername(payload.username);
+            if (!user) {
+                return new ServiceResponse(
+                    ResponseStatus.Failed,
+                    "The username or password is incorrect.",
+                    null,
+                    StatusCodes.BAD_REQUEST
+                );
+            }
+
+            const isValidPassword = await bcrypt.compare(payload.password, user.password);
+            if (!isValidPassword) {
+                return new ServiceResponse(
+                    ResponseStatus.Failed,
+                    "The username or password is incorrect.",
+                    null,
+                    StatusCodes.BAD_REQUEST
+                );
+            }
+
+            // Payload สำหรับสร้าง Token
+            const tokenPayload = {
+                uuid: user.id, // แก้ไขจาก 'id' เป็น 'uuid'
+                role: user.role,
+            };
+
+            const token = await jwtGenerator.generate(tokenPayload);
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: (10 * 60 * 60 * 1000) // 10 hours
+            });
+
+            return new ServiceResponse(
+                ResponseStatus.Success,
+                "User authenticated successfully.",
+                null,
+                StatusCodes.OK
+            );
+        } catch (ex) {
+            const errorMessage = "Error during login: " + (ex as Error).message;
+            return new ServiceResponse(
+                ResponseStatus.Failed,
+                errorMessage,
+                null,
+                StatusCodes.INTERNAL_SERVER_ERROR
+            );
+        }
+    },
+
     logout: (res: Response) => {
         try {
             res.clearCookie('token', {
-                httpOnly: true, 
-                secure: process.env.NODE_ENV !== 'production', 
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict'
             });
-    
+
             return new ServiceResponse(
                 ResponseStatus.Success,
                 "User logged out successfully.",
@@ -79,37 +113,36 @@ export const authService = {
                 errorMessage,
                 null,
                 StatusCodes.INTERNAL_SERVER_ERROR
-            );  
+            );
         }
     },
-    authStatus:(req: any) => {
+
+    authStatus: (req: Request) => {
         try {
             const token = req.cookies.token;
             if (token) {
                 return new ServiceResponse(
                     ResponseStatus.Success,
-                    "User authenticated successfully",
+                    "User is authenticated.",
                     null,
                     StatusCodes.OK
                 );
-            }else {
+            } else {
                 return new ServiceResponse(
                     ResponseStatus.Failed,
-                    "Authentication required",
+                    "Authentication required.",
                     null,
                     StatusCodes.UNAUTHORIZED
-                )
-            }  
+                );
+            }
         } catch (ex) {
-            const errorMessage = "Error auth status: " + (ex as Error).message;
+            const errorMessage = "Error checking auth status: " + (ex as Error).message;
             return new ServiceResponse(
                 ResponseStatus.Failed,
                 errorMessage,
                 null,
                 StatusCodes.INTERNAL_SERVER_ERROR
-            );  
+            );
         }
     },
-
-    
-}
+};

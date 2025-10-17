@@ -1,37 +1,30 @@
+// @modules/auth/authModel.ts
 import { z } from "zod";
+import { Role } from "@prisma/client";
 
+// Payload สำหรับ User model
+export type UserPayload = {
+    id?: string;
+    username: string;
+    password: string;
+    email?: string | null;
+    role?: Role;
+};
 
-export type TypePayloadAuth = {
-    employee_id : string;
-    employee_code : string;   
-    username : string;
-    password : string ; 
-    email : string ;
-    is_active : Boolean      
-    role?: string;
-    role_id?: string;
-    position? : string;     
-    first_name : string ;   
-    last_name? : string;  
-    birthdate? : string;  
-    phone? : string;   
-    line_id?: string;
-    contact_name? : string;  
-    address? :  string;  
-    country? : string;   
-    province? : string;  
-    district? : string;   
-    remark? : string;  
-    profile_picture? : string; 
-    created_by? : string; 
-    updated_by? : string; 
-    created_at : Date; 
-    updated_at :  Date; 
-}
-
+// Schema สำหรับการ Login
 export const LoginSchema = z.object({
     body: z.object({
-        username : z.string().min(4).max(50),
-        password : z.string().min(4).max(50),
-    })
-})
+        username: z.string().min(4, "Username must be at least 4 characters long"),
+        password: z.string().min(4, "Password must be at least 4 characters long"),
+    }),
+});
+
+// Schema สำหรับการ Register
+export const RegisterSchema = z.object({
+    body: z.object({
+        username: z.string().min(4).max(50),
+        password: z.string().min(4).max(50),
+        email: z.string().email().optional(),
+        role: z.nativeEnum(Role).default(Role.BUYER), // กำหนดค่าเริ่มต้นเป็น BUYER
+    }),
+});

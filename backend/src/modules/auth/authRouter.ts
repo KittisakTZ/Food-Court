@@ -1,30 +1,33 @@
-import express, {Request, Response, Router} from "express";
-
-import {
-    handleServiceResponse,
-    validateRequest,
-  } from "@common/utils/httpHandlers";
+// @modules/auth/authRouter.ts
+import express, { Request, Response } from "express";
+import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { authService } from "@modules/auth/authService";
-import { LoginSchema} from "@modules/auth/authModel";
+import { LoginSchema, RegisterSchema } from "@modules/auth/authModel"; // import RegisterSchema
+
 export const authRouter = (() => {
     const router = express.Router();
 
-
-    router.post("/login", validateRequest(LoginSchema),  async (req: Request, res: Response) => {
+    router.post("/register", validateRequest(RegisterSchema), async (req: Request, res: Response) => {
         const payload = req.body;
-        const ServiceResponse = await authService.login(payload, res);
-        handleServiceResponse(ServiceResponse, res);
-    })
+        const serviceResponse = await authService.register(payload);
+        handleServiceResponse(serviceResponse, res);
+    });
 
-    router.get("/logout", async (req: Request, res: Response) => {
-        const ServiceResponse = await authService.logout(res);
-        handleServiceResponse(ServiceResponse, res);
-    })
+    router.post("/login", validateRequest(LoginSchema), async (req: Request, res: Response) => {
+        const payload = req.body;
+        const serviceResponse = await authService.login(payload, res);
+        handleServiceResponse(serviceResponse, res);
+    });
+
+    router.get("/logout", async (_req: Request, res: Response) => {
+        const serviceResponse = await authService.logout(res);
+        handleServiceResponse(serviceResponse, res);
+    });
 
     router.get("/auth-status", async (req: Request, res: Response) => {
-        const ServiceResponse = await authService.authStatus(req);
-        handleServiceResponse(ServiceResponse, res);
-    })
+        const serviceResponse = authService.authStatus(req);
+        handleServiceResponse(serviceResponse, res);
+    });
 
     return router;
 })();

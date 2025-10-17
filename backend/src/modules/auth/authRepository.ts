@@ -1,65 +1,51 @@
-import { employees , roles } from "@prisma/client";
+// @modules/auth/authRepository.ts
+import { User, Role } from "@prisma/client";
 import prisma from "@src/db";
-import { TypePayloadAuth } from "@modules/auth/authModel";
+import { UserPayload } from "@modules/auth/authModel";
 import bcrypt from "bcrypt";
 
+// Fields ที่ต้องการ select เวลา query
+const UserSelect = {
+    id: true,
+    username: true,
+    email: true,
+    role: true,
+    createdAt: true, // เพิ่ม field นี้
+    updatedAt: true, // เพิ่ม field นี้
+};
 
-export const Keys = [
-    "employee_id",
-    "employee_code",
-    "username",
-    "password",
-    "email",
-    "is_active",
-    "role_id",
-    "first_name",
-    "last_name",
-    "birthday",
-    "phone_number",
-    "line_id",
-    "contact_name",
-    "country",
-    "province",
-    "district",
-    "position",
-    "remark",
-    "created_at",
-    "updated_at",
-    "picture",
-];
-
-export const KeysFindUsername = [
-  "employee_id",
-  "username",
-  "password",
-  "role_id",
-];
-
-export const KeysFineEmployee = [
-    "employee_id",
-    "username",
-    "password",
-    "role_id",
-];
+const UserSelectWithPassword = {
+    ...UserSelect,
+    password: true,
+};
 
 export const authRepository = {
-
-    findByUsername: async <Key extends keyof employees>(
-      username: string,
-      keys = KeysFineEmployee as Key[]
-    ) => {
-      return prisma.employees.findUnique({
-        where: { username: username },
-        select: keys.reduce((obj, k) => ({ ...obj, [k]: true }), {}),
-      }) as Promise<Pick<employees, Key> | null>;
+    findByUsername: async (username: string) => {
+        return prisma.user.findUnique({
+            where: { username: username },
+            select: UserSelectWithPassword,
+        });
     },
-    findById: async <Key extends keyof employees>(
-      uuid : string,
-      keys = KeysFindUsername as Key[]
-    ) => {
-        return prisma.employees.findUnique({
-            where: { employee_id : uuid},
-            select: keys.reduce(( obj, k) => ({...obj, [k]: true}), {}),
-        }) as Promise<Pick<employees, Key> | null>;
+
+    findById: async (id: string) => {
+        return prisma.user.findUnique({
+            where: { id: id },
+            select: UserSelect,
+        });
+    },
+
+    createUser: async (payload: UserPayload): Promise<Omit<User, 'password'>> => {
+        const hashedPassword = await bcrypt.hash(payload.password, 10);
+        
+        const newUser = await prisma.user.create({
+            data: {
+                username: payload.username,
+                password: hashedPassword,
+                email: payload.email,
+                role: payload.role,
+            },
+            select: UserSelect,
+        });
+        return newUser;
     },
 };

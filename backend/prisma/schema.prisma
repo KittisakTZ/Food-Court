@@ -1,440 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+enum Role {
+  ADMIN
+  SELLER
+  BUYER
 }
 
-model roles {
-  role_id    String    @id @default(uuid()) @db.Uuid
-  role_name  String    @unique @db.VarChar(15)
-  created_at DateTime  @default(now())
-  created_by String?   @db.Uuid
-  updated_at DateTime? @updatedAt
-  updated_by String?   @db.Uuid
-
-  created_by_employee employees? @relation("RoleCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("RoleUpdatedBy", fields: [updated_by], references: [employee_id])
-
-  employee employees[]
+enum OrderStatus {
+  PENDING
+  REJECTED
+  ACCEPTED
+  PAID
+  COMPLETED
+  CANCELLED
 }
 
-model Company {
-  company_id  String    @id @default(uuid()) @db.Uuid
-  name_th     String    @unique @db.VarChar(50)
-  name_en     String    @unique @db.VarChar(50)
-  address_th  String?   @db.VarChar(255)
-  country_th  String?   @db.VarChar(50)
-  province_th String?   @db.VarChar(50)
-  district_th String?   @db.VarChar(50)
-  address_en  String?   @db.VarChar(255)
-  country_en  String?   @db.VarChar(50)
-  province_en String?   @db.VarChar(50)
-  district_en String?   @db.VarChar(50)
-  tax_id      String?   @db.VarChar(50)
-  phone       String?   @db.VarChar(10)
-  email       String?   @db.VarChar(50)
-  logo        String?   @db.VarChar(255)
-  created_at  DateTime  @default(now())
-  created_by  String?   @db.Uuid
-  updated_at  DateTime? @updatedAt
-  updated_by  String?   @db.Uuid
+model User {
+  id         String   @id @default(cuid())
+  username   String   @unique
+  password   String
+  email      String?  @unique
+  role       Role     @default(BUYER)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  store      Store?
 
-  created_by_employee employees? @relation("CompanyCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("CompanyUpdatedBy", fields: [updated_by], references: [employee_id])
+  orders     Order[]
+  reviews    Review[]
 }
 
-model employees {
-  employee_id     String    @id @default(uuid()) @db.Uuid
-  employee_code   String?   @unique @db.VarChar(50)
-  username        String    @unique @db.VarChar(50)
-  password        String    @db.VarChar(255)
-  email           String    @db.VarChar(50)
-  role_id         String    @db.Uuid
-  is_active       Boolean   @default(true)
-  position        String?   @db.VarChar(20)
-  team_id         String?   @db.Uuid
-  first_name      String    @db.VarChar(20)
-  last_name       String?   @db.VarChar(20)
-  birthdate       String?   @db.VarChar(10)
-  phone           String?   @db.VarChar(10)
-  line_id         String?   @db.VarChar(20)
-  address_id      String?   @db.Uuid
-  remark          String?   @db.VarChar(255)
-  profile_picture String?   @db.VarChar(100)
-  salary          Decimal?  @db.Decimal(7, 2)
-  status_id       String?   @db.Uuid
-  start_date      String?   @db.VarChar(10)
-  end_date        String?   @db.VarChar(10)
-  created_at      DateTime  @default(now())
-  created_by      String?   @db.Uuid
-  updated_at      DateTime? @updatedAt
-  updated_by      String?   @db.Uuid
+model Store {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  description   String?
+  location      String?
+  image         String?
+  isApproved    Boolean  @default(false)
+  isOpen        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  ownerId       String   @unique 
+  owner         User     @relation(fields: [ownerId], references: [id])
 
-  role roles @relation(fields: [role_id], references: [role_id])
-
-  // --- Back relations for created_by/updated_by ---
-  roles_created      roles[]     @relation("RoleCreatedBy")
-  roles_updated      roles[]     @relation("RoleUpdatedBy")
-  company_created    Company[]   @relation("CompanyCreatedBy")
-  company_updated    Company[]   @relation("CompanyUpdatedBy")
-  characters_created Character[] @relation("CharacterCreatedBy")
-  characters_updated Character[] @relation("CharacterUpdatedBy")
-
-  group_item_created        ms_group_item[]       @relation("GroupItemCreatedBy")
-  group_item_updated        ms_group_item[]       @relation("GroupItemUpdatedBy")
-  type_item_created         ms_type_item[]        @relation("TypeItemCreatedBy")
-  type_item_updated         ms_type_item[]        @relation("TypeItemUpdatedBy")
-  unit_created              ms_unit[]             @relation("UnitCreatedBy")
-  unit_updated              ms_unit[]             @relation("UnitUpdatedBy")
-  item_created              ms_item[]             @relation("ItemCreatedBy")
-  item_updated              ms_item[]             @relation("ItemUpdatedBy")
-  ship_type_created         ms_ship_type[]        @relation("ShipTypeCreatedBy")
-  ship_type_updated         ms_ship_type[]        @relation("ShipTypeUpdatedBy")
-  ms_customer_created       ms_customer[]         @relation("CustomerCreatedBy")
-  ms_customer_updated       ms_customer[]         @relation("CustomerUpdatedBy")
-  ms_saleperson_created     ms_saleperson[]       @relation("SalepersonCreatedBy")
-  ms_saleperson_updated     ms_saleperson[]       @relation("SalepersonUpdatedBy")
-  production_steps_created  ms_production_step[]  @relation("ProductionStepCreatedBy")
-  production_steps_updated  ms_production_step[]  @relation("ProductionStepUpdatedBy")
-  production_types_created  ms_production_type[]  @relation("ProductionTypeCreatedBy")
-  production_types_updated  ms_production_type[]  @relation("ProductionTypeUpdatedBy")
-  product_types_created     ms_product_type[]     @relation("ProductTypeCreatedBy")
-  product_types_updated     ms_product_type[]     @relation("ProductTypeUpdatedBy")
-  genders_created           ms_gender[]           @relation("GenderCreatedBy")
-  genders_updated           ms_gender[]           @relation("GenderUpdatedBy")
-  waste_products_created    ms_waste_product[]    @relation("WasteProductCreatedBy")
-  waste_products_updated    ms_waste_product[]    @relation("WasteProductUpdatedBy")
-  warehouses_created        ms_warehouse[]        @relation("WarehouseCreatedBy")
-  warehouses_updated        ms_warehouse[]        @relation("WarehouseUpdatedBy")
-  storage_locations_created ms_storage_location[] @relation("StorageLocationCreatedBy")
-  storage_locations_updated ms_storage_location[] @relation("StorageLocationUpdatedBy")
-  supplier_detail_created   ms_supplier_detail[]  @relation("SupplierDetailCreatedBy")
-  ms_supplier_created       ms_supplier[]         @relation("SupplierCreatedBy")
-  ms_supplier_updated       ms_supplier[]         @relation("SupplierUpdatedBy")
-
-  @@index([employee_code])
-  @@index([username])
-  @@index([email])
-  @@index([first_name])
-  @@index([last_name])
+  categories    MenuCategory[]
+  menus         Menu[]
+  orders        Order[]
+  reviews       Review[]
 }
 
-model Character {
-  character_id          String     @id @default(uuid()) @db.Uuid
-  character_name        String     @db.VarChar(50)
-  character_description String     @db.Text
-  created_at            DateTime   @default(now())
-  created_by            String     @db.Uuid
-  updated_at            DateTime?  @updatedAt
-  updated_by            String?    @db.Uuid
-  created_by_employee   employees  @relation("CharacterCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee   employees? @relation("CharacterUpdatedBy", fields: [updated_by], references: [employee_id])
+model MenuCategory {
+  id          String   @id @default(cuid())
+  name        String
 
-  @@index([character_name])
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+
+  menus       Menu[]
 }
 
-model ms_group_item {
-  group_item_id          String    @id @default(uuid()) @db.Uuid
-  group_item_name        String    @unique @db.VarChar(50)
-  group_item_description String    @db.Text
-  created_at             DateTime  @default(now())
-  created_by             String    @db.Uuid
-  updated_at             DateTime  @updatedAt
-  updated_by             String    @db.Uuid
-  created_by_employee    employees @relation("GroupItemCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee    employees @relation("GroupItemUpdatedBy", fields: [updated_by], references: [employee_id])
+model Menu {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  image         String?
+  isAvailable   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  categoryId    String?
+  category      MenuCategory? @relation(fields: [categoryId], references: [id])
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id])
 
-  type_item ms_type_item[] @relation("TypeItem")
-  item      ms_item[]      @relation("Item")
-
-  @@index([group_item_name])
+  orderItems    OrderItem[]
 }
 
-model ms_type_item {
-  type_item_id          String        @id @default(uuid()) @db.Uuid
-  group_item_id         String        @db.Uuid
-  type_item_name        String        @unique @db.VarChar(50)
-  type_item_description String        @db.Text
-  created_at            DateTime      @default(now())
-  created_by            String        @db.Uuid
-  updated_at            DateTime      @updatedAt
-  updated_by            String        @db.Uuid
-  created_by_employee   employees     @relation("TypeItemCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee   employees     @relation("TypeItemUpdatedBy", fields: [updated_by], references: [employee_id])
-  group_item            ms_group_item @relation("TypeItem", fields: [group_item_id], references: [group_item_id])
+model Order {
+  id              String       @id @default(cuid())
+  buyerId         String
+  buyer           User         @relation(fields: [buyerId], references: [id])
+  storeId         String
+  store           Store        @relation(fields: [storeId], references: [id])
+  status          OrderStatus  @default(PENDING)
+  totalAmount     Float        @default(0)
+  position        Float        
+  scheduledPickup DateTime?
+  paidAt          DateTime?
+  confirmedAt     DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  item ms_item[] @relation("Item")
-
-  @@index([type_item_name])
+  orderItems      OrderItem[]
 }
 
-model ms_unit {
-  unit_id             String    @id @default(uuid()) @db.Uuid
-  unit_name           String    @unique @db.VarChar(50)
-  created_at          DateTime  @default(now())
-  created_by          String    @db.Uuid
-  updated_at          DateTime  @updatedAt
-  updated_by          String    @db.Uuid
-  created_by_employee employees @relation("UnitCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees @relation("UnitUpdatedBy", fields: [updated_by], references: [employee_id])
-
-  item ms_item[] @relation("Item")
-
-  @@index([unit_name])
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id])
+  quantity  Int
+  subtotal  Float
 }
 
-model ms_item {
-  item_id             String        @id @default(uuid()) @db.Uuid
-  item_code           String        @unique @db.VarChar(50)
-  item_name           String        @unique @db.VarChar(50)
-  item_description    String        @db.Text
-  additional_note     String?       @db.Text
-  group_item_id       String        @db.Uuid
-  type_item_id        String        @db.Uuid
-  unit_id             String        @db.Uuid
-  item_price          Decimal       @db.Decimal(10, 2)
-  item_file           Json
-  created_at          DateTime      @default(now())
-  created_by          String        @db.Uuid
-  updated_at          DateTime      @updatedAt
-  updated_by          String        @db.Uuid
-  created_by_employee employees     @relation("ItemCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees     @relation("ItemUpdatedBy", fields: [updated_by], references: [employee_id])
-  group_item          ms_group_item @relation("Item", fields: [group_item_id], references: [group_item_id])
-  type_item           ms_type_item  @relation("Item", fields: [type_item_id], references: [type_item_id])
-  unit                ms_unit       @relation("Item", fields: [unit_id], references: [unit_id])
-
-  @@index([item_code])
-  @@index([item_name])
-}
-
-model ms_ship_type {
-  ship_type_id        String    @id @default(uuid()) @db.Uuid
-  ship_type_name      String    @unique @db.VarChar(50)
-  created_at          DateTime  @default(now())
-  created_by          String    @db.Uuid
-  updated_at          DateTime  @updatedAt
-  updated_by          String    @db.Uuid
-  created_by_employee employees @relation("ShipTypeCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees @relation("ShipTypeUpdatedBy", fields: [updated_by], references: [employee_id])
-
-  @@index([ship_type_name])
-}
-
-model ms_supplier {
-  supplier_id            String               @id @default(uuid()) @db.Uuid
-  supplier_code          String               @unique @db.VarChar(50)
-  sale_name_th           String               @db.VarChar(50)
-  sale_name_en           String?              @db.VarChar(50)
-  supplier_type          Boolean              @db.Boolean
-  supplier_picture       String?              @db.VarChar(100)
-  supplier_address       String               @db.Text
-  supplier_phone_main    String               @db.VarChar(20)
-  supplier_fax           String?              @db.VarChar(20)
-  supplier_contact_name  String               @db.VarChar(50)
-  supplier_contact_phone String               @db.VarChar(50)
-  supplier_contact_email String               @db.VarChar(50)
-  supplier_remark        String?              @db.Text
-  created_at             DateTime             @default(now())
-  created_by             String               @db.Uuid
-  updated_at             DateTime             @updatedAt
-  updated_by             String               @db.Uuid
-  created_by_employee    employees            @relation("SupplierCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee    employees            @relation("SupplierUpdatedBy", fields: [updated_by], references: [employee_id])
-  supplier_detail        ms_supplier_detail[] @relation("Supplier")
-
-  @@index([supplier_code])
-  @@index([sale_name_th])
-  @@index([sale_name_en])
-}
-
-model ms_supplier_detail {
-  supplier_detail_id  String             @id @default(uuid()) @db.Uuid
-  supplier_id         String             @db.Uuid
-  production_step_id  String             @db.Uuid
-  created_at          DateTime           @default(now())
-  created_by          String             @db.Uuid
-  created_by_employee employees          @relation("SupplierDetailCreatedBy", fields: [created_by], references: [employee_id])
-  supplier            ms_supplier        @relation("Supplier", fields: [supplier_id], references: [supplier_id])
-  product_step        ms_production_step @relation("ProductStep", fields: [production_step_id], references: [step_id])
-}
-
-model ms_customer {
-  customer_id   String    @id @default(uuid()) @db.Uuid
-  customer_code String    @unique @db.VarChar(20)
-  customer_name String    @db.VarChar(100)
-  email         String?   @db.VarChar(50)
-  phone         String?   @db.VarChar(20)
-  address       String?   @db.VarChar(255)
-  country_id    String?   @db.Uuid
-  province_id   String?   @db.Uuid
-  district_id   String?   @db.Uuid
-  postal_code   String?   @db.VarChar(10)
-  remark        String?   @db.Text
-  created_at    DateTime  @default(now())
-  created_by    String   @db.Uuid
-  updated_at    DateTime @updatedAt
-  updated_by    String   @db.Uuid
-
-  created_by_employee employees?   @relation("CustomerCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees?   @relation("CustomerUpdatedBy", fields: [updated_by], references: [employee_id])
-  country             ms_country?  @relation(fields: [country_id], references: [country_id])
-  province            ms_province? @relation(fields: [province_id], references: [province_id])
-  district            ms_district? @relation(fields: [district_id], references: [district_id])
-}
-
-model ms_saleperson {
-  saleperson_id       String     @id @default(uuid()) @db.Uuid
-  saleperson_code     String     @unique @db.VarChar(20)
-  first_name          String     @db.VarChar(50)
-  last_name           String     @db.VarChar(50)
-  position            String?    @db.VarChar(200)
-  email               String?    @db.VarChar(50)
-  phone               String?    @db.VarChar(20)
-  remark              String?    @db.Text
-  created_at          DateTime   @default(now())
-  created_by          String  @db.Uuid
-  updated_at          DateTime  @updatedAt
-  updated_by          String    @db.Uuid
-  created_by_employee employees? @relation("SalepersonCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("SalepersonUpdatedBy", fields: [updated_by], references: [employee_id])
-}
-
-model ms_production_step {
-  step_id     String    @id @default(uuid()) @db.Uuid
-  step_code   String    @unique @db.VarChar(20)
-  step_name   String    @db.VarChar(100)
-  description String?   @db.Text
-  remark      String?   @db.Text
-  created_at  DateTime  @default(now())
-  created_by  String  @db.Uuid
-  updated_at  DateTime @updatedAt
-  updated_by  String   @db.Uuid
-
-  created_by_employee employees?           @relation("ProductionStepCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees?           @relation("ProductionStepUpdatedBy", fields: [updated_by], references: [employee_id])
-  ms_supplier_detail  ms_supplier_detail[] @relation("ProductStep")
-}
-
-model ms_production_type {
-  production_type_id   String    @id @default(uuid()) @db.Uuid
-  production_type_code String    @unique @db.VarChar(20)
-  production_type_name String    @db.VarChar(100)
-  remark               String?   @db.Text
-  created_at           DateTime  @default(now())
-  created_by           String   @db.Uuid
-  updated_at           DateTime @updatedAt
-  updated_by           String   @db.Uuid
-
-  created_by_employee employees? @relation("ProductionTypeCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("ProductionTypeUpdatedBy", fields: [updated_by], references: [employee_id])
-}
-
-model ms_product_type {
-  product_type_id   String    @id @default(uuid()) @db.Uuid
-  product_type_code String    @unique @db.VarChar(20)
-  product_type_name String    @db.VarChar(100)
-  remark            String?   @db.Text
-  created_at        DateTime  @default(now())
-  created_by        String  @db.Uuid
-  updated_at        DateTime @updatedAt
-  updated_by        String   @db.Uuid
-
-  created_by_employee employees? @relation("ProductTypeCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("ProductTypeUpdatedBy", fields: [updated_by], references: [employee_id])
-}
-
-model ms_gender {
-  gender_id   String    @id @default(uuid()) @db.Uuid
-  gender_code String    @unique @db.VarChar(10)
-  gender_name String    @db.VarChar(20)
-  created_at  DateTime  @default(now())
-  created_by  String  @db.Uuid
-  updated_at  DateTime @updatedAt
-  updated_by  String   @db.Uuid
-
-  created_by_employee employees? @relation("GenderCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("GenderUpdatedBy", fields: [updated_by], references: [employee_id])
-}
-
-model ms_waste_product {
-  waste_product_id   String    @id @default(uuid()) @db.Uuid
-  waste_product_code String    @unique @db.VarChar(20)
-  waste_product_name String    @db.VarChar(100)
-  description        String?   @db.Text
-  created_at         DateTime  @default(now())
-  created_by         String  @db.Uuid
-  updated_at         DateTime @updatedAt
-  updated_by         String   @db.Uuid
-
-  created_by_employee employees? @relation("WasteProductCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("WasteProductUpdatedBy", fields: [updated_by], references: [employee_id])
-}
-
-model ms_warehouse {
-  warehouse_id   String    @id @default(uuid()) @db.Uuid
-  warehouse_code String    @unique @db.VarChar(20)
-  name_th        String    @db.VarChar(100)
-  name_en        String?   @db.VarChar(100)
-  remark         String?   @db.Text
-  created_at     DateTime  @default(now())
-  created_by     String   @db.Uuid
-  updated_at     DateTime @updatedAt
-  updated_by     String   @db.Uuid
-
-  created_by_employee employees? @relation("WarehouseCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("WarehouseUpdatedBy", fields: [updated_by], references: [employee_id])
-
-  strorage_location ms_storage_location[]
-}
-
-model ms_storage_location {
-  storage_location_id   String    @id @default(uuid()) @db.Uuid
-  storage_location_code String    @unique @db.VarChar(20)
-  warehouse_id          String    @db.Uuid
-  name_th               String    @db.VarChar(100)
-  name_en               String?   @db.VarChar(100)
-  remark                String?   @db.Text
-  created_at            DateTime  @default(now())
-  created_by            String   @db.Uuid
-  updated_at            DateTime @updatedAt
-  updated_by            String   @db.Uuid
-
-  created_by_employee employees? @relation("StorageLocationCreatedBy", fields: [created_by], references: [employee_id])
-  updated_by_employee employees? @relation("StorageLocationUpdatedBy", fields: [updated_by], references: [employee_id])
-
-  warehouse ms_warehouse @relation(fields: [warehouse_id], references: [warehouse_id])
-}
-
-model ms_country {
-  country_id   String @id @default(uuid()) @db.Uuid
-  country_name String @db.VarChar(100)
-  country_code String @unique @db.VarChar(10)
-
-  province ms_province[]
-  customer ms_customer[]
-}
-
-model ms_province {
-  province_id   String @id @default(uuid()) @db.Uuid
-  province_name String @db.VarChar(100)
-  province_code String @unique @db.VarChar(10)
-  country_id    String @db.Uuid
-
-  country  ms_country    @relation(fields: [country_id], references: [country_id])
-  district ms_district[]
-  customer ms_customer[]
-}
-
-model ms_district {
-  district_id   String @id @default(uuid()) @db.Uuid
-  district_name String @db.VarChar(100)
-  district_code String @unique @db.VarChar(10)
-  province_id   String @db.Uuid
-
-  province ms_province   @relation(fields: [province_id], references: [province_id])
-  customer ms_customer[]
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int
+  comment     String?
+  isVisible   Boolean  @default(false)
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
 }
