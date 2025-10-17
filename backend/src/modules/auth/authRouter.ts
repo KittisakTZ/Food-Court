@@ -2,7 +2,7 @@
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { authService } from "@modules/auth/authService";
-import { LoginSchema, RegisterSchema } from "@modules/auth/authModel"; // import RegisterSchema
+import { LoginSchema, RegisterSchema } from "@modules/auth/authModel"; 
 
 export const authRouter = (() => {
     const router = express.Router();
