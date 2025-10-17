@@ -44,28 +44,26 @@ export const authService = {
             const user = await authRepository.findByUsername(payload.username);
             if (!user) {
                 return new ServiceResponse(
-                    ResponseStatus.Failed,
-                    "The username or password is incorrect.",
-                    null,
-                    StatusCodes.BAD_REQUEST
+                    ResponseStatus.Failed, "The username or password is incorrect.", null, StatusCodes.BAD_REQUEST
                 );
             }
 
             const isValidPassword = await bcrypt.compare(payload.password, user.password);
             if (!isValidPassword) {
                 return new ServiceResponse(
-                    ResponseStatus.Failed,
-                    "The username or password is incorrect.",
-                    null,
-                    StatusCodes.BAD_REQUEST
+                    ResponseStatus.Failed, "The username or password is incorrect.", null, StatusCodes.BAD_REQUEST
                 );
             }
 
-            // Payload สำหรับสร้าง Token
+            // =========================================================
+            // **** แก้ไข Payload ตรงนี้ครับ ****
+            // =========================================================
             const tokenPayload = {
-                uuid: user.id, // แก้ไขจาก 'id' เป็น 'uuid'
-                role: user.role,
+                uuid: user.id,        // เปลี่ยนจาก uuid เป็น id เพื่อความชัดเจน
+                username: user.username, // เพิ่ม username เข้าไป มีประโยชน์สำหรับการแสดงผลหรือ Logging
+                role: user.role,    // field นี้มีอยู่แล้วและสำคัญมาก
             };
+            // =========================================================
 
             const token = await jwtGenerator.generate(tokenPayload);
 
@@ -84,10 +82,7 @@ export const authService = {
         } catch (ex) {
             const errorMessage = "Error during login: " + (ex as Error).message;
             return new ServiceResponse(
-                ResponseStatus.Failed,
-                errorMessage,
-                null,
-                StatusCodes.INTERNAL_SERVER_ERROR
+                ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR
             );
         }
     },

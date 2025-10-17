@@ -8,6 +8,7 @@ import path from 'path';
 import { env } from "@common/utils/envConfig";
 import { pino } from "pino";
 import { authRouter } from "@modules/auth/authRouter";
+import { storeRouter } from "@modules/store/storeRouter";
 
 const logger = pino({ name: "server start" });
 const app = express();
@@ -22,6 +23,7 @@ app.use(helmet());
 
 // Routes
 app.use("/v1/auth", authRouter);
+app.use("/v1/stores", storeRouter);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

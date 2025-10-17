@@ -125,7 +125,7 @@ const MainLayout = () => {
     ],
     sidebarFooter: {
       profile: {
-        name: (profile?.first_name ?? "") + " " + (profile?.last_name ?? ""),
+        name: (profile?.username ?? "") + " " + (profile?.last_name ?? ""),
         // avatar: profile?.image_url ?? "/images/avatar2.png",
         avatar: "/images/avatar2.png",
       },

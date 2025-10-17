@@ -1,0 +1,99 @@
+// @modules/store/storeService.ts
+
+import { StatusCodes } from "http-status-codes";
+import { ServiceResponse, ResponseStatus } from "@common/models/serviceResponse";
+import { storeRepository } from "./storeRepository";
+import { StorePayload } from "./storeModel";
+import { User, Role } from "@prisma/client";
+
+export const storeService = {
+    // สร้างร้านค้า
+    create: async (payload: StorePayload, user: { id: string, role: Role }) => {
+        // ตรวจสอบ: ผู้ใช้ต้องมี Role 'SELLER' เท่านั้น
+        if (user.role !== Role.SELLER) {
+            return new ServiceResponse(ResponseStatus.Failed, "Only sellers can create stores.", null, StatusCodes.FORBIDDEN);
+        }
+
+        // ตรวจสอบ: Seller 1 คน มีได้แค่ 1 ร้าน (ตาม Schema ที่ ownerId unique)
+        const existingStoreByOwner = await storeRepository.findByOwnerId(user.id);
+        if (existingStoreByOwner) {
+            return new ServiceResponse(ResponseStatus.Failed, "You already own a store.", null, StatusCodes.CONFLICT);
+        }
+
+        // ตรวจสอบ: ชื่อร้านค้าต้องไม่ซ้ำ
+        const existingStoreByName = await storeRepository.findByName(payload.name);
+        if (existingStoreByName) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store name is already taken.", null, StatusCodes.CONFLICT);
+        }
+
+        const newStore = await storeRepository.create(payload, user.id);
+        return new ServiceResponse(ResponseStatus.Success, "Store created successfully. Waiting for approval.", null, StatusCodes.CREATED);
+    },
+
+    // อัปเดตร้านค้า
+    update: async (storeId: string, payload: Partial<StorePayload>, user: { id: string, role: Role }) => {
+        const store = await storeRepository.findById(storeId);
+        if (!store) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
+        }
+
+        // ตรวจสอบสิทธิ์: ผู้ใช้ต้องเป็นเจ้าของร้าน หรือเป็น ADMIN
+        if (store.ownerId !== user.id && user.role !== Role.ADMIN) {
+            return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to update this store.", null, StatusCodes.FORBIDDEN);
+        }
+        
+        const updatedStore = await storeRepository.update(storeId, payload);
+        return new ServiceResponse(ResponseStatus.Success, "Store updated successfully.", updatedStore, StatusCodes.OK);
+    },
+    
+    // ดึงข้อมูลร้านค้าทั้งหมด
+    findAllPublic: async () => {
+        const stores = await storeRepository.findAllPublic();
+        return new ServiceResponse(ResponseStatus.Success, "Approved stores retrieved successfully.", stores, StatusCodes.OK);
+    },
+
+    // (ใหม่) Service สำหรับ Admin เพื่อดึงร้านค้าทั้งหมด
+    findAllAdmin: async () => {
+        const stores = await storeRepository.findAllAdmin();
+        return new ServiceResponse(ResponseStatus.Success, "All stores retrieved successfully for admin.", stores, StatusCodes.OK);
+    },
+
+    // ดึงข้อมูลร้านค้าเดียว
+    findById: async (storeId: string) => {
+        const store = await storeRepository.findById(storeId);
+        if (!store) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
+        }
+        return new ServiceResponse(ResponseStatus.Success, "Store found.", store, StatusCodes.OK);
+    },
+
+    // (ใหม่) Service สำหรับ Admin เพื่อ "อนุมัติ" ร้านค้า
+    approveStore: async (storeId: string) => {
+        const store = await storeRepository.findById(storeId);
+        if (!store) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
+        }
+
+        if (store.isApproved) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store has already been approved.", null, StatusCodes.BAD_REQUEST);
+        }
+
+        const approvedStore = await storeRepository.update(storeId, { isApproved: true });
+        return new ServiceResponse(ResponseStatus.Success, "Store approved successfully.", approvedStore, StatusCodes.OK);
+    },
+    
+    // (ใหม่) Service สำหรับ Admin เพื่อ "ปฏิเสธ/ยกเลิกอนุมัติ" ร้านค้า (เผื่อไว้)
+    rejectStore: async (storeId: string) => {
+        const store = await storeRepository.findById(storeId);
+        if (!store) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
+        }
+
+        if (!store.isApproved) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store has not been approved yet.", null, StatusCodes.BAD_REQUEST);
+        }
+
+        const rejectedStore = await storeRepository.update(storeId, { isApproved: false });
+        return new ServiceResponse(ResponseStatus.Success, "Store approval has been revoked.", rejectedStore, StatusCodes.OK);
+    },
+};
