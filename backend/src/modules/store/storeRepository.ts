@@ -2,6 +2,7 @@
 
 import prisma from "@src/db";
 import { StorePayload } from "./storeModel";
+import { Prisma } from "@prisma/client";
 
 export const storeRepository = {
     // สร้างร้านค้าใหม่ โดยต้องระบุ ownerId (มาจาก token ของผู้ใช้ที่ login)
@@ -14,19 +15,47 @@ export const storeRepository = {
         });
     },
 
-    countPublic: async () => {
+    countPublic: async (searchText?: string) => {
+        // กำหนดไทป์ให้ตัวแปร
+        const whereClause: Prisma.StoreWhereInput = {
+            isApproved: true,
+        };
+
+        // ใช้ if-block เพื่อเพิ่มเงื่อนไข (เหมือนกับ findAllPublic)
+        if (searchText) {
+            whereClause.name = {
+                contains: searchText,
+                mode: 'insensitive',
+            };
+        }
+
         return prisma.store.count({
-            where: { isApproved: true },
+            where: whereClause,
         });
     },
 
-    findAllPublic: async (page: number, pageSize: number) => {
+    findAllPublic: async (page: number, pageSize: number, searchText?: string) => {
+
+        //กำหนดไทป์ให้ตัวแปร
+        const whereClause: Prisma.StoreWhereInput = {
+            isApproved: true,
+        };
+
+        //ใช้ if-block เพื่อเพิ่มเงื่อนไข
+        if (searchText) {
+            whereClause.name = {
+                contains: searchText,
+                mode: 'insensitive',
+            };
+        }
+
         const skip = (page - 1) * pageSize;
+
         return prisma.store.findMany({
             skip: skip,
             take: pageSize,
-            where: { isApproved: true }, // Logic เดิม
-            orderBy: { name: 'asc' },   // เรียงตามชื่อ
+            where: whereClause,
+            orderBy: { name: 'asc' },
             include: { owner: { select: { id: true, username: true } } }
         });
     },

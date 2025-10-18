@@ -47,9 +47,17 @@ export const storeService = {
     },
 
     // ดึงข้อมูลร้านค้าทั้งหมด
-    findAllPublic: async (page: number, pageSize: number) => {
-        const stores = await storeRepository.findAllPublic(page, pageSize);
-        const totalCount = await storeRepository.countPublic();
+    findAllPublic: async (
+        page: number,
+        pageSize: number,
+        searchText?: string 
+    ) => {
+
+        // <--- (2) ส่ง searchText ไปยัง Repository
+        const stores = await storeRepository.findAllPublic(page, pageSize, searchText);
+
+        // <--- (3) ส่ง searchText ไปยังการนับด้วย (สำคัญมาก)
+        const totalCount = await storeRepository.countPublic(searchText);
 
         return new ServiceResponse(
             ResponseStatus.Success,

@@ -17,9 +17,16 @@ export const storeRouter = (() => {
     router.get("/", async (req: Request, res: Response) => {
         // ดึงค่า page และ pageSize จาก query string
         const page = parseInt(req.query.page as string) || 1;
-        const pageSize = parseInt(req.query.pageSize as string) || 10; // กำหนดค่าเริ่มต้น
+        const pageSize = parseInt(req.query.pageSize as string) || 10;
 
-        const serviceResponse = await storeService.findAllPublic(page, pageSize);
+        // --- (1) เพิ่มส่วนนี้ ---
+        // ดึงค่า searchText จาก query string (ถ้าไม่มีจะเป็น undefined)
+        const searchText = req.query.searchText as string | undefined;
+
+        // --- (2) แก้ไขส่วนนี้ ---
+        // ส่ง searchText เพิ่มเข้าไปใน service
+        const serviceResponse = await storeService.findAllPublic(page, pageSize, searchText);
+
         handleServiceResponse(serviceResponse, res);
     });
 
