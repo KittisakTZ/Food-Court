@@ -10,12 +10,16 @@ import { Role } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 
 export const storeRouter = (() => {
-    
+
     const router = express.Router();
     // --- Public Routes ---
     // GET /v1/stores - (แก้ไข) ดึงข้อมูลร้านค้าที่อนุมัติแล้วสำหรับทุกคน
-    router.get("/", async (_req: Request, res: Response) => {
-        const serviceResponse = await storeService.findAllPublic();
+    router.get("/", async (req: Request, res: Response) => {
+        // ดึงค่า page และ pageSize จาก query string
+        const page = parseInt(req.query.page as string) || 1;
+        const pageSize = parseInt(req.query.pageSize as string) || 10; // กำหนดค่าเริ่มต้น
+
+        const serviceResponse = await storeService.findAllPublic(page, pageSize);
         handleServiceResponse(serviceResponse, res);
     });
 
@@ -31,7 +35,7 @@ export const storeRouter = (() => {
             }
 
             const userPayload = req.token.payload;
-            
+
             // เราต้องการแค่ id จาก payload
             const userForService = {
                 id: userPayload.uuid
@@ -42,7 +46,7 @@ export const storeRouter = (() => {
         }
     );
 
-     // (ใหม่) GET /v1/stores/admin/all - ดึงร้านค้าทั้งหมดสำหรับ Admin
+    // (ใหม่) GET /v1/stores/admin/all - ดึงร้านค้าทั้งหมดสำหรับ Admin
     router.get(
         "/admin/all",
         authenticateToken,
@@ -52,7 +56,7 @@ export const storeRouter = (() => {
             handleServiceResponse(serviceResponse, res);
         }
     );
-    
+
     // GET /v1/stores/:storeId - ดึงข้อมูลร้านค้าเดียว (เหมือนเดิม)
     router.get("/:storeId", validateRequest(StoreIdParamSchema), async (req: Request, res: Response) => {
         const { storeId } = req.params;
@@ -70,9 +74,9 @@ export const storeRouter = (() => {
         async (req: Request, res: Response) => {
             if (!req.token) {
                 res.status(StatusCodes.UNAUTHORIZED).json({ message: "Authentication token is missing." });
-                return; 
+                return;
             }
-            
+
             const userPayload = req.token.payload;
             const userForService = {
                 id: userPayload.uuid,
@@ -83,7 +87,7 @@ export const storeRouter = (() => {
             handleServiceResponse(serviceResponse, res);
         }
     );
-    
+
     router.patch(
         "/:storeId",
         authenticateToken,
@@ -91,7 +95,7 @@ export const storeRouter = (() => {
         async (req: Request, res: Response) => {
             if (!req.token) {
                 res.status(StatusCodes.UNAUTHORIZED).json({ message: "Authentication token is missing." });
-                return; 
+                return;
             }
 
             const { storeId } = req.params;

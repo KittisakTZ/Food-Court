@@ -41,15 +41,27 @@ export const storeService = {
         if (store.ownerId !== user.id && user.role !== Role.ADMIN) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to update this store.", null, StatusCodes.FORBIDDEN);
         }
-        
+
         const updatedStore = await storeRepository.update(storeId, payload);
         return new ServiceResponse(ResponseStatus.Success, "Store updated successfully.", null, StatusCodes.OK);
     },
-    
+
     // ดึงข้อมูลร้านค้าทั้งหมด
-    findAllPublic: async () => {
-        const stores = await storeRepository.findAllPublic();
-        return new ServiceResponse(ResponseStatus.Success, "Approved stores retrieved successfully.", stores, StatusCodes.OK);
+    findAllPublic: async (page: number, pageSize: number) => {
+        const stores = await storeRepository.findAllPublic(page, pageSize);
+        const totalCount = await storeRepository.countPublic();
+
+        return new ServiceResponse(
+            ResponseStatus.Success,
+            "Approved stores retrieved successfully.",
+            {
+                data: stores,
+                totalCount: totalCount,
+                totalPages: Math.ceil(totalCount / pageSize),
+                currentPage: page,
+            },
+            StatusCodes.OK
+        );
     },
 
     // (ใหม่) Service สำหรับ Admin เพื่อดึงร้านค้าทั้งหมด
@@ -81,7 +93,7 @@ export const storeService = {
         const approvedStore = await storeRepository.update(storeId, { isApproved: true });
         return new ServiceResponse(ResponseStatus.Success, "Store approved successfully.", approvedStore, StatusCodes.OK);
     },
-    
+
     // (ใหม่) Service สำหรับ Admin เพื่อ "ปฏิเสธ/ยกเลิกอนุมัติ" ร้านค้า (เผื่อไว้)
     rejectStore: async (storeId: string) => {
         const store = await storeRepository.findById(storeId);

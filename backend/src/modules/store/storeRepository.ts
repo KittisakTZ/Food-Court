@@ -14,12 +14,19 @@ export const storeRepository = {
         });
     },
 
-    findAllPublic: async () => {
+    countPublic: async () => {
+        return prisma.store.count({
+            where: { isApproved: true },
+        });
+    },
+
+    findAllPublic: async (page: number, pageSize: number) => {
+        const skip = (page - 1) * pageSize;
         return prisma.store.findMany({
-            where: {
-                isApproved: true,
-                isOpen: true,
-            },
+            skip: skip,
+            take: pageSize,
+            where: { isApproved: true }, // Logic เดิม
+            orderBy: { name: 'asc' },   // เรียงตามชื่อ
             include: { owner: { select: { id: true, username: true } } }
         });
     },
@@ -45,7 +52,7 @@ export const storeRepository = {
     findById: async (storeId: string) => {
         return prisma.store.findUnique({
             where: { id: storeId },
-             include: { owner: true } // ดึงข้อมูลเจ้าของมาด้วยเพื่อใช้ตรวจสอบสิทธิ์
+            include: { owner: true } // ดึงข้อมูลเจ้าของมาด้วยเพื่อใช้ตรวจสอบสิทธิ์
         });
     },
 
@@ -55,7 +62,7 @@ export const storeRepository = {
             where: { name: name },
         });
     },
-    
+
     // ค้นหาร้านค้าด้วย ownerId
     findByOwnerId: async (ownerId: string) => {
         return prisma.store.findUnique({
