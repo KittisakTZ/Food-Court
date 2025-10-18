@@ -113,7 +113,7 @@ export const storeRepository = {
     },
 
     // อัปเดตข้อมูลร้านค้า
-    update: async (storeId: string, payload: Partial<StorePayload & { isApproved: boolean }>) => {
+    update: async (storeId: string, payload: Partial<StorePayload & { isApproved: boolean, isOpen: boolean }>) => {
         return prisma.store.update({
             where: { id: storeId },
             data: payload,

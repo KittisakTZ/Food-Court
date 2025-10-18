@@ -43,10 +43,12 @@ model Store {
   location      String?
   image         String?
   isApproved    Boolean  @default(false)
-  isOpen        Boolean  @default(true)
+  isOpen        Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   ownerId       String   @unique 
+  avgRating     Float    @default(0) // <-- เพิ่ม field นี้
+  reviewCount   Int      @default(0) // <-- เพิ่ม field นี้
   owner         User     @relation(fields: [ownerId], references: [id])
 
   categories    MenuCategory[]

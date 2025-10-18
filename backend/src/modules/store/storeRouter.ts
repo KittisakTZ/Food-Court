@@ -8,6 +8,8 @@ import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
 import { Role } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
+import { ToggleStoreStatusSchema } from "./storeModel";
+import { storeRepository } from "./storeRepository";
 
 export const storeRouter = (() => {
 
@@ -139,6 +141,35 @@ export const storeRouter = (() => {
         async (req: Request, res: Response) => {
             const { storeId } = req.params;
             const serviceResponse = await storeService.rejectStore(storeId);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // (ใหม่) PATCH /v1/stores/my-store/status - สำหรับ Seller เพื่อเปิด/ปิดร้านของตัวเอง
+    router.patch(
+        "/my-store/status",
+        authenticateToken,
+        authorizeRoles([Role.SELLER]),
+        validateRequest(ToggleStoreStatusSchema),
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.status(StatusCodes.UNAUTHORIZED).json({ message: "Authentication token is missing." });
+                return;
+            }
+
+            const store = await storeRepository.findByOwnerId(req.token.payload.uuid);
+            if (!store) {
+                res.status(StatusCodes.NOT_FOUND).json({ message: "You do not own a store yet." });
+                return;
+            }
+            const { isOpen } = req.body;
+
+            const userForService = {
+                id: req.token.payload.uuid,
+                role: req.token.payload.role
+            };
+            const serviceResponse = await storeService.toggleStoreStatus(store.id, isOpen, userForService);
+
             handleServiceResponse(serviceResponse, res);
         }
     );

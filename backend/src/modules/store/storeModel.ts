@@ -40,3 +40,10 @@ export const StoreIdParamSchema = z.object({
         storeId: z.string().cuid("Invalid store ID"),
     }),
 });
+
+// (ใหม่) Schema สำหรับการเปลี่ยนสถานะ เปิด/ปิด ร้าน
+export const ToggleStoreStatusSchema = z.object({
+    body: z.object({
+        isOpen: z.boolean({ required_error: "isOpen status is required" }),
+    }),
+});

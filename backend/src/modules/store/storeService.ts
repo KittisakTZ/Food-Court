@@ -50,7 +50,7 @@ export const storeService = {
     findAllPublic: async (
         page: number,
         pageSize: number,
-        searchText?: string 
+        searchText?: string
     ) => {
 
         // <--- (2) ส่ง searchText ไปยัง Repository
@@ -127,5 +127,24 @@ export const storeService = {
         }
 
         return new ServiceResponse(ResponseStatus.Success, "Your store information retrieved successfully.", store, StatusCodes.OK);
+    },
+
+    // (ใหม่) Service สำหรับเปลี่ยนสถานะ เปิด/ปิด ร้าน
+    toggleStoreStatus: async (storeId: string, isOpen: boolean, user: { id: string, role: Role }) => {
+        const store = await storeRepository.findById(storeId);
+
+        if (!store) {
+            return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
+        }
+
+        // ตรวจสอบสิทธิ์: ผู้ใช้ต้องเป็นเจ้าของร้านเท่านั้น (ยังคงเงื่อนไขนี้ไว้)
+        if (store.ownerId !== user.id) {
+            return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to change this store's status.", null, StatusCodes.FORBIDDEN);
+        }
+
+        const updatedStore = await storeRepository.update(storeId, { isOpen: isOpen });
+        const message = isOpen ? "Store is now open." : "Store is now closed.";
+
+        return new ServiceResponse(ResponseStatus.Success, message, updatedStore, StatusCodes.OK);
     },
 };
