@@ -11,6 +11,7 @@ import { StatusCodes } from "http-status-codes";
 import { ToggleStoreStatusSchema } from "./storeModel";
 import { storeRepository } from "./storeRepository";
 import { menuCategoryRouter } from "@modules/menu-category/menuCategoryRouter";
+import { menuRouter } from "@modules/menu/menuRouter";
 
 export const storeRouter = (() => {
 
@@ -18,6 +19,7 @@ export const storeRouter = (() => {
 
     // บอกให้ Express รู้ว่าถ้าเจอ Path /:storeId/categories ให้ส่งต่อไปให้ menuCategoryRouter จัดการ
     router.use("/:storeId/categories", menuCategoryRouter);
+    router.use("/:storeId/menus", menuRouter);
     // --- Public Routes ---
     // GET /v1/stores - (แก้ไข) ดึงข้อมูลร้านค้าที่อนุมัติแล้วสำหรับทุกคน
     router.get("/", async (req: Request, res: Response) => {
