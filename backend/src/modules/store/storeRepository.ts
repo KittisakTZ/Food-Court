@@ -60,6 +60,19 @@ export const storeRepository = {
     findByOwnerId: async (ownerId: string) => {
         return prisma.store.findUnique({
             where: { ownerId: ownerId },
+            include: {
+                // ตัวอย่างการดึงข้อมูลที่เกี่ยวข้องเผื่อไว้สำหรับหน้า Dashboard
+                _count: {
+                    select: {
+                        menus: true,
+                        orders: true,
+                        reviews: true,
+                    }
+                },
+                categories: {
+                    orderBy: { name: 'asc' }
+                }
+            }
         });
     },
 

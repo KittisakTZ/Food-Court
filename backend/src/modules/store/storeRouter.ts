@@ -18,6 +18,40 @@ export const storeRouter = (() => {
         const serviceResponse = await storeService.findAllPublic();
         handleServiceResponse(serviceResponse, res);
     });
+
+    // (ใหม่) GET /v1/stores/seller/mystore - ดึงข้อมูลร้านค้าของ Seller ที่ login อยู่
+    router.get(
+        "/my-store", // Endpoint ใหม่
+        authenticateToken,
+        authorizeRoles([Role.SELLER]), // *** ป้องกันให้เฉพาะ SELLER เท่านั้น ***
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.status(StatusCodes.UNAUTHORIZED).json({ message: "Authentication token is missing." });
+                return;
+            }
+
+            const userPayload = req.token.payload;
+            
+            // เราต้องการแค่ id จาก payload
+            const userForService = {
+                id: userPayload.uuid
+            };
+
+            const serviceResponse = await storeService.findMyStore(userForService);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+     // (ใหม่) GET /v1/stores/admin/all - ดึงร้านค้าทั้งหมดสำหรับ Admin
+    router.get(
+        "/admin/all",
+        authenticateToken,
+        authorizeRoles([Role.ADMIN]), // *** ป้องกันให้เฉพาะ ADMIN ***
+        async (req: Request, res: Response) => {
+            const serviceResponse = await storeService.findAllAdmin();
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
     
     // GET /v1/stores/:storeId - ดึงข้อมูลร้านค้าเดียว (เหมือนเดิม)
     router.get("/:storeId", validateRequest(StoreIdParamSchema), async (req: Request, res: Response) => {
@@ -68,18 +102,6 @@ export const storeRouter = (() => {
             };
 
             const serviceResponse = await storeService.update(storeId, req.body, userForService);
-            handleServiceResponse(serviceResponse, res);
-        }
-    );
-
-    // --- Admin Routes ---
-    // (ใหม่) GET /v1/stores/admin/all - ดึงร้านค้าทั้งหมดสำหรับ Admin
-    router.get(
-        "/admin/all",
-        authenticateToken,
-        authorizeRoles([Role.ADMIN]), // *** ป้องกันให้เฉพาะ ADMIN ***
-        async (req: Request, res: Response) => {
-            const serviceResponse = await storeService.findAllAdmin();
             handleServiceResponse(serviceResponse, res);
         }
     );

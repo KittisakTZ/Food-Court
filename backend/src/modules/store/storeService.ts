@@ -43,7 +43,7 @@ export const storeService = {
         }
         
         const updatedStore = await storeRepository.update(storeId, payload);
-        return new ServiceResponse(ResponseStatus.Success, "Store updated successfully.", updatedStore, StatusCodes.OK);
+        return new ServiceResponse(ResponseStatus.Success, "Store updated successfully.", null, StatusCodes.OK);
     },
     
     // ดึงข้อมูลร้านค้าทั้งหมด
@@ -95,5 +95,17 @@ export const storeService = {
 
         const rejectedStore = await storeRepository.update(storeId, { isApproved: false });
         return new ServiceResponse(ResponseStatus.Success, "Store approval has been revoked.", rejectedStore, StatusCodes.OK);
+    },
+
+    // (ใหม่) Service สำหรับดึงข้อมูลร้านค้าของ ID ที่ login อยู่ (My Store)
+    findMyStore: async (user: { id: string }) => {
+        const store = await storeRepository.findByOwnerId(user.id);
+
+        if (!store) {
+            // ในกรณีที่ Seller login เข้ามาแต่ยังไม่มีร้านค้า (อาจจะยังไม่ได้สร้าง)
+            return new ServiceResponse(ResponseStatus.Failed, "You do not own a store yet.", null, StatusCodes.NOT_FOUND);
+        }
+
+        return new ServiceResponse(ResponseStatus.Success, "Your store information retrieved successfully.", store, StatusCodes.OK);
     },
 };
