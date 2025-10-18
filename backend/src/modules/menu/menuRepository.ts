@@ -2,6 +2,7 @@
 
 import prisma from "@src/db";
 import { MenuPayload } from "./menuModel";
+import { Prisma } from "@prisma/client";
 
 export const menuRepository = {
     create: async (payload: MenuPayload, storeId: string) => {
@@ -14,11 +15,44 @@ export const menuRepository = {
     },
 
     // ค้นหาเมนูทั้งหมดของร้านค้า
-    findByStoreId: async (storeId: string) => {
+    findByStoreId: async (storeId: string, page: number, pageSize: number, searchText?: string) => {
+        const skip = (page - 1) * pageSize;
+
+        // สร้างเงื่อนไขการค้นหา
+        const whereClause: Prisma.MenuWhereInput = {
+            storeId: storeId,
+            ...(searchText && {
+                name: {
+                    contains: searchText,
+                    mode: 'insensitive',
+                }
+            })
+        };
+
         return prisma.menu.findMany({
-            where: { storeId: storeId },
-            include: { category: true }, // ดึงข้อมูลหมวดหมู่มาด้วย
+            where: whereClause,
+            skip: skip,
+            take: pageSize,
+            include: { category: true },
             orderBy: { name: 'asc' },
+        });
+    },
+
+    // (ใหม่) นับจำนวนเมนูทั้งหมดในร้านค้า (สำหรับ Pagination)
+    countByStoreId: async (storeId: string, searchText?: string) => {
+        // สร้างเงื่อนไขการค้นหา (ต้องเหมือนกับ findByStoreId)
+        const whereClause: Prisma.MenuWhereInput = {
+            storeId: storeId,
+            ...(searchText && {
+                name: {
+                    contains: searchText,
+                    mode: 'insensitive',
+                }
+            })
+        };
+
+        return prisma.menu.count({
+            where: whereClause,
         });
     },
 

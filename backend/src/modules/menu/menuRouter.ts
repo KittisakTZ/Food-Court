@@ -3,7 +3,7 @@
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { menuService } from "./menuService";
-import { CreateMenuSchema, UpdateMenuSchema, MenuIdParamSchema } from "./menuModel";
+import { CreateMenuSchema, UpdateMenuSchema, MenuIdParamSchema, GetMenusQuerySchema } from "./menuModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
 import { Role } from "@prisma/client";
@@ -14,11 +14,19 @@ export const menuRouter = (() => {
     const router = express.Router({ mergeParams: true });
 
     // GET /v1/stores/:storeId/menus - ดูเมนูทั้งหมดของร้าน (Public)
-    router.get("/", async (req: Request, res: Response) => {
-        const { storeId } = req.params;
-        const serviceResponse = await menuService.findByStoreId(storeId);
-        handleServiceResponse(serviceResponse, res);
-    });
+    router.get(
+        "/",
+        validateRequest(GetMenusQuerySchema),
+        async (req: Request, res: Response) => {
+            const { storeId } = req.params;
+            const page = parseInt(req.query.page as string);
+            const pageSize = parseInt(req.query.pageSize as string);
+            const searchText = req.query.searchText as string | undefined;
+
+            const serviceResponse = await menuService.findByStoreId(storeId, page, pageSize, searchText);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
 
     // POST /v1/stores/:storeId/menus - สร้างเมนูใหม่ (Seller เจ้าของร้าน)
     router.post(

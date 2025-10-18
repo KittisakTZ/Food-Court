@@ -45,3 +45,12 @@ export const MenuIdParamSchema = z.object({
         menuId: z.string().cuid("Invalid menu ID"),
     }),
 });
+
+// (ใหม่) Schema สำหรับการดึงข้อมูลเมนูแบบมี Pagination
+export const GetMenusQuerySchema = z.object({
+    query: z.object({
+        page: z.coerce.number().int().positive().optional().default(1),
+        pageSize: z.coerce.number().int().positive().optional().default(10),
+        searchText: z.string().optional(),
+    }),
+});

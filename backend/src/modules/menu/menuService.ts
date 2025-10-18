@@ -18,9 +18,21 @@ export const menuService = {
         return new ServiceResponse(ResponseStatus.Success, "Menu created successfully.", null, StatusCodes.CREATED);
     },
 
-    findByStoreId: async (storeId: string) => {
-        const menus = await menuRepository.findByStoreId(storeId);
-        return new ServiceResponse(ResponseStatus.Success, "Menus retrieved successfully.", menus, StatusCodes.OK);
+    findByStoreId: async (storeId: string, page: number, pageSize: number, searchText?: string) => {
+        const menus = await menuRepository.findByStoreId(storeId, page, pageSize, searchText);
+        const totalCount = await menuRepository.countByStoreId(storeId, searchText);
+
+        return new ServiceResponse(
+            ResponseStatus.Success,
+            "Menus retrieved successfully.",
+            {
+                data: menus,
+                totalCount: totalCount,
+                totalPages: Math.ceil(totalCount / pageSize),
+                currentPage: page,
+            },
+            StatusCodes.OK
+        );
     },
 
     update: async (menuId: string, payload: Partial<MenuPayload>, storeId: string) => {
