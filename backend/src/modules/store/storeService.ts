@@ -99,7 +99,7 @@ export const storeService = {
         }
 
         const approvedStore = await storeRepository.update(storeId, { isApproved: true });
-        return new ServiceResponse(ResponseStatus.Success, "Store approved successfully.", approvedStore, StatusCodes.OK);
+        return new ServiceResponse(ResponseStatus.Success, "Store approved successfully.", null, StatusCodes.OK);
     },
 
     // (ใหม่) Service สำหรับ Admin เพื่อ "ปฏิเสธ/ยกเลิกอนุมัติ" ร้านค้า (เผื่อไว้)
