@@ -8,14 +8,14 @@ import { ReviewPayload } from '@modules/review/reviewModel';
 export const reviewService = {
     createReview: async (storeId: string, payload: ReviewPayload, user: { id: string }) => {
         // ดูก่อนว่าผู้ใช้เคยรีวิวร้านค้านี้แล้วหรือยัง
-        const existingReview = await reviewRepository.findUserReviewForStore(storeId, user.id);
+        const existingReview = await reviewRepository.findUserReviewForStore(user.id, storeId);
         if (existingReview) {
             return new ServiceResponse(ResponseStatus.Failed, "You have already reviewed this store.", null, StatusCodes.CONFLICT);
         }
 
         try {
-            const newReview = await reviewRepository.createAndReviewcalculateRating(storeId, user.id, payload);
-            return new ServiceResponse(ResponseStatus.Success, "Review created successfully.", newReview, StatusCodes.CREATED);
+            const newReview = await reviewRepository.createAndRecalculateRating(storeId, user.id, payload);
+            return new ServiceResponse(ResponseStatus.Success, "Review created successfully.", null, StatusCodes.CREATED);
         } catch (error) {
             const errorMessage = "Error submitting review: " + (error as Error).message;
             return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);

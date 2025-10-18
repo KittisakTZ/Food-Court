@@ -29,3 +29,5 @@ export const GetReviewsSchema = z.object({
         pageSize: z.coerce.number().int().positive().optional().default(5),
     }),
 });
+
+export type GetReviewsQuery = z.infer<typeof GetReviewsSchema>['query'];

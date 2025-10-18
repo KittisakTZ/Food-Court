@@ -1,9 +1,9 @@
-// @modules/review/reviewRouter.ts (ฉบับแก้ไขสมบูรณ์)
+// @modules/review/reviewRouter.ts 
 
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { reviewService } from "./reviewService";
-import { CreateReviewSchema, GetReviewsSchema } from "./reviewModel";
+import { CreateReviewSchema, GetReviewsSchema, GetReviewsQuery } from "./reviewModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
 import { Role } from "@prisma/client";
@@ -18,14 +18,15 @@ export const reviewRouter = (() => {
         validateRequest(GetReviewsSchema),
         async (req: Request, res: Response) => {
             const { storeId } = req.params;
-            const page = parseInt(req.query.page as string);
-            const pageSize = parseInt(req.query.pageSize as string);
+            const query = req.query as unknown as GetReviewsQuery;
+            const page = Number(query.page) || 1;
+            const pageSize = Number(query.pageSize) || 5;
+
             const serviceResponse = await reviewService.getReviewsForStore(storeId, page, pageSize);
             handleServiceResponse(serviceResponse, res);
         }
     );
 
-    // POST /v1/reviews/store/:storeId - สร้างรีวิวใหม่
     router.post(
         "/store/:storeId",
         authenticateToken,
@@ -35,12 +36,9 @@ export const reviewRouter = (() => {
             if (!req.token) {
                 res.status(StatusCodes.UNAUTHORIZED).json({ message: "Authentication token is missing." });
                 return;
-
             }
-
             const { storeId } = req.params;
             const userForService = { id: req.token.payload.uuid };
-
             const serviceResponse = await reviewService.createReview(storeId, req.body, userForService);
             handleServiceResponse(serviceResponse, res);
         }

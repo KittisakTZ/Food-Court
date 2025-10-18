@@ -15,15 +15,15 @@ export const reviewRepository = {
     },
 
     // ฟังชันสำหรับสร้างรีวิวเเละคำนวนคะเเนนใหม่ใน Transacion เดียว
-    createAndReviewcalculateRating: async (userId: string, storeId: string, payload: ReviewPayload) => {
+    createAndRecalculateRating: async (storeId: string, userId: string, payload: ReviewPayload) => {
         return prisma.$transaction(async (tx) => {
-            // สร้างรีวิวใหม่
+            // 1. สร้างรีวิวใหม่
             const newReview = await tx.review.create({
                 data: {
                     ...payload,
-                    storeId: storeId,
-                    userId: userId,
-                    isVisible: true, // ตั้งค่ารีวิวให้มองเห็นได้เลย
+                    storeId: storeId, // <--- ตรวจสอบว่าค่านี้คือ ID ของร้านค้าจริงๆ
+                    userId: userId,   // <--- ตรวจสอบว่าค่านี้คือ ID ของผู้ใช้จริงๆ
+                    isVisible: true,
                 },
             });
 
@@ -53,14 +53,13 @@ export const reviewRepository = {
 
     // ดึงรีวิวของร้านพร้อม pagination
     findByStoreId: async (storeId: string, page: number, pageSize: number) => {
-
         const skip = (page - 1) * pageSize;
         return prisma.review.findMany({
-            where: { storeId: storeId, isVisible: true, },
+            where: { storeId: storeId, isVisible: true },
             skip: skip,
             take: pageSize,
             orderBy: { createdAt: 'desc' },
-            include: { user: { select: { id: true, username: true } } } // ดึงข้อมูล User ที่รีวิวมาด้วย
+            include: { user: { select: { id: true, username: true } } }
         });
     },
 
