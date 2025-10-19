@@ -26,6 +26,7 @@ export const storeRouter = (() => {
     router.use(
         "/my-store/orders",
         authenticateToken,
+        authorizeRoles([Role.SELLER]),
         sellerOrderRouter
     );
 

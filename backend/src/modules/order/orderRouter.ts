@@ -3,7 +3,7 @@
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { orderService } from "./orderService";
-import { CreateOrderSchema, GetOrdersQuerySchema, SellerUpdateOrderStatusSchema } from "./orderModel";
+import { CreateOrderSchema, GetOrdersQuerySchema, SellerUpdateOrderStatusSchema, OrderIdParamSchema } from "./orderModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
 import { Role } from "@prisma/client";
@@ -49,6 +49,44 @@ export const orderRouter = (() => {
         }
     );
 
+    // (ใหม่) PATCH /v1/orders/:orderId/cancel - Buyer ยกเลิก Order ของตัวเอง
+    router.patch(
+        "/:orderId/cancel", // Endpoint ใหม่
+        authenticateToken,
+        authorizeRoles([Role.BUYER]),
+        validateRequest(OrderIdParamSchema), // ใช้ Schema เดิมเพื่อ validate orderId
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+                return;
+            }
+            const { orderId } = req.params;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+
+            const serviceResponse = await orderService.cancelMyOrder(orderId, userForService);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // (ใหม่) GET /v1/orders/:orderId - Buyer ดูรายละเอียด Order เดียว
+    router.get(
+        "/:orderId",
+        authenticateToken,
+        authorizeRoles([Role.BUYER]), // เข้าได้เฉพาะ Buyer ก่อน
+        validateRequest(OrderIdParamSchema),
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+                return;
+            }
+            const { orderId } = req.params;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+            
+            const serviceResponse = await orderService.findOrderDetails(orderId, userForService);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
     return router;
 })();
 
@@ -86,6 +124,23 @@ export const sellerOrderRouter = (() => {
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
             
             const serviceResponse = await orderService.reviewOrder(orderId, action, userForService);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // (ใหม่) GET /v1/stores/my-store/orders/:orderId - Seller ดูรายละเอียด Order เดียว
+    router.get(
+        "/:orderId",
+        validateRequest(OrderIdParamSchema),
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+                return;
+            }
+            const { orderId } = req.params;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+
+            const serviceResponse = await orderService.findOrderDetails(orderId, userForService);
             handleServiceResponse(serviceResponse, res);
         }
     );

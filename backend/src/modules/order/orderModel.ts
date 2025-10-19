@@ -30,8 +30,8 @@ export const SellerUpdateOrderStatusSchema = z.object({
         orderId: z.string().cuid("Invalid order ID"),
     }),
     body: z.object({
-        // รับ Action เข้ามาแทน Status ตรงๆ
-        action: z.enum(["APPROVE", "REJECT", "CONFIRM_PAYMENT", "PREPARE_COMPLETE"]),
+        // เพิ่ม Action ใหม่เข้าไป
+        action: z.enum(["APPROVE", "REJECT", "CONFIRM_PAYMENT", "PREPARE_COMPLETE", "CUSTOMER_PICKED_UP"]),
     }),
 });
 

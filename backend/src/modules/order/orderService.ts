@@ -82,7 +82,7 @@ export const orderService = {
     },
 
     // 2. Seller จัดการ Order (Approve, Reject, Confirm Payment, etc.)
-    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE", user: UserPayload) => {
+    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP", user: UserPayload) => {
         const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
         if (!store) {
             return new ServiceResponse(ResponseStatus.Failed, "You do not own a store.", null, StatusCodes.FORBIDDEN);
@@ -108,14 +108,14 @@ export const orderService = {
                     paymentQrCode: qrCode,
                     paymentExpiresAt: paymentExpiresAt,
                 });
-                return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting payment.", updatedOrder, StatusCodes.OK);
+                return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting payment.", null, StatusCodes.OK);
 
             case 'REJECT':
                 if (order.status !== 'PENDING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot reject an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
                 const rejectedOrder = await orderRepository.updateOrder(orderId, { status: 'REJECTED' });
-                return new ServiceResponse(ResponseStatus.Success, "Order has been rejected.", rejectedOrder, StatusCodes.OK);
+                return new ServiceResponse(ResponseStatus.Success, "Order has been rejected.", null, StatusCodes.OK);
 
             case 'CONFIRM_PAYMENT':
                 if (order.status !== 'AWAITING_PAYMENT') {
@@ -127,14 +127,25 @@ export const orderService = {
                     paymentQrCode: null,
                     paymentExpiresAt: null,
                 });
-                return new ServiceResponse(ResponseStatus.Success, "Payment confirmed. Order is now cooking.", paidOrder, StatusCodes.OK);
+                return new ServiceResponse(ResponseStatus.Success, "Payment confirmed. Order is now cooking.", null, StatusCodes.OK);
 
             case 'PREPARE_COMPLETE':
                 if (order.status !== 'COOKING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot complete an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
                 const completedOrder = await orderRepository.updateOrder(orderId, { status: 'READY_FOR_PICKUP' });
-                return new ServiceResponse(ResponseStatus.Success, "Order is ready for pickup.", completedOrder, StatusCodes.OK);
+                return new ServiceResponse(ResponseStatus.Success, "Order is ready for pickup.", null, StatusCodes.OK);
+
+            // (ใหม่) Case สำหรับปิด Order
+            case 'CUSTOMER_PICKED_UP':
+                if (order.status !== 'READY_FOR_PICKUP') {
+                    return new ServiceResponse(ResponseStatus.Failed, `Cannot complete an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
+                }
+                const finishedOrder = await orderRepository.updateOrder(orderId, {
+                    status: 'COMPLETED',
+                    completedAt: new Date(), // บันทึกเวลาที่จบสมบูรณ์
+                });
+                return new ServiceResponse(ResponseStatus.Success, "Order has been completed.", null, StatusCodes.OK);
 
             default:
                 return new ServiceResponse(ResponseStatus.Failed, "Invalid action.", null, StatusCodes.BAD_REQUEST);
@@ -164,5 +175,70 @@ export const orderService = {
         return new ServiceResponse(ResponseStatus.Success, "Your store's orders retrieved successfully.", {
             data: orders, totalCount, totalPages: Math.ceil(totalCount / pageSize), currentPage: page
         }, StatusCodes.OK);
+    },
+
+    // (ใหม่) Service สำหรับ Buyer เพื่อยกเลิก Order
+    cancelMyOrder: async (orderId: string, user: { id: string }) => {
+        // 1. ค้นหา Order ที่ต้องการยกเลิก
+        const order = await orderRepository.findOrderById(orderId);
+
+        if (!order) {
+            return new ServiceResponse(ResponseStatus.Failed, "Order not found.", null, StatusCodes.NOT_FOUND);
+        }
+
+        // 2. ตรวจสอบสิทธิ์: ผู้ใช้คนนี้เป็นเจ้าของ Order จริงหรือไม่
+        if (order.buyerId !== user.id) {
+            return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to cancel this order.", null, StatusCodes.FORBIDDEN);
+        }
+
+        // 3. ตรวจสอบเงื่อนไข: สถานะของ Order ต้องเป็น PENDING เท่านั้น
+        if (order.status !== 'PENDING') {
+            return new ServiceResponse(
+                ResponseStatus.Failed,
+                `Cannot cancel an order with status '${order.status}'. It may have already been processed by the store.`,
+                null,
+                StatusCodes.BAD_REQUEST
+            );
+        }
+
+        // 4. ถ้าเงื่อนไขทั้งหมดผ่าน, ทำการอัปเดตสถานะเป็น CANCELLED
+        const cancelledOrder = await orderRepository.updateOrder(orderId, { status: 'CANCELLED' });
+
+        return new ServiceResponse(ResponseStatus.Success, "Your order has been successfully cancelled.", null, StatusCodes.OK);
+    },
+
+    // (ใหม่) Service สำหรับดู Order เดียวแบบละเอียด
+    findOrderDetails: async (orderId: string, user: { id: string, role: Role }) => {
+        const order = await orderRepository.findOrderById(orderId);
+        if (!order) {
+            return new ServiceResponse(ResponseStatus.Failed, "Order not found.", null, StatusCodes.NOT_FOUND);
+        }
+
+        // ตรวจสอบสิทธิ์:
+        // 1. ถ้าผู้ใช้เป็น BUYER, ต้องเป็นเจ้าของ Order
+        // 2. ถ้าผู้ใช้เป็น SELLER, Order นั้นต้องเป็นของร้านเค้า
+        if (user.role === 'BUYER' && order.buyerId !== user.id) {
+            return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to view this order.", null, StatusCodes.FORBIDDEN);
+        }
+
+        if (user.role === 'SELLER') {
+            const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
+            if (!store || order.storeId !== store.id) {
+                return new ServiceResponse(ResponseStatus.Failed, "This order does not belong to your store.", null, StatusCodes.FORBIDDEN);
+            }
+        }
+
+        // ถ้าผ่านการตรวจสอบสิทธิ์ทั้งหมด, ส่งข้อมูลกลับไป
+        // (เราอาจจะอยากดึงข้อมูลที่ละเอียดกว่านี้)
+        const detailedOrder = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                store: true,
+                buyer: { select: { username: true } },
+                orderItems: { include: { menu: true } },
+            }
+        });
+
+        return new ServiceResponse(ResponseStatus.Success, "Order details retrieved successfully.", detailedOrder, StatusCodes.OK);
     },
 };
