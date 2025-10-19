@@ -145,6 +145,6 @@ export const storeService = {
         const updatedStore = await storeRepository.update(storeId, { isOpen: isOpen });
         const message = isOpen ? "Store is now open." : "Store is now closed.";
 
-        return new ServiceResponse(ResponseStatus.Success, message, updatedStore, StatusCodes.OK);
+        return new ServiceResponse(ResponseStatus.Success, message, null, StatusCodes.OK);
     },
 };
