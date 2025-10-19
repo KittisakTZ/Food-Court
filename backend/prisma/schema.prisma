@@ -14,12 +14,14 @@ enum Role {
 }
 
 enum OrderStatus {
-  PENDING
-  REJECTED
-  ACCEPTED
-  PAID
-  COMPLETED
-  CANCELLED
+  PENDING         // รอ Seller ตรวจสอบ
+  REJECTED        // Seller ปฏิเสธ
+  AWAITING_PAYMENT // รอ Buyer ชำระเงิน
+  PAID            // สถานะเดิมของคุณ ผมขอเก็บไว้ก่อน อาจจะได้ใช้ในอนาคต
+  COOKING         // กำลังเตรียมของ (ชื่อใหม่ที่สื่อความหมายดี)
+  READY_FOR_PICKUP // พร้อมให้มารับ (ชื่อใหม่)
+  COMPLETED       // สถานะเดิมของคุณ อาจจะหมายถึง Buyer รับของไปแล้ว
+  CANCELLED       // Buyer ไม่จ่ายเงิน หรือยกเลิก
 }
 
 model User {
@@ -93,6 +95,8 @@ model Order {
   status          OrderStatus  @default(PENDING)
   totalAmount     Float        @default(0)
   position        Float        
+  paymentQrCode   String?      // <-- (ใหม่) Field สำหรับเก็บ QR Code (อาจจะเป็น URL หรือ Base64)
+  paymentExpiresAt DateTime?    // <-- (ใหม่) Field สำหรับเก็บเวลาหมดอายุของการชำระเงิน
   scheduledPickup DateTime?
   paidAt          DateTime?
   confirmedAt     DateTime?

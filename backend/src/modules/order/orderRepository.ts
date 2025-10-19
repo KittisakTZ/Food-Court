@@ -87,10 +87,10 @@ export const orderRepository = {
     },
     
     // อัปเดตสถานะ Order
-    updateOrderStatus: async (orderId: string, status: OrderStatus) => { 
+    updateOrder: async (orderId: string, data: Partial<Order>) => {
         return prisma.order.update({
             where: { id: orderId },
-            data: { status: status }
+            data: data
         });
     }
 };

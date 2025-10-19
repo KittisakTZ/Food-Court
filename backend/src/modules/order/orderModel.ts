@@ -25,12 +25,13 @@ export const OrderIdParamSchema = z.object({
 });
 
 // Schema สำหรับ Seller เพื่ออัปเดตสถานะ Order
-export const UpdateOrderStatusSchema = z.object({
+export const SellerUpdateOrderStatusSchema = z.object({
     params: z.object({
         orderId: z.string().cuid("Invalid order ID"),
     }),
     body: z.object({
-        status: z.enum(["ACCEPTED", "REJECTED", "COMPLETED", "CANCELLED"]), // สถานะที่ Seller สามารถเปลี่ยนได้
+        // รับ Action เข้ามาแทน Status ตรงๆ
+        action: z.enum(["APPROVE", "REJECT", "CONFIRM_PAYMENT", "PREPARE_COMPLETE"]),
     }),
 });
 
