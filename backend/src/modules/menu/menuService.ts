@@ -7,11 +7,17 @@ import { MenuPayload } from "./menuModel";
 import { menuCategoryRepository } from "@modules/menu-category/menuCategoryRepository"; // Import เข้ามาเพื่อตรวจสอบ
 
 export const menuService = {
-    create: async (payload: MenuPayload, storeId: string) => {
+    create: async (payload: MenuPayload, storeId: string, file?: Express.Multer.File) => {
         // ตรวจสอบ: Category ID ที่ส่งมา มีอยู่จริงและเป็นของร้านค้านี้หรือไม่
         const category = await menuCategoryRepository.findById(payload.categoryId);
         if (!category || category.storeId !== storeId) {
             return new ServiceResponse(ResponseStatus.Failed, "Category not found or does not belong to this store.", null, StatusCodes.BAD_REQUEST);
+        }
+
+        // ถ้ามีการอัปโหลดไฟล์เข้ามา, ให้สร้าง URL ของรูปภาพ
+        if (file) {
+            // URL จะเป็น http://your-domain/uploads/filename.jpg
+            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
         }
 
         const newMenu = await menuRepository.create(payload, storeId);
@@ -35,12 +41,12 @@ export const menuService = {
         );
     },
 
-    update: async (menuId: string, payload: Partial<MenuPayload>, storeId: string) => {
+    update: async (menuId: string, payload: Partial<MenuPayload>, storeId: string, file?: Express.Multer.File) => {
         const menu = await menuRepository.findById(menuId);
         if (!menu) {
             return new ServiceResponse(ResponseStatus.Failed, "Menu not found.", null, StatusCodes.NOT_FOUND);
         }
-        
+
         // **การตรวจสอบสิทธิ์:** เมนูนี้เป็นของร้านค้าที่ถูกต้องหรือไม่
         if (menu.storeId !== storeId) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to update this menu.", null, StatusCodes.FORBIDDEN);
@@ -54,8 +60,13 @@ export const menuService = {
             }
         }
 
+        if (file) {
+            // (Optional) อาจจะเพิ่ม Logic ลบไฟล์รูปเก่าก่อนที่จะอัปเดต Path ใหม่
+            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
+        }
+
         const updatedMenu = await menuRepository.update(menuId, payload);
-        return new ServiceResponse(ResponseStatus.Success, "Menu updated successfully.", null, StatusCodes.OK);
+        return new ServiceResponse(ResponseStatus.Success, "Menu updated successfully.", updatedMenu, StatusCodes.OK);
     },
 
     delete: async (menuId: string, storeId: string) => {
@@ -63,7 +74,7 @@ export const menuService = {
         if (!menu) {
             return new ServiceResponse(ResponseStatus.Failed, "Menu not found.", null, StatusCodes.NOT_FOUND);
         }
-        
+
         // **การตรวจสอบสิทธิ์:**
         if (menu.storeId !== storeId) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to delete this menu.", null, StatusCodes.FORBIDDEN);

@@ -9,6 +9,8 @@ import { authorizeRoles } from "@common/middleware/authorizeRoles";
 import { Role } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { storeRepository } from "@modules/store/storeRepository";
+import upload from '@common/utils/upload';
+import { z } from "zod";
 
 export const menuRouter = (() => {
     const router = express.Router({ mergeParams: true });
@@ -28,53 +30,80 @@ export const menuRouter = (() => {
         }
     );
 
-    // POST /v1/stores/:storeId/menus - สร้างเมนูใหม่ (Seller เจ้าของร้าน)
+    // POST /v1/stores/:storeId/menus
     router.post(
         "/",
         authenticateToken,
         authorizeRoles([Role.SELLER]),
-        validateRequest(CreateMenuSchema),
+        upload.single('image'),
         async (req: Request, res: Response) => {
-            if (!req.token) {
-                res.sendStatus(StatusCodes.UNAUTHORIZED);
+            try {
+                const validatedBody = CreateMenuSchema.shape.body.parse(req.body);
+
+                if (!req.token) {
+                    res.sendStatus(StatusCodes.UNAUTHORIZED);
+                    return;
+                }
+                const { storeId } = req.params;
+                const userStore = await storeRepository.findByOwnerId(req.token.payload.uuid);
+                if (!userStore || userStore.id !== storeId) {
+                    res.status(StatusCodes.FORBIDDEN).json({ message: "You are not the owner of this store." });
+                    return;
+                }
+
+                const serviceResponse = await menuService.create(validatedBody, storeId, req.file);
+                handleServiceResponse(serviceResponse, res);
+
+            } catch (error) {
+                if (error instanceof z.ZodError) {
+                    res.status(StatusCodes.BAD_REQUEST).json({
+                        message: "Invalid input",
+                        errors: error.errors,
+                    });
+                    return;
+                }
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An unexpected error occurred." });
                 return;
             }
-
-            const { storeId } = req.params;
-            const userStore = await storeRepository.findByOwnerId(req.token.payload.uuid);
-
-            if (!userStore || userStore.id !== storeId) {
-                res.status(StatusCodes.FORBIDDEN).json({ message: "You are not the owner of this store." });
-                return;
-            }
-
-            const serviceResponse = await menuService.create(req.body, storeId);
-            handleServiceResponse(serviceResponse, res);
         }
     );
 
-    // PATCH /v1/stores/:storeId/menus/:menuId - อัปเดตเมนู (Seller เจ้าของร้าน)
+    // PATCH /v1/stores/:storeId/menus/:menuId
     router.patch(
         "/:menuId",
         authenticateToken,
         authorizeRoles([Role.SELLER]),
-        validateRequest(UpdateMenuSchema),
+        upload.single('image'),
         async (req: Request, res: Response) => {
-            if (!req.token) {
-                res.sendStatus(StatusCodes.UNAUTHORIZED);
+            try {
+                const { menuId } = MenuIdParamSchema.shape.params.parse(req.params);
+                const validatedBody = UpdateMenuSchema.shape.body.parse(req.body);
+
+                if (!req.token) {
+                    res.sendStatus(StatusCodes.UNAUTHORIZED);
+                    return;
+                }
+                const { storeId } = req.params;
+                const userStore = await storeRepository.findByOwnerId(req.token.payload.uuid);
+                if (!userStore || userStore.id !== storeId) {
+                    res.status(StatusCodes.FORBIDDEN).json({ message: "You are not the owner of this store." });
+                    return;
+                }
+
+                const serviceResponse = await menuService.update(menuId, validatedBody, storeId, req.file);
+                handleServiceResponse(serviceResponse, res);
+
+            } catch (error) {
+                if (error instanceof z.ZodError) {
+                    res.status(StatusCodes.BAD_REQUEST).json({
+                        message: "Invalid input",
+                        errors: error.errors,
+                    });
+                    return;
+                }
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An unexpected error occurred." });
                 return;
             }
-
-            const { storeId, menuId } = req.params;
-            const userStore = await storeRepository.findByOwnerId(req.token.payload.uuid);
-
-            if (!userStore || userStore.id !== storeId) {
-                res.status(StatusCodes.FORBIDDEN).json({ message: "You are not the owner of this store." });
-                return;
-            }
-
-            const serviceResponse = await menuService.update(menuId, req.body, storeId);
-            handleServiceResponse(serviceResponse, res);
         }
     );
 

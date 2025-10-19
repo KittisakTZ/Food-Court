@@ -28,8 +28,7 @@ app.use("/v1/auth", authRouter);
 app.use("/v1/stores", storeRouter);
 app.use("/v1/reviews", reviewRouter);
 app.use("/v1/orders", orderRouter);
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
 
 app.use(errorHandler());
 export { app, logger };
