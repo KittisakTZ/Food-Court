@@ -9,6 +9,7 @@ type OrderCreationData = {
     storeId: string;
     totalAmount: number;
     position: number;
+    scheduledPickup?: Date | null;
     items: Array<{
         menuId: string;
         quantity: number;
@@ -27,7 +28,7 @@ export const orderRepository = {
                     storeId: data.storeId,
                     position: data.position,
                     totalAmount: data.totalAmount,
-                    // status จะเป็น PENDING โดย default
+                    scheduledPickup: data.scheduledPickup,
                 },
             });
 
@@ -41,7 +42,7 @@ export const orderRepository = {
             await tx.orderItem.createMany({
                 data: orderItemsData,
             });
-            
+
             // 4. ดึงข้อมูล Order ที่สมบูรณ์พร้อม Items กลับไป
             const completeOrder = await tx.order.findUniqueOrThrow({
                 where: { id: newOrder.id },
@@ -77,7 +78,7 @@ export const orderRepository = {
         });
     },
     countOrdersByStoreId: (storeId: string) => prisma.order.count({ where: { storeId } }),
-    
+
     // ค้นหา Order ด้วย ID
     findOrderById: async (orderId: string) => {
         return prisma.order.findUnique({
@@ -85,7 +86,7 @@ export const orderRepository = {
             include: { store: true }
         });
     },
-    
+
     // อัปเดตสถานะ Order
     updateOrder: async (orderId: string, data: Partial<Order>) => {
         return prisma.order.update({

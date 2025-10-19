@@ -14,6 +14,11 @@ export const CreateOrderSchema = z.object({
         storeId: z.string().cuid("Invalid store ID"),
         position: z.number().positive("position must be a positive integer"),
         items: z.array(OrderItemSchema).min(1, "Order must contain at least one item"),
+        
+        // (แก้ไข) เปลี่ยนเป็นรับแค่เวลาในรูปแบบ HH:mm
+        scheduledPickupTime: z.string()
+            .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format. Please use HH:mm (24-hour).")
+            .optional(), 
     }),
 });
 

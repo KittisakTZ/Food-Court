@@ -12,6 +12,7 @@ type CreateOrderPayload = {
     storeId: string;
     position: number;
     items: Array<{ menuId: string; quantity: number }>;
+    scheduledPickupTime?: string;
 };
 
 // Type สำหรับข้อมูล user ที่ได้จาก Token
@@ -26,6 +27,7 @@ export const orderService = {
         try {
             // 1.1 ตรวจสอบร้านค้า
             const store = await prisma.store.findUnique({ where: { id: payload.storeId } });
+            let scheduledPickupDate: Date | null = null;
             if (!store) {
                 return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
             }
@@ -41,6 +43,28 @@ export const orderService = {
 
             if (menusFromDb.length !== menuIds.length) {
                 return new ServiceResponse(ResponseStatus.Failed, "Some menu items are invalid or do not belong to this store.", null, StatusCodes.BAD_REQUEST);
+            }
+
+            if (payload.scheduledPickupTime) {
+                const now = new Date();
+                
+                // 1. แยกชั่วโมงและนาทีออกจาก String "HH:mm"
+                const [hours, minutes] = payload.scheduledPickupTime.split(':').map(Number);
+                
+                // 2. สร้าง Date object ของเวลาที่นัดรับ โดยใช้วันที่ของ "วันนี้"
+                const pickupTime = new Date();
+                pickupTime.setHours(hours, minutes, 0, 0); // ตั้งค่า ชั่วโมง, นาที, วินาที, มิลลิวินาที
+
+                // --- ทำการ Validate เหมือนเดิม แต่ใช้ pickupTime ที่เราสร้างขึ้นใหม่ ---
+
+                // เงื่อนไขที่ 1: เวลาที่เลือกต้องไม่เป็นเวลาในอดีต
+                if (pickupTime < now) {
+                    return new ServiceResponse(ResponseStatus.Failed, "Scheduled pickup time cannot be in the past.", null, StatusCodes.BAD_REQUEST);
+                }
+
+                // (เงื่อนไขเรื่องต้องเป็นวันเดียวกัน ไม่จำเป็นแล้ว เพราะเราสร้างจากวันที่ปัจจุบันเสมอ)
+
+                scheduledPickupDate = pickupTime; // กำหนดค่า Date object ที่ถูกต้องให้กับตัวแปรของเรา
             }
 
             let totalAmount = 0;
@@ -68,12 +92,13 @@ export const orderService = {
                 storeId: payload.storeId,
                 position: payload.position,
                 totalAmount: totalAmount,
+                scheduledPickup: scheduledPickupDate,
                 items: itemsForRepo,
             };
 
             // 1.5 เรียกใช้ Transaction เพื่อสร้าง Order
             const newOrder = await orderRepository.createOrderTransaction(orderCreationData);
-            return new ServiceResponse(ResponseStatus.Success, "Order created successfully. Awaiting seller approval.", newOrder, StatusCodes.CREATED);
+            return new ServiceResponse(ResponseStatus.Success, "Order created successfully.", newOrder, StatusCodes.CREATED);
 
         } catch (error) {
             const errorMessage = "Error creating order: " + (error as Error).message;
