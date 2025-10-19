@@ -15,30 +15,35 @@ export const reviewRepository = {
     },
 
     // ฟังชันสำหรับสร้างรีวิวเเละคำนวนคะเเนนใหม่ใน Transacion เดียว
-    createAndRecalculateRating: async (storeId: string, userId: string, payload: ReviewPayload) => {
+    createReviewAndUpdateOrder: async (orderId: string, storeId: string, userId: string, payload: ReviewPayload) => {
         return prisma.$transaction(async (tx) => {
             // 1. สร้างรีวิวใหม่
             const newReview = await tx.review.create({
                 data: {
                     ...payload,
-                    storeId: storeId, // <--- ตรวจสอบว่าค่านี้คือ ID ของร้านค้าจริงๆ
-                    userId: userId,   // <--- ตรวจสอบว่าค่านี้คือ ID ของผู้ใช้จริงๆ
+                    storeId: storeId,
+                    userId: userId,
                     isVisible: true,
                 },
             });
 
-            // Aggregaion = การรวม
-            // คำนวณคะแนนเฉลี่ยและจำนวนรีวิวใหม่ของร้านนี้
-            const ratingAggregaion = await tx.review.aggregate({
-                where: { storeId: storeId, },
+            // 2. อัปเดต Order ให้เป็น isReviewed: true
+            await tx.order.update({
+                where: { id: orderId },
+                data: { isReviewed: true },
+            });
+
+            // 3. คำนวณคะแนนเฉลี่ยและจำนวนรีวิวใหม่ (Logic เดิม)
+            const ratingAggregation = await tx.review.aggregate({
+                where: { storeId: storeId },
                 _avg: { rating: true },
                 _count: { rating: true },
             });
 
-            const newAvgRating = ratingAggregaion._avg.rating || 0;
-            const newReviewCount = ratingAggregaion._count.rating || 0;
+            const newAvgRating = ratingAggregation._avg.rating || 0;
+            const newReviewCount = ratingAggregation._count.rating || 0;
 
-            // อัพเดตค่าในตราง store
+            // 4. อัปเดตค่าในตาราง Store (Logic เดิม)
             await tx.store.update({
                 where: { id: storeId },
                 data: {
@@ -48,7 +53,7 @@ export const reviewRepository = {
             });
 
             return newReview;
-        })
+        });
     },
 
     // ดึงรีวิวของร้านพร้อม pagination
@@ -67,6 +72,24 @@ export const reviewRepository = {
     countByStoreId: async (storeId: string) => {
         return prisma.review.count({
             where: { storeId: storeId, isVisible: true, },
+        });
+    },
+
+    // (ใหม่) ฟังก์ชันสำหรับค้นหา Order ที่รีวิวได้
+    // เงื่อนไข: เป็นของ Buyer คนนี้, สั่งจากร้านนี้, สถานะพร้อมรีวิว, และยังไม่เคยถูกรีวิว
+    findCompleterdOrderToReview: async (userId: string, storeId: string) => {
+        return prisma.order.findFirst({
+            where: {
+                buyerId: userId,
+                storeId: storeId,
+                status: {
+                    in: ['READY_FOR_PICKUP', 'COMPLETED']
+                },
+                isReviewed: false,
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
         });
     },
 }

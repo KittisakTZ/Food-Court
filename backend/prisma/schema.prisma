@@ -93,6 +93,7 @@ model Order {
   storeId         String
   store           Store        @relation(fields: [storeId], references: [id])
   status          OrderStatus  @default(PENDING)
+  isReviewed      Boolean      @default(false)
   totalAmount     Float        @default(0)
   position        Float        
   paymentQrCode   String?      // <-- (ใหม่) Field สำหรับเก็บ QR Code (อาจจะเป็น URL หรือ Base64)

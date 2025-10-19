@@ -7,15 +7,28 @@ import { ReviewPayload } from '@modules/review/reviewModel';
 
 export const reviewService = {
     createReview: async (storeId: string, payload: ReviewPayload, user: { id: string }) => {
-        // ดูก่อนว่าผู้ใช้เคยรีวิวร้านค้านี้แล้วหรือยัง
-        const existingReview = await reviewRepository.findUserReviewForStore(user.id, storeId);
-        if (existingReview) {
-            return new ServiceResponse(ResponseStatus.Failed, "You have already reviewed this store.", null, StatusCodes.CONFLICT);
+        // 1. ตรวจสอบเงื่อนไขการรีวิว
+        // User คนนี้มี Order ที่เสร็จสมบูรณ์จากร้านนี้และยังไม่ได้รีวิวหรือไม่?
+        const orderToReview = await reviewRepository.findCompleterdOrderToReview(user.id, storeId);
+
+        if (!orderToReview) {
+            return new ServiceResponse(
+                ResponseStatus.Failed,
+                "You do not have a completed order to review for this store, or you have already reviewed it.",
+                null,
+                StatusCodes.FORBIDDEN // ใช้ 403 Forbidden เพราะเป็นเรื่องของสิทธิ์
+            );
         }
 
+        // 2. ถ้าเงื่อนไขผ่าน, ก็ทำการสร้างรีวิวโดยอ้างอิงถึง Order ID ที่หาเจอ
         try {
-            const newReview = await reviewRepository.createAndRecalculateRating(storeId, user.id, payload);
-            return new ServiceResponse(ResponseStatus.Success, "Review created successfully.", null, StatusCodes.CREATED);
+            const newReview = await reviewRepository.createReviewAndUpdateOrder(
+                orderToReview.id, // ส่ง Order ID เข้าไปเพื่ออัปเดต isReviewed
+                storeId,
+                user.id,
+                payload
+            );
+            return new ServiceResponse(ResponseStatus.Success, "Review submitted successfully.", newReview, StatusCodes.CREATED);
         } catch (error) {
             const errorMessage = "Error submitting review: " + (error as Error).message;
             return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
