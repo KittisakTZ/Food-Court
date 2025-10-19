@@ -1,7 +1,7 @@
 // @modules/order/orderRepository.ts
 
 import prisma from "@src/db";
-import { Order, OrderItem } from "@prisma/client";
+import { Order, OrderItem, OrderStatus } from "@prisma/client";
 
 // Type สำหรับข้อมูลที่จำเป็นในการสร้าง Order
 type OrderCreationData = {
@@ -87,7 +87,7 @@ export const orderRepository = {
     },
     
     // อัปเดตสถานะ Order
-    updateOrderStatus: async (orderId: string, status: "ACCEPTED" | "REJECTED" | "COMPLETED" | "CANCELLED") => {
+    updateOrderStatus: async (orderId: string, status: OrderStatus) => { 
         return prisma.order.update({
             where: { id: orderId },
             data: { status: status }
