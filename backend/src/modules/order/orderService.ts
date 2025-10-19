@@ -10,7 +10,6 @@ import { paymentGateway } from "@common/utils/paymentGateway"; // Import QR Code
 // Type สำหรับข้อมูลที่ Frontend ส่งมาเพื่อสร้าง Order
 type CreateOrderPayload = {
     storeId: string;
-    position: number;
     items: Array<{ menuId: string; quantity: number }>;
     scheduledPickupTime?: string;
 };
@@ -47,10 +46,10 @@ export const orderService = {
 
             if (payload.scheduledPickupTime) {
                 const now = new Date();
-                
+
                 // 1. แยกชั่วโมงและนาทีออกจาก String "HH:mm"
                 const [hours, minutes] = payload.scheduledPickupTime.split(':').map(Number);
-                
+
                 // 2. สร้าง Date object ของเวลาที่นัดรับ โดยใช้วันที่ของ "วันนี้"
                 const pickupTime = new Date();
                 pickupTime.setHours(hours, minutes, 0, 0); // ตั้งค่า ชั่วโมง, นาที, วินาที, มิลลิวินาที
@@ -86,13 +85,18 @@ export const orderService = {
                 });
             }
 
+            // **(ใหม่) Logic การกำหนด Position เริ่มต้น**
+            // หา position ที่มากที่สุดในร้านนั้นๆ แล้วบวก 1
+            const maxPosition = await orderRepository.findMaxPositionInStore(payload.storeId);
+            const newPosition = maxPosition + 1;
+
             // 1.4 สร้างข้อมูลสำหรับส่งให้ Repository
             const orderCreationData = {
                 buyerId: user.id,
                 storeId: payload.storeId,
-                position: payload.position,
-                totalAmount: totalAmount,
+                position: newPosition,
                 scheduledPickup: scheduledPickupDate,
+                totalAmount: totalAmount,
                 items: itemsForRepo,
             };
 
@@ -102,6 +106,42 @@ export const orderService = {
 
         } catch (error) {
             const errorMessage = "Error creating order: " + (error as Error).message;
+            return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+    },
+
+    // (ใหม่) Service สำหรับ Seller เพื่อเรียงลำดับคิวใหม่
+    reorderQueue: async (orderedIds: string[], user: { id: string }) => {
+        const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
+        if (!store) {
+            return new ServiceResponse(ResponseStatus.Failed, "You do not own a store.", null, StatusCodes.FORBIDDEN);
+        }
+
+        // สร้าง Array ของ object สำหรับอัปเดต
+        const updates = orderedIds.map((id, index) => ({
+            id: id,
+            position: index + 1, // กำหนด position ใหม่ตามลำดับใน Array
+        }));
+
+        try {
+            // **ตรวจสอบสิทธิ์เพิ่มเติมที่นี่ (ขั้นสูง)**
+            // เราควรจะเช็คก่อนว่า Order ID ทั้งหมดที่ส่งมา เป็นของร้านนี้จริงหรือไม่
+            const ordersInStore = await prisma.order.count({
+                where: {
+                    id: { in: orderedIds },
+                    storeId: store.id,
+                },
+            });
+
+            if (ordersInStore !== orderedIds.length) {
+                return new ServiceResponse(ResponseStatus.Failed, "Some orders do not belong to your store or do not exist.", null, StatusCodes.BAD_REQUEST);
+            }
+
+            await orderRepository.updateOrderPositions(updates);
+            return new ServiceResponse(ResponseStatus.Success, "Queue has been reordered successfully.", null, StatusCodes.OK);
+
+        } catch (error) {
+            const errorMessage = "Error reordering queue: " + (error as Error).message;
             return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     },
@@ -188,14 +228,14 @@ export const orderService = {
     },
 
     // 4. Seller ดู Order ของร้านตัวเอง
-    findMyStoreOrders: async (user: UserPayload, page: number, pageSize: number) => {
+    findMyStoreOrders: async (user: { id: string }, page: number, pageSize: number, filterStatus?: OrderStatus[]) => {
         const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
         if (!store) {
             return new ServiceResponse(ResponseStatus.Failed, "You do not own a store.", null, StatusCodes.NOT_FOUND);
         }
 
-        const orders = await orderRepository.findOrdersByStoreId(store.id, page, pageSize);
-        const totalCount = await orderRepository.countOrdersByStoreId(store.id);
+        const orders = await orderRepository.findOrdersByStoreId(store.id, page, pageSize, filterStatus);
+        const totalCount = await orderRepository.countOrdersByStoreId(store.id, filterStatus);
 
         return new ServiceResponse(ResponseStatus.Success, "Your store's orders retrieved successfully.", {
             data: orders, totalCount, totalPages: Math.ceil(totalCount / pageSize), currentPage: page

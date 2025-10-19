@@ -3,16 +3,22 @@
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { orderService } from "./orderService";
-import { CreateOrderSchema, GetOrdersQuerySchema, SellerUpdateOrderStatusSchema, OrderIdParamSchema } from "./orderModel";
+import {
+    CreateOrderSchema,
+    GetOrdersQuerySchema,
+    SellerUpdateOrderStatusSchema,
+    OrderIdParamSchema,
+    ReorderQueueSchema
+} from "./orderModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
-import { Role } from "@prisma/client";
+import { OrderStatus, Role } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 
 // ===== Router หลักสำหรับ /v1/orders (ส่วนใหญ่สำหรับ Buyer) =====
 export const orderRouter = (() => {
     const router = express.Router();
-    
+
     // GET /v1/orders/my-orders - ดูประวัติการสั่งซื้อของ Buyer
     router.get(
         "/my-orders",
@@ -24,6 +30,7 @@ export const orderRouter = (() => {
                 res.sendStatus(StatusCodes.UNAUTHORIZED);
                 return;
             }
+            // **แก้ไข:** ดึงข้อมูลจาก req.query
             const { page, pageSize } = req.query;
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
 
@@ -31,7 +38,7 @@ export const orderRouter = (() => {
             handleServiceResponse(serviceResponse, res);
         }
     );
-    
+
     // POST /v1/orders - สร้าง Order ใหม่ (สำหรับ BUYER)
     router.post(
         "/",
@@ -49,12 +56,12 @@ export const orderRouter = (() => {
         }
     );
 
-    // (ใหม่) PATCH /v1/orders/:orderId/cancel - Buyer ยกเลิก Order ของตัวเอง
+    // PATCH /v1/orders/:orderId/cancel - Buyer ยกเลิก Order ของตัวเอง
     router.patch(
-        "/:orderId/cancel", // Endpoint ใหม่
+        "/:orderId/cancel",
         authenticateToken,
         authorizeRoles([Role.BUYER]),
-        validateRequest(OrderIdParamSchema), // ใช้ Schema เดิมเพื่อ validate orderId
+        validateRequest(OrderIdParamSchema),
         async (req: Request, res: Response) => {
             if (!req.token) {
                 res.sendStatus(StatusCodes.UNAUTHORIZED);
@@ -68,11 +75,11 @@ export const orderRouter = (() => {
         }
     );
 
-    // (ใหม่) GET /v1/orders/:orderId - Buyer ดูรายละเอียด Order เดียว
+    // GET /v1/orders/:orderId - Buyer ดูรายละเอียด Order เดียว
     router.get(
         "/:orderId",
         authenticateToken,
-        authorizeRoles([Role.BUYER]), // เข้าได้เฉพาะ Buyer ก่อน
+        authorizeRoles([Role.BUYER]),
         validateRequest(OrderIdParamSchema),
         async (req: Request, res: Response) => {
             if (!req.token) {
@@ -81,7 +88,7 @@ export const orderRouter = (() => {
             }
             const { orderId } = req.params;
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
-            
+
             const serviceResponse = await orderService.findOrderDetails(orderId, userForService);
             handleServiceResponse(serviceResponse, res);
         }
@@ -94,7 +101,7 @@ export const orderRouter = (() => {
 export const sellerOrderRouter = (() => {
     const router = express.Router({ mergeParams: true });
 
-    // GET /v1/stores/my-store/orders - Seller ดู Order ทั้งหมดของร้าน
+    // GET /v1/stores/my-store/orders - Seller ดู Order ทั้งหมดของร้าน (คิว หรือ ประวัติ)
     router.get(
         "/",
         validateRequest(GetOrdersQuerySchema),
@@ -103,32 +110,31 @@ export const sellerOrderRouter = (() => {
                 res.sendStatus(StatusCodes.UNAUTHORIZED);
                 return;
             }
-            const { page, pageSize } = req.query;
-            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
-            const serviceResponse = await orderService.findMyStoreOrders(userForService, parseInt(page as string), parseInt(pageSize as string));
-            handleServiceResponse(serviceResponse, res);
-        }
-    );
 
-    // PATCH /v1/stores/my-store/orders/:orderId - Seller จัดการ Order
-    router.patch(
-        "/:orderId",
-        validateRequest(SellerUpdateOrderStatusSchema),
-        async (req: Request, res: Response) => {
-            if (!req.token) {
-                res.sendStatus(StatusCodes.UNAUTHORIZED);
-                return;
-            }
-            const { orderId } = req.params;
-            const { action } = req.body;
-            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+            // --- 🔴 START FIX ---
+
+            // 1. ใช้ Schema ในการ Parse ตัว req.query เพื่อให้ได้ค่า Default และ Type ที่ถูกต้อง
+            // Zod จะจัดการ .coerce.number() และ .default() ให้เรา
+            const validatedQuery = GetOrdersQuerySchema.shape.query.parse(req.query);
             
-            const serviceResponse = await orderService.reviewOrder(orderId, action, userForService);
+            // 2. ดึงค่าที่ Parse แล้วออกมา
+            //    ณ จุดนี้ page และ pageSize จะเป็น number (เช่น 1 และ 10)
+            //    status จะเป็น array (ถ้าส่งมา) หรือ undefined
+            const { page, pageSize, status } = validatedQuery;
+
+            // --- 🔴 END FIX ---
+
+            // 3. (แก้ไข) ใช้ status ที่ได้จาก Zod โดยตรง
+            const filterStatus = status ? (Array.isArray(status) ? status : [status]) : undefined;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+
+            // 4. (แก้ไข) ส่ง page และ pageSize (ที่เป็น number อยู่แล้ว) เข้า Service โดยตรง
+            const serviceResponse = await orderService.findMyStoreOrders(userForService, page, pageSize, filterStatus as OrderStatus[]);
             handleServiceResponse(serviceResponse, res);
         }
     );
 
-    // (ใหม่) GET /v1/stores/my-store/orders/:orderId - Seller ดูรายละเอียด Order เดียว
+    // GET /v1/stores/my-store/orders/:orderId - Seller ดูรายละเอียด Order เดียว
     router.get(
         "/:orderId",
         validateRequest(OrderIdParamSchema),
@@ -141,6 +147,41 @@ export const sellerOrderRouter = (() => {
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
 
             const serviceResponse = await orderService.findOrderDetails(orderId, userForService);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // PATCH /v1/stores/my-store/orders/reorder - Seller เรียงลำดับคิวใหม่
+    router.patch(
+        "/reorder",
+        validateRequest(ReorderQueueSchema),
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+                return;
+            }
+            const { orderedIds } = req.body;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+
+            const serviceResponse = await orderService.reorderQueue(orderedIds, userForService);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // PATCH /v1/stores/my-store/orders/:orderId - Seller จัดการสถานะ Order
+    router.patch(
+        "/:orderId",
+        validateRequest(SellerUpdateOrderStatusSchema),
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+                return;
+            }
+            const { orderId } = req.params;
+            const { action } = req.body;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+
+            const serviceResponse = await orderService.reviewOrder(orderId, action, userForService);
             handleServiceResponse(serviceResponse, res);
         }
     );

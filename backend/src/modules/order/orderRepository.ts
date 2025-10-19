@@ -1,7 +1,7 @@
 // @modules/order/orderRepository.ts
 
 import prisma from "@src/db";
-import { Order, OrderItem, OrderStatus } from "@prisma/client";
+import { Order, OrderItem, OrderStatus, Prisma } from "@prisma/client";
 
 // Type สำหรับข้อมูลที่จำเป็นในการสร้าง Order
 type OrderCreationData = {
@@ -67,17 +67,37 @@ export const orderRepository = {
     countOrdersByBuyerId: (buyerId: string) => prisma.order.count({ where: { buyerId } }),
 
     // ดึงรายการสั่งซื้อของร้านค้า (สำหรับ Seller)
-    findOrdersByStoreId: async (storeId: string, page: number, pageSize: number) => {
+    findOrdersByStoreId: async (storeId: string, page: number, pageSize: number, filterStatus?: OrderStatus[]) => {
         const skip = (page - 1) * pageSize;
+
+        const whereClause: Prisma.OrderWhereInput = {
+            storeId: storeId,
+            // ถ้ามี filterStatus ส่งเข้ามา ให้ใช้เงื่อนไข in
+            ...(filterStatus && filterStatus.length > 0 && {
+                status: { in: filterStatus }
+            })
+        };
+
         return prisma.order.findMany({
-            where: { storeId: storeId },
+            where: whereClause,
             skip: skip,
             take: pageSize,
-            orderBy: { createdAt: 'desc' },
+            // ถ้าไม่มี filter (ดูประวัติ) ให้เรียงตามเวลา
+            // ถ้ามี filter (ดูคิว) ให้เรียงตาม position
+            orderBy: filterStatus ? { position: 'asc' } : { createdAt: 'desc' },
             include: { buyer: { select: { username: true } }, orderItems: { include: { menu: true } } }
         });
     },
-    countOrdersByStoreId: (storeId: string) => prisma.order.count({ where: { storeId } }),
+
+    countOrdersByStoreId: (storeId: string, filterStatus?: OrderStatus[]) => {
+        const whereClause: Prisma.OrderWhereInput = {
+            storeId: storeId,
+            ...(filterStatus && filterStatus.length > 0 && {
+                status: { in: filterStatus }
+            })
+        };
+        return prisma.order.count({ where: whereClause });
+    },
 
     // ค้นหา Order ด้วย ID
     findOrderById: async (orderId: string) => {
@@ -93,5 +113,30 @@ export const orderRepository = {
             where: { id: orderId },
             data: data
         });
-    }
+    },
+
+    // (ใหม่) หาค่า position ที่มากที่สุดในร้านค้า
+    findMaxPositionInStore: async (storeId: string) => {
+        const result = await prisma.order.aggregate({
+            _max: {
+                position: true,
+            },
+            where: {
+                storeId: storeId,
+            },
+        });
+        return result._max.position || 0; // ถ้ายังไม่มีเลย ให้เริ่มที่ 0
+    },
+
+    // (ใหม่) อัปเดต position ของหลายๆ Order ใน Transaction เดียว
+    updateOrderPositions: async (updates: Array<{ id: string; position: number }>) => {
+        return prisma.$transaction(
+            updates.map(update =>
+                prisma.order.update({
+                    where: { id: update.id },
+                    data: { position: update.position },
+                })
+            )
+        );
+    },
 };
