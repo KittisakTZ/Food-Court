@@ -1,7 +1,7 @@
 // @/hooks/useMenus.ts
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createMenu, updateMenu } from "@/services/menu.service";
+import { createMenu, updateMenu, deleteMenu } from "@/services/menu.service";
 import { getMenusByStore } from "@/services/store.service";
 
 const MENUS_QUERY_KEY = 'menus';
@@ -57,6 +57,23 @@ export const useUpdateMenu = () => {
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             alert(`Failed to update menu: ${errorMessage}`);
+        }
+    });
+};
+
+// (ใหม่) Hook สำหรับลบเมนู
+export const useDeleteMenu = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: deleteMenu,
+        onSuccess: (data, variables) => {
+            // เมื่อลบสำเร็จ, บอกให้ react-query ไปดึงข้อมูล 'menus' ของร้านนั้นๆ มาใหม่
+            // เราดึง storeId มาจาก variables ที่ส่งเข้ามา
+            queryClient.invalidateQueries({ queryKey: [MENUS_QUERY_KEY, variables.storeId] });
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || error.message;
+            alert(`Failed to delete menu: ${errorMessage}`);
         }
     });
 };

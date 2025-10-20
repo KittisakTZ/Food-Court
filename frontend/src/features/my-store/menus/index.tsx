@@ -3,7 +3,7 @@ import { useAuthStore } from "@/zustand/useAuthStore";
 import { useMyStore } from "@/hooks/useStores";
 import { useStore } from "@/hooks/useStores"; // Hook ที่ดึงข้อมูลร้านเดียว
 import { useMenuCategories, useCreateCategory } from "@/hooks/useMenuCategories";
-import { useMenus } from "@/hooks/useMenus"; // Hook ที่เรามีอยู่แล้ว
+import { useMenus, useDeleteMenu } from "@/hooks/useMenus"; // Import useDeleteMenu
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Menu } from "@/types/response/menu.response"; // Import Type
@@ -51,6 +51,13 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
 // 2. Component สำหรับแสดงรายการเมนู
 const MenuList = ({ storeId, onEdit }: { storeId: string, onEdit: (menu: Menu) => void }) => {
     const { data: menusData, isLoading } = useMenus({ storeId });
+    const { mutate: deleteItem, isPending } = useDeleteMenu(); // Hook สำหรับลบ
+
+    const handleDelete = (menuId: string, menuName: string) => {
+        if (window.confirm(`Are you sure you want to delete the menu "${menuName}"? This action cannot be undone.`)) {
+            deleteItem({ storeId, menuId });
+        }
+    };
 
     if (isLoading) return <p>Loading menus...</p>;
 
@@ -69,10 +76,20 @@ const MenuList = ({ storeId, onEdit }: { storeId: string, onEdit: (menu: Menu) =
                         </div>
                         <div className="text-right">
                             <p className="font-bold">${menu.price.toFixed(2)}</p>
-                            {/* (ใหม่) ปุ่ม Edit */}
-                            <button onClick={() => onEdit(menu)} className="text-sm text-blue-600 hover:underline mt-1">
-                                Edit
-                            </button>
+                            <div className="flex space-x-2 justify-end mt-1">
+                                <button onClick={() => onEdit(menu)} className="text-sm text-blue-600 hover:underline">
+                                    Edit
+                                </button>
+                                <span className="text-sm text-gray-300">|</span>
+                                {/* (ใหม่) ปุ่ม Delete */}
+                                <button
+                                    onClick={() => handleDelete(menu.id, menu.name)}
+                                    disabled={isPending}
+                                    className="text-sm text-red-600 hover:underline disabled:text-gray-400"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -85,18 +102,18 @@ const MenuList = ({ storeId, onEdit }: { storeId: string, onEdit: (menu: Menu) =
 // Component หลัก
 const MenuManagementFeature = () => {
     const { data: myStore, isLoading: isLoadingStore } = useMyStore();
-    
+
     // (ใหม่) State สำหรับเก็บเมนูที่กำลังแก้ไข
     const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
 
     if (isLoadingStore) return <div>Loading...</div>;
     if (!myStore) return <div>You do not have a store.</div>;
-    
+
     // Handler เพื่อปิดฟอร์มแก้ไข
     const handleFormComplete = () => {
         setEditingMenu(null);
     };
-    
+
     return (
         <div className="container mx-auto p-4 md:p-8">
             <h1 className="text-3xl font-bold mb-6">Menu Management for <span className="text-blue-600">{myStore.name}</span></h1>
@@ -107,10 +124,10 @@ const MenuManagementFeature = () => {
                 <div className="lg:col-span-1 order-1 lg:order-2 space-y-6">
                     <CategoryManager storeId={myStore.id} />
                     {/* (แก้ไข) แสดงฟอร์มสร้าง/แก้ไข */}
-                    <MenuForm 
-                        storeId={myStore.id} 
-                        initialData={editingMenu} 
-                        onComplete={handleFormComplete} 
+                    <MenuForm
+                        storeId={myStore.id}
+                        initialData={editingMenu}
+                        onComplete={handleFormComplete}
                     />
                 </div>
             </div>

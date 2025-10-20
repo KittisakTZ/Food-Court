@@ -39,3 +39,17 @@ export const updateMenu = async ({ storeId, menuId, formData }: UpdateMenuParams
     );
     return response.responseObject;
 };
+
+// (ใหม่) Type สำหรับ Parameter การลบ
+interface DeleteMenuParams {
+    storeId: string;
+    menuId: string;
+}
+
+// (ใหม่) ฟังก์ชันลบเมนู
+export const deleteMenu = async ({ storeId, menuId }: DeleteMenuParams) => {
+    const { data: response } = await mainApi.delete<APIResponseType<null>>(
+        `/v1/stores/${storeId}/menus/${menuId}`
+    );
+    return response;
+};
