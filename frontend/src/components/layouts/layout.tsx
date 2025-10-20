@@ -1,153 +1,128 @@
-import { Outlet } from "react-router-dom";
+// @/components/layouts/layout.tsx
+
+import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import NavbarMain from "./navbars/navbar.main";
+import { SidebarComponent, DataSideBar } from "./sidebars/sidebar";
+import { useAuthStore } from "@/zustand/useAuthStore";
 import { useEffect } from "react";
-import { getAuthStatus, getLogout } from "@/services/auth.service";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { SidebarInset, SidebarProvider } from "../ui/sidebar";
+import { getLogout } from "@/services/auth.service";
+
+// UI Components
+import { SidebarProvider, SidebarInset } from "../ui/sidebar";
+
+// Icons
 import { IoIosLogOut } from "react-icons/io";
-import { DataSideBar, SidebarComponent } from "./sidebars/sidebar";
-
-import { FaAppStore, FaCartShopping, FaCircleUser } from "react-icons/fa6";
-import { IoIosCube,IoIosSettings} from "react-icons/io";
-import { GiSellCard } from "react-icons/gi";
-import { FaCalendarDay } from "react-icons/fa";
-
-// import { getUserProfie } from "@/services/user.service";
-import { useLocalProfileData } from "@/zustand/useProfile";
-import { permissionMap } from "@/utils/permissionMap";
-import PermissionRedirect from "@/utils/permissionRedirect";
+import { FaUserShield, FaStore, FaShoppingBag } from "react-icons/fa"; // ตัวอย่าง Icons สำหรับ Roles
+import { MdDashboard, MdListAlt, MdStorefront } from "react-icons/md"; // ตัวอย่าง Icons เพิ่มเติม
 
 const MainLayout = () => {
   const navigate = useNavigate();
-  const { setLocalProfileData, profile } = useLocalProfileData();
 
-  const handleLogout = async () => {
-    getLogout()
-      .then((response) => {
-        if (response.statusCode === 200) {
-          navigate("/login");
-        } else {
-          alert(`Unexpected error: ${response.message}`);
-        }
-      })
-      .catch((error) => {
-        console.error(
-          "Error creating category:",
-          error.response?.data || error.message
-        );
-        alert("Failed to create category. Please try again.");
-      });
-  };
+  // 1. ดึง state และ action ที่จำเป็นทั้งหมดจาก useAuthStore
+  const { isAuthenticated, user, clearAuth, isLoading, setIsLoading } = useAuthStore();
 
+  // 2. จัดการ Initial Load เมื่อผู้ใช้เปิดแอปหรือ Refresh หน้า
+  // useEffect นี้จะทำงานแค่ครั้งเดียวหลังจากที่ Zustand rehydrate state จาก localStorage เสร็จ
   useEffect(() => {
-    getAuthStatus()
-      .then((response) => {
-        if (response.statusCode === 200) {
-          if (response.message == "Authentication required") {
-            navigate("/login");
-          }
-        }
-      })
-      .catch((error) => {
-        console.error("Error checking authentication status:", error.message);
-      });
+    // ฟังก์ชันนี้จะถูกเรียกเมื่อ state ของ persist rehydrate เสร็จ
+    const handleRehydration = () => {
+      // ไม่ว่าจะมี user หรือไม่ก็ตาม การ rehydrate ถือว่าเสร็จสิ้น
+      // เราจึงสามารถปิดสถานะ isLoading ได้
+      setIsLoading(false);
+    };
+
+    // สมัครใช้งาน event 'rehydrated' ของ store
+    const unsubscribe = useAuthStore.persist.onFinishHydration(handleRehydration);
+
+    // ทำความสะอาด (cleanup) เมื่อ component unmount
+    return () => {
+      unsubscribe();
+    };
+  }, [setIsLoading]);
 
 
-
-    // getUserProfie().then((res) => {
-    //   if (res.responseObject) {
-    //     setLocalProfileData(res.responseObject);
-    //     console.log("response", res);
-    //   }
-    // });
-  }, []);
-
-  const eiditprofile = () => {
-    console.log("profile", profile.company_id);
-    //navigate('/eidit/companies', { state: { customer_id: profile.company_id} });
-    navigate('/eidit/companies', { state: { customer_id: profile.company_id } });
+  // 3. แสดงหน้า Loading ขณะที่ Zustand กำลังดึงข้อมูลจาก localStorage
+  if (isLoading) {
+      return (
+          <div className="flex items-center justify-center min-h-screen">
+              Loading Application...
+          </div>
+      );
   }
 
-  const rawSidebarItems = [
-    
-    {
-      title: "ลูกค้า",
-      url: "",
-      icon: FaCircleUser,
-      disable: true,
-      items: [
-        {
-          title: "นิสัยลูกค้า",
-          url: `/customer-character`,
-        },
-      ],
-    },
+  // 4. Logic ป้องกัน Route: ถ้าโหลดเสร็จแล้วแต่ยังไม่ Login ให้ Redirect
+  if (!isAuthenticated) {
+    // ใช้ component <Navigate> จาก react-router-dom เพื่อเปลี่ยนหน้า
+    // `replace` จะทำให้ผู้ใช้กด back กลับมาหน้านี้ไม่ได้
+    return <Navigate to="/login" replace />;
+  }
+  
+  // 5. Logic การออกจากระบบ
+  const handleLogout = async () => {
+    try {
+        await getLogout(); // เรียก API Logout
+    } catch (error) {
+        console.error("Logout API failed, but clearing client-side auth anyway.", error);
+    } finally {
+        clearAuth(); // เคลียร์ข้อมูลใน store และ localStorage
+        navigate("/login"); // ส่งไปหน้า Login (เป็น fallback ที่ดี)
+    }
+  };
 
-  ];
+  // 6. สร้างข้อมูล Sidebar แบบ Dynamic ตาม Role ของผู้ใช้
+  const generateSidebarItems = () => {
+    if (!user) return []; // กรณีฉุกเฉิน
 
-  // ฟังก์ชันกรองเฉพาะเมนูที่ role ของ user มีสิทธิ์ (A หรือ R)
-  const filteredSidebarItems = rawSidebarItems
-    .map((item) => {
-      if (item.items) {
-        // ตรวจสอบ permission ของ items ย่อย
-        const filteredSubItems = item.items.filter((subItem) => {
-          const permission =
-            permissionMap[subItem.title]?.[
-            profile?.role?.role_name ?? "Admin"
-            ] || "N";
-          return permission !== "N";
-        });
+    switch (user.role) {
+      case 'ADMIN':
+        return [
+            { title: "Dashboard", url: "/", icon: MdDashboard },
+            { title: "Approve Stores", url: "/admin/stores-approval", icon: MdStorefront },
+            { title: "User Management", url: "/admin/users", icon: FaUserShield },
+        ];
+      case 'SELLER':
+        return [
+            { title: "My Dashboard", url: "/", icon: MdDashboard },
+            { title: "Order Queue", url: "/my-store/orders", icon: MdListAlt },
+            { title: "My Menu", url: "/my-store/menus", icon: FaStore },
+        ];
+      case 'BUYER':
+        return [
+            { title: "Home", url: "/", icon: MdDashboard },
+            { title: "Find Stores", url: "/stores", icon: MdStorefront },
+            { title: "My Orders", url: "/my-orders", icon: FaShoppingBag },
+        ];
+      default:
+        return [];
+    }
+  };
 
-        // ถ้ามี items ที่ผ่านการกรอง ให้สร้าง object ใหม่
-        if (filteredSubItems.length > 0) {
-          return { ...item, items: filteredSubItems };
-        }
-      }
-
-      // ตรวจสอบ permission ของเมนูหลัก
-      const permission =
-        permissionMap[item.title]?.[profile?.role?.role_name ?? "Admin"] || "N";
-      if (permission !== "N") {
-        return item; // คืนค่าเมนูหลักที่มี permission
-      }
-
-      return null; // กรณีที่ไม่มี permission จะคืนค่าเป็น null
-    })
-    .filter((item) => item !== null); // กรอง null ออกจากอาร์เรย์
-
+  // 7. เตรียมข้อมูลทั้งหมดสำหรับ SidebarComponent
   const dataSidebar: DataSideBar = {
     sidebarItems: [
       {
-        name: "",
-        items: filteredSidebarItems,
+        name: "MENU",
+        items: generateSidebarItems(),
       },
     ],
     sidebarFooter: {
       profile: {
-        name: (profile?.username ?? "") + " " + (profile?.last_name ?? ""),
-        // avatar: profile?.image_url ?? "/images/avatar2.png",
-        avatar: "/images/avatar2.png",
+        name: user?.username ?? "Guest",
+        avatar: "/images/avatar2.png", // อาจจะใช้ user.profilePicture ในอนาคต
       },
       items: [
         {
           icon: <IoIosLogOut className="text-theme-yellow" />,
           name: "ออกจากระบบ",
-          onClick: () => {
-            console.log("logout");
-            handleLogout();
-          },
-
+          onClick: handleLogout,
         },
-
       ],
     },
   };
 
+  // 8. แสดงผล Layout หลักสำหรับผู้ใช้ที่ Login แล้ว
   return (
     <div className=" relative w-screen h-screen">
-      <PermissionRedirect />
-
       <SidebarProvider
         style={{
           height: "100%",
@@ -160,12 +135,8 @@ const MainLayout = () => {
         <NavbarMain />
         <SidebarComponent data={dataSidebar} />
         <SidebarInset className="m-0 p-0 bg-[#F6F7F9] w-full max-w-full">
-          {/* <header className="clas flex shrink-0 items-center gap-2">
-            <div className="flex items-center gap-2 p-4">
-              <SidebarTriggerCustom />
-            </div>
-          </header> */}
           <div className=" px-4 py-4 overflow-auto max-h-[calc(100%-70px)]">
+            {/* <Outlet> คือจุดที่เนื้อหาของแต่ละหน้า (เช่น HomePage) จะถูกแสดงผล */}
             <Outlet />
           </div>
         </SidebarInset>

@@ -1,44 +1,43 @@
 // @/pages/login/index.tsx
 import { useEffect, useState } from "react";
-import { postLogin, getAuthStatus } from "@/services/auth.service";
-import { Link, useNavigate } from "react-router-dom"; // Import Link
+import { postLogin, getAuthStatus, getMe } from "@/services/auth.service";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/zustand/useAuthStore";
 
 export default function LoginFeature() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { setUser, isAuthenticated } = useAuthStore(); // ดึง action และ state จาก store
 
+  // Redirect ถ้า login อยู่แล้ว
   useEffect(() => {
-    // ตรวจสอบสถานะ login เมื่อ component โหลด
-    const checkAuth = async () => {
-      try {
-        const response = await getAuthStatus();
-        if (response.statusCode === 200) {
-          navigate("/"); // ถ้า login อยู่แล้ว ให้ไปหน้าหลัก
-        }
-      } catch (error) {
-        // ไม่ต้องทำอะไร ถ้าเช็คไม่ผ่าน (เช่น token ไม่มี) ก็อยู่หน้า login ต่อไป
-        console.log("Not authenticated");
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!username || !password) return alert("Please enter username and password.");
 
     try {
-      const response = await postLogin({ username, password });
-      if (response.statusCode === 200) {
-        navigate("/");
+      const loginResponse = await postLogin({ username, password });
+      if (loginResponse.statusCode === 200) {
+        // Login สำเร็จ, ดึงข้อมูล user ต่อ
+        const userResponse = await getMe();
+        if (userResponse.responseObject) {
+          setUser(userResponse.responseObject); // บันทึกข้อมูล user ลง store
+          navigate("/"); // ไปยังหน้า Home
+        } else {
+          throw new Error("Failed to fetch user profile after login.");
+        }
       } else {
-        // แสดงข้อความจาก Backend โดยตรง
-        alert(response.message || "An unexpected error occurred");
+        alert(loginResponse.message || "An unexpected error occurred");
       }
     } catch (error: any) {
       console.error("Error logging in:", error);
-      // แสดงข้อความ error จาก response ของ API ที่ล้มเหลว
       alert(error.response?.data?.message || "Failed to log in. Please check your credentials.");
     }
   };

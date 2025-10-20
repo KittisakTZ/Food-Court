@@ -1,5 +1,5 @@
 // @/services/auth.service.ts
-import { LOGIN, REGISTER, AUTH_STATUS, LOGOUT } from "@/apis/endpoint.api";
+import { LOGIN, REGISTER, AUTH_STATUS, LOGOUT, ME } from "@/apis/endpoint.api";
 import mainApi from "@/apis/main.api";
 import { PayloadLogin, PayloadRegister } from "@/types/requests/request.auth";
 import { APIResponseType } from "@/types/response/index";
@@ -35,5 +35,11 @@ export const getLogout = async () => {
     const { data: response } = await mainApi.get<APIResponseType<null>>(
         LOGOUT // Endpoint: /v1/auth/logout
     );
+    return response;
+};
+
+// (ใหม่) ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้ที่ Login อยู่
+export const getMe = async () => {
+    const { data: response } = await mainApi.get<APIResponseType<UserAuthResponse>>(ME);
     return response;
 };

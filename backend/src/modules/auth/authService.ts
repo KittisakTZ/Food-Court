@@ -140,4 +140,19 @@ export const authService = {
             );
         }
     },
+
+    // (ใหม่) Service สำหรับดึงข้อมูลผู้ใช้ที่ Login อยู่
+    me: async (userId: string) => {
+        try {
+            // เรามี Repository ที่ดึงข้อมูล user จาก ID อยู่แล้ว
+            const user = await authRepository.findById(userId);
+            if (!user) {
+                return new ServiceResponse(ResponseStatus.Failed, "User not found.", null, StatusCodes.NOT_FOUND);
+            }
+            return new ServiceResponse(ResponseStatus.Success, "User profile retrieved successfully.", user, StatusCodes.OK);
+        } catch (ex) {
+            const errorMessage = "Error retrieving user profile: " + (ex as Error).message;
+            return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+    },
 };

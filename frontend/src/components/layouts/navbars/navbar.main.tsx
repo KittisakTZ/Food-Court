@@ -1,5 +1,7 @@
+// @/components/layouts/navbars/navbar.main.tsx
+
+import { useAuthStore } from "@/zustand/useAuthStore";
 import { Avatar, Box, Flex, Link, Text } from "@radix-ui/themes";
-import { useLocalProfileData } from "@/zustand/useProfile";
 import SidebarTriggerCustom from "@/components/customs/button/sidebarTriggerCustom";
 import MenuItem, { MenuItemType } from './MenuItem';
 
@@ -33,7 +35,7 @@ const menuItems: MenuItemType[] = [
 ];
 
 const   NavbarProfileInfo = () => {
-  const { profile } = useLocalProfileData();
+  const { user  } = useAuthStore();
   return (
 
     <Flex className=" text-main mr-8" align={"center"} gap={"4"}>
@@ -45,7 +47,7 @@ const   NavbarProfileInfo = () => {
           size={"2"}
         />
       </Box>
-      <Text className=" text-sm">{profile?.role?.role_name ?? "Admin"}</Text>
+      <Text className=" text-sm">{user?.role ?? "Guest"}</Text>
     </Flex>
   );
 };

@@ -2,7 +2,9 @@
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { authService } from "@modules/auth/authService";
-import { LoginSchema, RegisterSchema } from "@modules/auth/authModel"; 
+import { LoginSchema, RegisterSchema } from "@modules/auth/authModel";
+import authenticateToken from "@common/middleware/authenticateToken";
+import { StatusCodes } from "http-status-codes";
 
 export const authRouter = (() => {
     const router = express.Router();
@@ -28,6 +30,22 @@ export const authRouter = (() => {
         const serviceResponse = authService.authStatus(req);
         handleServiceResponse(serviceResponse, res);
     });
+
+    // (ใหม่) GET /v1/auth/me - ดึงข้อมูลโปรไฟล์ของฉัน
+    router.get(
+        "/me",
+        authenticateToken, // ใช้ middleware เพื่อตรวจสอบ token
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                // ถูก: ส่ง Response แล้ว return; (void) เพื่อหยุดทำงาน
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+                return;
+            }
+            const userId = req.token.payload.uuid;
+            const serviceResponse = await authService.me(userId);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
 
     return router;
 })();
