@@ -4,6 +4,7 @@ import { useStore } from "@/hooks/useStores";
 import { useMenus } from "@/hooks/useMenus";
 import { useState } from "react";
 import { useCartStore } from "@/zustand/useCartStore";
+import { useAddItemToCart } from '@/hooks/useCart';
 
 interface StoreDetailFeatureProps {
     storeId: string;
@@ -11,9 +12,14 @@ interface StoreDetailFeatureProps {
 
 const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
     const [page, setPage] = useState(1);
-    const { addItem } = useCartStore(); // ดึง action 'addItem' มาใช้
+    const { mutate: addItem, isPending: isAdding } = useAddItemToCart(); // ดึง mutate function มาใช้
     const { data: store, isLoading: isLoadingStore, isError: isErrorStore } = useStore(storeId); // ดึงข้อมูลร้านค้า
     const { data: menus, isLoading: isLoadingMenus, isError: isErrorMenus } = useMenus({ storeId, page }); // ดึงข้อมูลเมนู
+
+    // Handler สำหรับกดปุ่ม
+    const handleAddItem = (menuId: string) => {
+        addItem({ menuId, quantity: 1 });
+    };
 
     if (isLoadingStore) return <div>Loading store details...</div>;
     if (isErrorStore) return <div>Error loading store details.</div>;
@@ -39,7 +45,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {menus?.data.map(menu => (
-                        <div key={menu.id} className="border rounded-lg p-4 flex">
+                        <div key={menu.id} className="border rounded-lg p-4 flex items-center">
                             <div className="flex-grow pr-4">
                                 <h3 className="text-lg font-semibold">{menu.name}</h3>
                                 <p className="text-sm text-gray-500">{menu.description}</p>
@@ -48,8 +54,9 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                             <img src={menu.image || 'https://via.placeholder.com/100'} alt={menu.name} className="w-24 h-24 object-cover rounded-md" />
 
                             {/* (ใหม่) เพิ่มปุ่ม Add to Cart */}
-                            <button 
-                                onClick={() => addItem(menu)}
+                            <button
+                                onClick={() => handleAddItem(menu.id)}
+                                disabled={isAdding} // Disable ปุ่มขณะกำลังเพิ่ม
                                 className="ml-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
                             >
                                 Add
