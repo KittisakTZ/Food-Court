@@ -3,6 +3,7 @@
 import { getMyOrders, getMyStoreOrders, updateOrderStatus } from "@/services/order.service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
+import { toastService } from '@/services/toast.service';
 
 // ===== HOOK สำหรับ BUYER (โค้ดเดิม) =====
 type UseOrdersProps = {
@@ -47,7 +48,7 @@ export const useUpdateOrderStatus = () => {
         onError: (error) => {
             // เราสามารถเข้าถึง message ของ error ที่ axios ส่งกลับมาได้
             const errorMessage = (error as any)?.response?.data?.message || error.message;
-            alert(`Failed to update order status: ${errorMessage}`);
+            toastService.error(`Failed to update order status: ${errorMessage}`);
         }
     });
 };

@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { postLogin, getAuthStatus, getMe } from "@/services/auth.service";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/zustand/useAuthStore";
+import { toastService } from "@/services/toast.service";
 
 export default function LoginFeature() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { setUser, isAuthenticated } = useAuthStore(); // ดึง action และ state จาก store
+
 
   // Redirect ถ้า login อยู่แล้ว
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function LoginFeature() {
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!username || !password) return alert("Please enter username and password.");
+    if (!username || !password) return toastService.error("Please enter username and password.");
 
     try {
       const loginResponse = await postLogin({ username, password });
@@ -34,11 +36,11 @@ export default function LoginFeature() {
           throw new Error("Failed to fetch user profile after login.");
         }
       } else {
-        alert(loginResponse.message || "An unexpected error occurred");
+        toastService.error(loginResponse.message || "An unexpected error occurred");
       }
     } catch (error: any) {
       console.error("Error logging in:", error);
-      alert(error.response?.data?.message || "Failed to log in. Please check your credentials.");
+      toastService.error(error.response?.data?.message || "Failed to log in. Please check your credentials.");
     }
   };
 

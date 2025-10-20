@@ -3,6 +3,7 @@
 import { getStores, getStoreById, getMyStore, toggleMyStoreStatus, updateMyStore } from "@/services/store.service";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toastService } from '@/services/toast.service';
 
 // Type ของ Parameter ที่ Hook จะรับเข้ามา
 type UseStoresProps = {
@@ -51,13 +52,13 @@ export const useUpdateMyStore = () => {
         onSuccess: (updatedStore) => {
             queryClient.setQueryData(['my-store'], updatedStore);
             // **Alert "Success" มาจากตรงนี้**
-            alert("Store information updated successfully!"); 
+            toastService.success("Store information updated successfully!");
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             // **Console Error อาจจะมาจากตรงนี้**
             console.error("Mutation Error:", error.response?.data || error); 
-            alert(`Failed to update store: ${errorMessage}`);
+            toastService.error(`Failed to update store: ${errorMessage}`);
         }
     });
 };
@@ -72,7 +73,7 @@ export const useToggleMyStoreStatus = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            alert(`Failed to toggle store status: ${errorMessage}`);
+            toastService.error(`Failed to toggle store status: ${errorMessage}`);
         }
     });
 };

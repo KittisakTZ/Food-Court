@@ -1,6 +1,7 @@
 // @/hooks/useMenuCategories.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCategoriesByStore, createCategory } from "@/services/menuCategory.service";
+import { toastService } from '@/services/toast.service';
 
 const CATEGORIES_QUERY_KEY = 'menu-categories';
 
@@ -21,7 +22,7 @@ export const useCreateCategory = () => {
             queryClient.invalidateQueries({ queryKey: [CATEGORIES_QUERY_KEY, data.storeId] });
         },
         onError: (error) => {
-            alert(`Failed to create category: ${error.message}`);
+            toastService.error(`Failed to create category: ${error.message}`);
         }
     });
 };

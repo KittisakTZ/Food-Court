@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { postRegister } from "@/services/auth.service";
 import { Link, useNavigate } from "react-router-dom";
+import { toastService } from "@/services/toast.service";
 
 export default function RegisterFeature() {
     const [username, setUsername] = useState("");
@@ -13,21 +14,21 @@ export default function RegisterFeature() {
     const handleRegister = async (event: React.FormEvent) => {
         event.preventDefault();
         if (!username || !password) {
-            return alert("Please enter username and password.");
+            return toastService.error("Please enter username and password.");
         }
 
         try {
             const response = await postRegister({ username, password, email, role });
             if (response.statusCode === 201) {
-                alert("Registration successful! Please log in.");
+                toastService.success("Registration successful! Please log in.");
                 navigate("/login");
             } else {
                 // แสดงข้อความ error จาก Backend
-                alert(response.message || "Registration failed.");
+                toastService.error(response.message || "Registration failed.");
             }
         } catch (error: any) {
             console.error("Error registering:", error);
-            alert(error.response?.data?.message || "An unexpected error occurred.");
+            toastService.error(error.response?.data?.message || "An unexpected error occurred.");
         }
     };
 

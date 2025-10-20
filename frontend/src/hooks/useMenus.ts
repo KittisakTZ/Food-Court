@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createMenu, updateMenu, deleteMenu } from "@/services/menu.service";
 import { getMenusByStore } from "@/services/store.service";
+import { toastService } from '@/services/toast.service';
 
 const MENUS_QUERY_KEY = 'menus';
 
@@ -37,10 +38,11 @@ export const useCreateMenu = () => {
             
             // ตอนนี้เรามั่นใจได้ 100% ว่า storeId จะมีค่าเสมอ
             queryClient.invalidateQueries({ queryKey: [MENUS_QUERY_KEY, storeId] });
+            toastService.success(`Menu created successfully!`);
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            alert(`Failed to create menu: ${errorMessage}`);
+            toastService.error(`Failed to create menu: ${errorMessage}`);
         }
     });
 };
@@ -56,7 +58,7 @@ export const useUpdateMenu = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            alert(`Failed to update menu: ${errorMessage}`);
+            toastService.error(`Failed to update menu: ${errorMessage}`);
         }
     });
 };
@@ -73,7 +75,7 @@ export const useDeleteMenu = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            alert(`Failed to delete menu: ${errorMessage}`);
+            toastService.error(`Failed to delete menu: ${errorMessage}`);
         }
     });
 };

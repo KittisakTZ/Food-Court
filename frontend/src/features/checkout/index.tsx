@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { createOrder } from "@/services/order.service";
 import { useMemo } from "react";
+import { toastService } from '@/services/toast.service';
 
 const CheckoutFeature = () => {
     // 1. ดึงข้อมูลจาก Stores
@@ -65,16 +66,16 @@ const CheckoutFeature = () => {
         try {
             const response = await createOrder(payload);
             if (response.statusCode === 201) {
-                alert("Order created successfully! You can check its status in 'My Orders'.");
+                toastService.success("Order created successfully! You can check its status in 'My Orders'.");
                 // **** เราจะไม่ล้างตะกร้าที่นี่ ****
                 // clearCart(); 
                 navigate('/my-orders'); // พาไปหน้าประวัติการสั่งซื้อ
             } else {
-                alert(`Error: ${response.message}`);
+                toastService.error(`Error: ${response.message}`);
             }
         } catch (error: any) {
             console.error("Failed to create order:", error);
-            alert(error.response?.data?.message || "An unexpected error occurred while placing your order.");
+            toastService.error(error.response?.data?.message || "An unexpected error occurred while placing your order.");
         } finally {
             setIsSubmitting(false); // หยุด Loading
         }

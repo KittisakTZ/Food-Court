@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import mainApi from "@/apis/main.api";
 import { useNavigate } from "react-router-dom";
+import { toastService } from "@/services/toast.service";
 
 // Service สำหรับสร้างร้านค้า (อาจจะแยกไปไฟล์ service ก็ได้)
 const createStore = async (formData: FormData) => {
@@ -28,13 +29,13 @@ const CreateStoreFeature = () => {
     const { mutate, isPending } = useMutation({
         mutationFn: createStore,
         onSuccess: () => {
-            alert("Store created successfully! It is now awaiting administrator approval.");
+            toastService.success("Store created successfully! It is now awaiting administrator approval.");
             // บอกให้ react-query ไปดึงข้อมูล my-store มาใหม่ในครั้งถัดไป
             queryClient.invalidateQueries({ queryKey: ['my-store'] });
             navigate("/"); // กลับไปหน้า Dashboard
         },
         onError: (error: any) => {
-            alert(`Failed to create store: ${error.response?.data?.message || error.message}`);
+            toastService.error(`Failed to create store: ${error.response?.data?.message || error.message}`);
         }
     });
 

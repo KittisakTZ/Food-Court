@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminGetAllStores, adminApproveStore } from "@/services/admin.service";
+import { toastService } from '@/services/toast.service';
 
 const ADMIN_STORES_QUERY_KEY = 'admin-stores';
 
@@ -22,11 +23,11 @@ export const useAdminApproveStore = () => {
         onSuccess: () => {
             // เมื่ออนุมัติสำเร็จ, บอกให้ react-query ไปดึงข้อมูล 'admin-stores' มาใหม่
             queryClient.invalidateQueries({ queryKey: [ADMIN_STORES_QUERY_KEY] });
-            alert("Store approved successfully!");
+            toastService.success("Store approved successfully!");
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            alert(`Failed to approve store: ${errorMessage}`);
+            toastService.error(`Failed to approve store: ${errorMessage}`);
         }
     });
 };

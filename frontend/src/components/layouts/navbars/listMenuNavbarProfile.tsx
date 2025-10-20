@@ -2,6 +2,7 @@ import { Flex, Text } from "@radix-ui/themes";
 import { IoIosLogOut } from "react-icons/io";
 import { getLogout } from "@/services/auth.service";
 import { useNavigate } from "react-router-dom";
+import { toastService } from "@/services/toast.service";
 
 const ListMenuNavbarProfile = ({ title }: { title: string }) => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const ListMenuNavbarProfile = ({ title }: { title: string }) => {
         if (response.statusCode === 200) {
           navigate("/login");
         } else {
-          alert(`Unexpected error: ${response.message}`);
+          toastService.error(`Unexpected error: ${response.message}`);
         }
       })
       .catch((error) => {
@@ -20,7 +21,7 @@ const ListMenuNavbarProfile = ({ title }: { title: string }) => {
           "Error creating category:",
           error.response?.data || error.message
         );
-        alert("Failed to create category. Please try again.");
+        toastService.error("Failed to create category. Please try again.");
       });
   };
   return (
