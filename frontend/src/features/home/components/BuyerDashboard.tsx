@@ -1,3 +1,3 @@
 export const BuyerDashboard = () => {
-    return <div>Welcome, BUYER! This is your dashboard.</div>;
+    return <div>Welcome, SELLER! This is your dashboard.</div>;
 };

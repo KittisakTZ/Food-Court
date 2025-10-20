@@ -47,7 +47,7 @@ const   NavbarProfileInfo = () => {
           size={"2"}
         />
       </Box>
-      <Text className=" text-sm">{user?.role ?? "Guest"}</Text>
+      <Text className=" text-sm">{user?.username ?? "Guest"}</Text>
     </Flex>
   );
 };
