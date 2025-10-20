@@ -8,6 +8,7 @@ import StoreDetailPage from "@/pages/store-detail";
 import CheckoutPage from "@/pages/checkout";
 import MyOrdersPage from "@/pages/my-orders";
 import MenuManagementPage from "@/pages/my-store/menus";
+import StoreSettingsPage from "@/pages/my-store/settings";
 
 
 const router = createBrowserRouter([
@@ -39,6 +40,11 @@ const router = createBrowserRouter([
       {
         path: "my-store/menus",
         element: <MenuManagementPage />,
+      },
+      // (ใหม่) เพิ่ม Route สำหรับหน้าตั้งค่าร้านค้า
+      {
+        path: "my-store/settings",
+        element: <StoreSettingsPage />,
       },
     ],
   },

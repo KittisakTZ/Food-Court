@@ -37,13 +37,21 @@ export const storeService = {
             return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
         }
 
-        // ตรวจสอบสิทธิ์: ผู้ใช้ต้องเป็นเจ้าของร้าน หรือเป็น ADMIN
+        // **การตรวจสอบสิทธิ์:** ผู้ใช้ต้องเป็นเจ้าของร้าน หรือเป็น ADMIN
         if (store.ownerId !== user.id && user.role !== Role.ADMIN) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to update this store.", null, StatusCodes.FORBIDDEN);
         }
+        
+        // (Optional) ตรวจสอบชื่อซ้ำ ถ้ามีการส่ง name มา
+        if (payload.name) {
+            const existingStore = await storeRepository.findByName(payload.name);
+            if (existingStore && existingStore.id !== storeId) {
+                return new ServiceResponse(ResponseStatus.Failed, "Store name is already taken.", null, StatusCodes.CONFLICT);
+            }
+        }
 
         const updatedStore = await storeRepository.update(storeId, payload);
-        return new ServiceResponse(ResponseStatus.Success, "Store updated successfully.", null, StatusCodes.OK);
+        return new ServiceResponse(ResponseStatus.Success, "Store updated successfully.", updatedStore, StatusCodes.OK);
     },
 
     // ดึงข้อมูลร้านค้าทั้งหมด

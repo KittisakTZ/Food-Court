@@ -53,3 +53,30 @@ export const getMyStore = async () => {
     );
     return response.responseObject;
 };
+
+// (ใหม่) Type สำหรับ Payload การอัปเดตข้อมูลร้าน
+// เราจะอนุญาตให้อัปเดตแค่บาง field เท่านั้น
+interface UpdateStorePayload {
+    name?: string;
+    description?: string;
+    location?: string;
+    // เราจะแยกการอัปเดต image ไปทำต่างหากในอนาคตเพราะซับซ้อนกว่า
+}
+
+// (ใหม่) ฟังก์ชันสำหรับ Seller อัปเดตข้อมูลร้านของตัวเอง
+export const updateMyStore = async (payload: UpdateStorePayload) => {
+    const { data: response } = await mainApi.patch<APIResponseType<Store>>(
+        `/v1/stores/my-store`, // <-- ตรวจสอบ URL
+        payload
+    );
+    return response.responseObject;
+};
+
+// (ใหม่) ฟังก์ชันสำหรับ Seller เปิด/ปิดร้าน
+export const toggleMyStoreStatus = async (isOpen: boolean) => {
+    const { data: response } = await mainApi.patch<APIResponseType<Store>>(
+        `/v1/stores/my-store/status`,
+        { isOpen }
+    );
+    return response.responseObject;
+};

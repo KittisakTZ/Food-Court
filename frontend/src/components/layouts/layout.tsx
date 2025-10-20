@@ -12,6 +12,7 @@ import { SidebarProvider, SidebarInset } from "../ui/sidebar";
 import { IoIosLogOut } from "react-icons/io";
 import { FaUserShield, FaStore, FaShoppingBag } from "react-icons/fa";
 import { MdDashboard, MdListAlt, MdStorefront } from "react-icons/md";
+import { IoIosSettings } from "react-icons/io";
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -80,9 +81,9 @@ const MainLayout = () => {
         ];
       case 'SELLER':
         return [
-            { title: "Order Queue", url: "/", icon: FaShoppingBag }, // เปลี่ยนชื่อ Dashboard
-            { title: "Menu Management", url: "/my-store/menus", icon: FaUtensils }, // <-- เพิ่ม Link ใหม่
-            // { title: "Store Settings", url: "/my-store/settings", icon: IoIosSettings }, // (สำหรับอนาคต)
+            { title: "Order Queue", url: "/", icon: FaShoppingBag },
+            { title: "Menu Management", url: "/my-store/menus", icon: FaUtensils },
+            { title: "Store Settings", url: "/my-store/settings", icon: IoIosSettings }, // <-- เพิ่ม Link ใหม่
         ];
       case 'BUYER':
         return [
