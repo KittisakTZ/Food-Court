@@ -3,6 +3,7 @@
 import { useStore } from "@/hooks/useStores";
 import { useMenus } from "@/hooks/useMenus";
 import { useState } from "react";
+import { useCartStore } from "@/zustand/useCartStore";
 
 interface StoreDetailFeatureProps {
     storeId: string;
@@ -10,11 +11,9 @@ interface StoreDetailFeatureProps {
 
 const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
     const [page, setPage] = useState(1);
-
-    // ดึงข้อมูลร้านค้า
-    const { data: store, isLoading: isLoadingStore, isError: isErrorStore } = useStore(storeId);
-    // ดึงข้อมูลเมนู
-    const { data: menus, isLoading: isLoadingMenus, isError: isErrorMenus } = useMenus({ storeId, page });
+    const { addItem } = useCartStore(); // ดึง action 'addItem' มาใช้
+    const { data: store, isLoading: isLoadingStore, isError: isErrorStore } = useStore(storeId); // ดึงข้อมูลร้านค้า
+    const { data: menus, isLoading: isLoadingMenus, isError: isErrorMenus } = useMenus({ storeId, page }); // ดึงข้อมูลเมนู
 
     if (isLoadingStore) return <div>Loading store details...</div>;
     if (isErrorStore) return <div>Error loading store details.</div>;
@@ -47,10 +46,17 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                                 <p className="mt-2 font-bold text-green-600">${menu.price.toFixed(2)}</p>
                             </div>
                             <img src={menu.image || 'https://via.placeholder.com/100'} alt={menu.name} className="w-24 h-24 object-cover rounded-md" />
+
+                            {/* (ใหม่) เพิ่มปุ่ม Add to Cart */}
+                            <button 
+                                onClick={() => addItem(menu)}
+                                className="ml-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+                            >
+                                Add
+                            </button>
                         </div>
                     ))}
                 </div>
-
                 {/* (Optional) เพิ่ม Pagination สำหรับเมนูที่นี่ */}
             </div>
         </div>

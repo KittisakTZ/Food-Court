@@ -5,6 +5,7 @@ import LoginPage from "@/pages/login";
 import MainLayout from "@/components/layouts/layout";
 import RegisterPage from "@/pages/register";
 import StoreDetailPage from "@/pages/store-detail";
+import CheckoutPage from "@/pages/checkout";
 
 
 const router = createBrowserRouter([
@@ -21,6 +22,11 @@ const router = createBrowserRouter([
       {
         path: "stores/:storeId",
         element: <StoreDetailPage />,
+      },
+      // (ใหม่) เพิ่ม Route สำหรับหน้า Checkout
+      {
+        path: "checkout",
+        element: <CheckoutPage />,
       },
     ],
   },

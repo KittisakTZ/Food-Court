@@ -6,6 +6,7 @@ import { SidebarComponent, DataSideBar } from "./sidebars/sidebar";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { useEffect } from "react";
 import { getLogout } from "@/services/auth.service";
+import { Cart } from "./cart/Cart";
 
 // UI Components
 import { SidebarProvider, SidebarInset } from "../ui/sidebar";
@@ -141,6 +142,8 @@ const MainLayout = () => {
           </div>
         </SidebarInset>
       </SidebarProvider>
+      
+      <Cart />
     </div>
   );
 };
