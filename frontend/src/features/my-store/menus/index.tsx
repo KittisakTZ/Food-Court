@@ -6,6 +6,7 @@ import { useMenuCategories, useCreateCategory } from "@/hooks/useMenuCategories"
 import { useMenus } from "@/hooks/useMenus"; // Hook ที่เรามีอยู่แล้ว
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { MenuForm } from "../components/MenuForm";
 
 // (สร้าง Component ย่อยๆ เพื่อความสะอาด)
 // 1. Component สำหรับจัดการ Categories
@@ -107,15 +108,20 @@ const MenuManagementFeature = () => {
         return <div className="text-center p-10">Could not find store data. Please try again.</div>;
     }
 
+    if (isLoadingStore) return <div>Loading...</div>;
+    if (!myStore) return <div>You do not have a store.</div>;
+
     return (
         <div className="container mx-auto p-4 md:p-8">
             <h1 className="text-3xl font-bold mb-6">Menu Management for <span className="text-blue-600">{myStore.name}</span></h1>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1">
-                    <CategoryManager storeId={myStore.id} />
-                </div>
-                <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                {/* จัด Layout ใหม่ */}
+                <div className="lg:col-span-2 order-2 lg:order-1">
                     <MenuList storeId={myStore.id} />
+                </div>
+                <div className="lg:col-span-1 order-1 lg:order-2 space-y-6">
+                    <CategoryManager storeId={myStore.id} />
+                    <MenuForm storeId={myStore.id} /> {/* <-- นำ Form มาใส่ที่นี่ */}
                 </div>
             </div>
         </div>

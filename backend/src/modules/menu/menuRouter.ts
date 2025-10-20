@@ -21,10 +21,15 @@ export const menuRouter = (() => {
         validateRequest(GetMenusQuerySchema),
         async (req: Request, res: Response) => {
             const { storeId } = req.params;
+
+            // **** แก้ไขตรงนี้ ****
+            // Zod ได้ Validate และกำหนด Default ให้แล้ว เราจึงมั่นใจได้ว่าค่าเป็น String ที่แปลงเป็นตัวเลขได้
             const page = parseInt(req.query.page as string);
             const pageSize = parseInt(req.query.pageSize as string);
+            // searchText เป็น optional และเป็น string อยู่แล้ว
             const searchText = req.query.searchText as string | undefined;
 
+            // ส่งค่าที่แปลงแล้วและมี Type ถูกต้องเข้าไปใน Service
             const serviceResponse = await menuService.findByStoreId(storeId, page, pageSize, searchText);
             handleServiceResponse(serviceResponse, res);
         }

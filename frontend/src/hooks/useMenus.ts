@@ -1,7 +1,10 @@
 // @/hooks/useMenus.ts
 
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createMenu } from "@/services/menu.service";
 import { getMenusByStore } from "@/services/store.service";
-import { useQuery } from "@tanstack/react-query";
+
+const MENUS_QUERY_KEY = 'menus';
 
 type UseMenusProps = {
     storeId: string;
@@ -15,5 +18,29 @@ export const useMenus = ({ storeId, page = 1, pageSize = 12, searchText = "" }: 
         queryKey: ['menus', storeId, { page, pageSize, searchText }],
         queryFn: () => getMenusByStore({ storeId, page, pageSize, searchText }),
         enabled: !!storeId, // จะเริ่มดึงข้อมูลก็ต่อเมื่อ storeId มีค่า
+    });
+};
+
+// (ใหม่) Hook สำหรับสร้างเมนูใหม่
+export const useCreateMenu = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        // 'variables' คือ object ที่เราส่งเข้ามาใน mutate()
+        mutationFn: (variables: { storeId: string, formData: FormData }) => createMenu(variables),
+        
+        // 'data' คือผลลัพธ์จาก mutationFn
+        // 'variables' คือสิ่งที่เราส่งเข้ามาในตอนแรก
+        onSuccess: (data, variables) => {
+            // **แก้ไขตรงนี้:**
+            // ดึง storeId มาจาก 'variables' แทนที่จะเป็น 'data'
+            const storeId = variables.storeId;
+            
+            // ตอนนี้เรามั่นใจได้ 100% ว่า storeId จะมีค่าเสมอ
+            queryClient.invalidateQueries({ queryKey: [MENUS_QUERY_KEY, storeId] });
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || error.message;
+            alert(`Failed to create menu: ${errorMessage}`);
+        }
     });
 };

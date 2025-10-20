@@ -32,7 +32,7 @@ export const menuRepository = {
         return prisma.menu.findMany({
             where: whereClause,
             skip: skip,
-            take: pageSize,
+            take: pageSize, // <-- **เพิ่มบรรทัดนี้**
             include: { category: true },
             orderBy: { name: 'asc' },
         });
