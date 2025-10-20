@@ -4,6 +4,7 @@ import Error404 from "@/components/layouts/layout.error404";
 import LoginPage from "@/pages/login";
 import MainLayout from "@/components/layouts/layout";
 import RegisterPage from "@/pages/register";
+import StoreDetailPage from "@/pages/store-detail";
 
 
 const router = createBrowserRouter([
@@ -15,6 +16,11 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      // (ใหม่) เพิ่ม Route สำหรับหน้ารายละเอียดร้านค้า
+      {
+        path: "stores/:storeId",
+        element: <StoreDetailPage />,
       },
     ],
   },

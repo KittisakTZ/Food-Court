@@ -9,4 +9,5 @@ export type APIPaginationType<T> = {
   data: T;
   totalCount: number;
   totalPages: number;
+  currentPage: number;
 };
