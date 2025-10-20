@@ -11,6 +11,10 @@ export interface Order {
     isReviewed: boolean;
     createdAt: string;
     updatedAt: string;
-    store: Omit<Store, 'owner'>; // อาจจะไม่ต้องการข้อมูล owner ในหน้านี้
+    store: Omit<Store, 'owner'>;
     orderItems: CartItem[];
+    buyer?: {
+        username: string;
+    };
+    scheduledPickup?: string | null;
 }
