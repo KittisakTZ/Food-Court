@@ -6,6 +6,9 @@ import { Order } from '@/types/response/order.response';
 import { getStatusColor, getStatusName } from '@/utils/statusUtils';
 import { useUpdateOrderStatus } from '@/hooks/useOrders';
 import { FaGripVertical } from "react-icons/fa";
+import { useMoveOrderPosition } from '@/hooks/useOrders';
+import { useState } from 'react';
+import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 // Component ย่อยสำหรับปุ่ม Action
 const OrderActions = ({ order }: { order: Order }) => {
@@ -37,21 +40,30 @@ const OrderActions = ({ order }: { order: Order }) => {
 }
 
 // Component หลักที่ทำให้ลากได้
-export const DraggableOrderCard = ({ order }: { order: Order }) => {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: order.id });
+export const DraggableOrderCard = ({ order, isFirst, isLast }: { order: Order, isFirst: boolean, isLast: boolean }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: order.id });
+    const { mutate: moveOrder, isPending } = useMoveOrderPosition();
+    const [jumpPosition, setJumpPosition] = useState<string>(String(order.position));
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.7 : 1,
         zIndex: isDragging ? 10 : 'auto',
+    };
+
+    const handleMove = (newPosition: number) => {
+        if (newPosition === order.position) return;
+        moveOrder({ orderId: order.id, newPosition });
+    };
+
+    const handleJump = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const newPos = parseInt(jumpPosition);
+            if (!isNaN(newPos) && newPos > 0) {
+                handleMove(newPos);
+            }
+        }
     };
 
     return (
@@ -81,8 +93,25 @@ export const DraggableOrderCard = ({ order }: { order: Order }) => {
                         </p>
                     )}
                 </div>
-                <div className="flex-shrink-0 ml-0 sm:ml-4 mt-4 sm:mt-0 self-center">
-                    <OrderActions order={order} />
+                {/* ส่วนจัดการคิว และปุ่ม Actions */}
+                <div className="flex-shrink-0 ml-0 sm:ml-4 mt-4 sm:mt-0 flex flex-col items-center space-y-2">
+                    <div className="flex items-center space-x-2">
+                        {/* ปุ่มเลื่อนขึ้น/ลง */}
+                        <button onClick={() => handleMove(order.position - 1)} disabled={isFirst || isPending} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50"><FaArrowUp /></button>
+                        <button onClick={() => handleMove(order.position + 1)} disabled={isLast || isPending} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50"><FaArrowDown /></button>
+                        {/* ช่อง Input สำหรับ Jump */}
+                        <input
+                            type="number"
+                            value={jumpPosition}
+                            onChange={(e) => setJumpPosition(e.target.value)}
+                            onKeyDown={handleJump}
+                            disabled={isPending}
+                            className="w-16 text-center p-1 border rounded-md"
+                        />
+                    </div>
+                    <div className="pt-2">
+                        <OrderActions order={order} />
+                    </div>
                 </div>
             </div>
         </div>

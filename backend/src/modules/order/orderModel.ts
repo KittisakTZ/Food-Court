@@ -57,3 +57,11 @@ export const ReorderQueueSchema = z.object({
         orderedIds: z.array(z.string().cuid()).min(1, "At least one order ID is required"),
     }),
 });
+
+// (ใหม่) Schema สำหรับการย้ายตำแหน่ง Order
+export const MoveOrderSchema = z.object({
+    body: z.object({
+        // ตำแหน่งใหม่ที่ต้องการให้ไปอยู่
+        newPosition: z.number().positive("Position must be a positive number"),
+    }),
+});

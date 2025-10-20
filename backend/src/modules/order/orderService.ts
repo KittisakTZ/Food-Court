@@ -306,4 +306,50 @@ export const orderService = {
 
         return new ServiceResponse(ResponseStatus.Success, "Order details retrieved successfully.", detailedOrder, StatusCodes.OK);
     },
+
+    // (ใหม่) Service สำหรับย้ายตำแหน่ง Order
+    async moveOrder(user: any, orderId: string, newPosition: number): Promise<ServiceResponse<null>> {
+        try {
+            // 🔹 ตรวจสอบว่า user เป็นเจ้าของร้าน
+            const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
+            if (!store) {
+                return new ServiceResponse(
+                    ResponseStatus.Failed,
+                    "You do not own a store.",
+                    null,
+                    StatusCodes.FORBIDDEN
+                );
+            }
+
+            // 🔹 ตรวจสอบว่า order มีอยู่จริงและเป็นของร้านนี้
+            const order = await orderRepository.findOrderById(orderId);
+            if (!order || order.storeId !== store.id) {
+                return new ServiceResponse(
+                    ResponseStatus.Failed,
+                    "Order not found or does not belong to your store.",
+                    null,
+                    StatusCodes.NOT_FOUND
+                );
+            }
+
+            // 🔹 พยายามย้ายตำแหน่ง order
+            await orderRepository.moveOrderPosition(store.id, orderId, newPosition);
+
+            return new ServiceResponse(
+                ResponseStatus.Success,
+                "Order position updated successfully.",
+                null,
+                StatusCodes.OK
+            );
+        } catch (error) {
+            // 🔹 จัดการ error แบบปลอดภัย
+            const errorMessage = "Error moving order: " + (error as Error).message;
+            return new ServiceResponse(
+                ResponseStatus.Failed,
+                errorMessage,
+                null,
+                StatusCodes.INTERNAL_SERVER_ERROR
+            );
+        }
+    },
 };

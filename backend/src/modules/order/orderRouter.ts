@@ -8,7 +8,8 @@ import {
     GetOrdersQuerySchema,
     SellerUpdateOrderStatusSchema,
     OrderIdParamSchema,
-    ReorderQueueSchema
+    ReorderQueueSchema,
+    MoveOrderSchema,
 } from "./orderModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
@@ -116,7 +117,7 @@ export const sellerOrderRouter = (() => {
             // 1. ใช้ Schema ในการ Parse ตัว req.query เพื่อให้ได้ค่า Default และ Type ที่ถูกต้อง
             // Zod จะจัดการ .coerce.number() และ .default() ให้เรา
             const validatedQuery = GetOrdersQuerySchema.shape.query.parse(req.query);
-            
+
             // 2. ดึงค่าที่ Parse แล้วออกมา
             //    ณ จุดนี้ page และ pageSize จะเป็น number (เช่น 1 และ 10)
             //    status จะเป็น array (ถ้าส่งมา) หรือ undefined
@@ -183,6 +184,41 @@ export const sellerOrderRouter = (() => {
 
             const serviceResponse = await orderService.reviewOrder(orderId, action, userForService);
             handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // (ใหม่) PATCH /v1/stores/my-store/orders/:orderId/move
+    router.patch(
+        "/my-store/orders/:orderId/move",
+        authenticateToken,
+        authorizeRoles([Role.SELLER]),
+        async (req: Request, res: Response): Promise<void> => {
+            try {
+                const { orderId } = req.params;
+                const { newPosition } = req.body;
+
+                if (typeof newPosition !== "number") {
+                    res.status(StatusCodes.BAD_REQUEST).json({
+                        success: false,
+                        message: "Invalid request: 'newPosition' must be a number.",
+                    });
+                    return;
+                }
+
+                const serviceResponse = await orderService.moveOrder(
+                    req.token?.payload,
+                    orderId,
+                    newPosition
+                );
+
+                handleServiceResponse(serviceResponse, res);
+            } catch (error) {
+                console.error("Error in PATCH /my-store/orders/:orderId/move:", error);
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: "Internal server error while moving order.",
+                });
+            }
         }
     );
 

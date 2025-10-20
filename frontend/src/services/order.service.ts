@@ -73,3 +73,18 @@ export const updateOrderStatus = async ({ orderId, action }: UpdateOrderStatusPa
     );
     return response.responseObject;
 };
+
+// (ใหม่) Type สำหรับ Parameter การย้ายตำแหน่ง
+type MoveOrderParams = {
+    orderId: string;
+    newPosition: number;
+}
+
+// (ใหม่) ฟังก์ชันย้ายตำแหน่ง Order
+export const moveOrderPosition = async ({ orderId, newPosition }: MoveOrderParams) => {
+    const { data: response } = await mainApi.patch<APIResponseType<null>>(
+        `/v1/stores/my-store/orders/${orderId}/move`,
+        { newPosition }
+    );
+    return response;
+};

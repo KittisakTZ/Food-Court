@@ -139,4 +139,55 @@ export const orderRepository = {
             )
         );
     },
+
+    // (ใหม่) ย้ายตำแหน่ง Order และขยับตำแหน่งอื่นๆ ทั้งหมดใน Transaction
+    moveOrderPosition: async (storeId: string, orderToMoveId: string, newPosition: number) => {
+        return prisma.$transaction(async (tx) => {
+            // 1. หาตำแหน่งปัจจุบันของออเดอร์ที่จะย้าย
+            const orderToMove = await tx.order.findUniqueOrThrow({
+                where: { id: orderToMoveId },
+                select: { position: true }
+            });
+            const oldPosition = orderToMove.position;
+
+            if (oldPosition === newPosition) {
+                return; // ไม่ต้องทำอะไรถ้าตำแหน่งไม่เปลี่ยนแปลง
+            }
+
+            // 2. ขยับออเดอร์อื่นๆ
+            if (oldPosition < newPosition) {
+                // ถ้าเลื่อนลง (เช่น จาก 2 ไป 5)
+                // ออเดอร์ที่อยู่ระหว่าง 3-5 ต้องถูกขยับขึ้น (position - 1)
+                await tx.order.updateMany({
+                    where: {
+                        storeId: storeId,
+                        position: {
+                            gt: oldPosition,
+                            lte: newPosition
+                        }
+                    },
+                    data: { position: { decrement: 1 } }
+                });
+            } else { // oldPosition > newPosition
+                // ถ้าเลื่อนขึ้น (เช่น จาก 5 ไป 2)
+                // ออเดอร์ที่อยู่ระหว่าง 2-4 ต้องถูกขยับลง (position + 1)
+                await tx.order.updateMany({
+                    where: {
+                        storeId: storeId,
+                        position: {
+                            gte: newPosition,
+                            lt: oldPosition
+                        }
+                    },
+                    data: { position: { increment: 1 } }
+                });
+            }
+
+            // 3. อัปเดตตำแหน่งของออเดอร์เป้าหมาย
+            await tx.order.update({
+                where: { id: orderToMoveId },
+                data: { position: newPosition }
+            });
+        });
+    },
 };

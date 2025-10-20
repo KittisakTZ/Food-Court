@@ -1,6 +1,6 @@
 // @/hooks/useOrders.ts
 
-import { getMyOrders, getMyStoreOrders, updateOrderStatus } from "@/services/order.service";
+import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition  } from "@/services/order.service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
 import { toastService } from '@/services/toast.service';
@@ -27,11 +27,20 @@ const STORE_ORDERS_QUERY_KEY = 'store-orders';
 // **2. ดึง Type ของ status มาจาก 'Order' Type ของเรา**
 type OrderStatusString = Order['status'];
 
-// Hook สำหรับดึงข้อมูล Order ของร้าน
-export const useMyStoreOrders = (filters: { status?: OrderStatusString[] }) => { // **3. ใช้ Type ที่ถูกต้องที่นี่**
+// **1. สร้าง Type สำหรับ Filter ให้ชัดเจนขึ้น**
+interface StoreOrdersFilter {
+    page?: number;
+    pageSize?: number;
+    status?: OrderStatusString[];
+}
+
+// **2. แก้ไข Hook ให้รับ Parameter ที่ถูกต้อง**
+export const useMyStoreOrders = (filters: StoreOrdersFilter) => {
     return useQuery({
+        // **3. นำ Filter ทั้งหมดมาเป็นส่วนหนึ่งของ Query Key**
         queryKey: [STORE_ORDERS_QUERY_KEY, filters],
-        queryFn: () => getMyStoreOrders({ status: filters.status }),
+        // **4. ส่ง Filter ทั้งหมดต่อไปยัง Service**
+        queryFn: () => getMyStoreOrders(filters),
         staleTime: 1000 * 30, // 30 seconds
         refetchInterval: 1000 * 30,
     });
@@ -49,6 +58,24 @@ export const useUpdateOrderStatus = () => {
             // เราสามารถเข้าถึง message ของ error ที่ axios ส่งกลับมาได้
             const errorMessage = (error as any)?.response?.data?.message || error.message;
             toastService.error(`Failed to update order status: ${errorMessage}`);
+        }
+    });
+};
+
+// (ใหม่) Hook สำหรับย้ายตำแหน่ง Order (แทนที่ useReorderQueue)
+export const useMoveOrderPosition = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: moveOrderPosition,
+        onSuccess: () => {
+            // เมื่อสำเร็จ, invalidate query เพื่อดึงลำดับที่ถูกต้องจาก server มาแสดง
+            queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || error.message;
+            alert(`Failed to move order: ${errorMessage}`);
+            // ถ้าล้มเหลว, ก็ควร invalidate เพื่อให้ UI กลับไปเป็นลำดับเดิมที่ถูกต้อง
+            queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
         }
     });
 };
