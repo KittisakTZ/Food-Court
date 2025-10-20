@@ -11,6 +11,7 @@ import { authRouter } from "@modules/auth/authRouter";
 import { storeRouter } from "@modules/store/storeRouter";
 import { reviewRouter } from "@modules/review/reviewRouter";
 import { orderRouter } from "@modules/order/orderRouter";
+import { cartRouter } from "@modules/cart/cartRouter";
 
 const logger = pino({ name: "server start" });
 const app = express();
@@ -28,6 +29,8 @@ app.use("/v1/auth", authRouter);
 app.use("/v1/stores", storeRouter);
 app.use("/v1/reviews", reviewRouter);
 app.use("/v1/orders", orderRouter);
+app.use("/v1/cart", cartRouter);
+
 app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
 
 app.use(errorHandler());
