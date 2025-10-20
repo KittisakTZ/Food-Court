@@ -6,6 +6,7 @@ import MainLayout from "@/components/layouts/layout";
 import RegisterPage from "@/pages/register";
 import StoreDetailPage from "@/pages/store-detail";
 import CheckoutPage from "@/pages/checkout";
+import MyOrdersPage from "@/pages/my-orders";
 
 
 const router = createBrowserRouter([
@@ -27,6 +28,11 @@ const router = createBrowserRouter([
       {
         path: "checkout",
         element: <CheckoutPage />,
+      },
+      // (ใหม่) เพิ่ม Route สำหรับหน้าประวัติการสั่งซื้อ
+      {
+        path: "my-orders",
+        element: <MyOrdersPage />,
       },
     ],
   },

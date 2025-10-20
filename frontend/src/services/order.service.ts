@@ -1,7 +1,8 @@
 // @/services/order.service.ts
 
 import mainApi from "@/apis/main.api";
-import { APIResponseType } from "@/types/response";
+import { APIResponseType, APIPaginationType } from "@/types/response";
+import { Order } from "@/types/response/order.response";
 // เราอาจจะต้องสร้าง Order Response Type ในอนาคต
 // import { Order } from "@/types/response/order.response";
 
@@ -21,4 +22,17 @@ export const createOrder = async (payload: CreateOrderPayload) => {
         payload
     );
     return response;
+};
+
+type GetOrdersParams = {
+    page?: number;
+    pageSize?: number;
+}
+
+export const getMyOrders = async (params: GetOrdersParams) => {
+    const { data: response } = await mainApi.get<APIResponseType<APIPaginationType<Order[]>>>(
+        "/v1/orders/my-orders",
+        { params }
+    );
+    return response.responseObject;
 };
