@@ -7,14 +7,11 @@ import { useAuthStore } from "@/zustand/useAuthStore";
 import { useEffect } from "react";
 import { getLogout } from "@/services/auth.service";
 import { Cart } from "./cart/Cart";
-
-// UI Components
+import { FaUtensils } from "react-icons/fa";
 import { SidebarProvider, SidebarInset } from "../ui/sidebar";
-
-// Icons
 import { IoIosLogOut } from "react-icons/io";
-import { FaUserShield, FaStore, FaShoppingBag } from "react-icons/fa"; // ตัวอย่าง Icons สำหรับ Roles
-import { MdDashboard, MdListAlt, MdStorefront } from "react-icons/md"; // ตัวอย่าง Icons เพิ่มเติม
+import { FaUserShield, FaStore, FaShoppingBag } from "react-icons/fa";
+import { MdDashboard, MdListAlt, MdStorefront } from "react-icons/md";
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -83,9 +80,9 @@ const MainLayout = () => {
         ];
       case 'SELLER':
         return [
-            { title: "My Dashboard", url: "/", icon: MdDashboard },
-            { title: "Order Queue", url: "/my-store/orders", icon: MdListAlt },
-            { title: "My Menu", url: "/my-store/menus", icon: FaStore },
+            { title: "Order Queue", url: "/", icon: FaShoppingBag }, // เปลี่ยนชื่อ Dashboard
+            { title: "Menu Management", url: "/my-store/menus", icon: FaUtensils }, // <-- เพิ่ม Link ใหม่
+            // { title: "Store Settings", url: "/my-store/settings", icon: IoIosSettings }, // (สำหรับอนาคต)
         ];
       case 'BUYER':
         return [

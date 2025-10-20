@@ -7,6 +7,7 @@ import RegisterPage from "@/pages/register";
 import StoreDetailPage from "@/pages/store-detail";
 import CheckoutPage from "@/pages/checkout";
 import MyOrdersPage from "@/pages/my-orders";
+import MenuManagementPage from "@/pages/my-store/menus";
 
 
 const router = createBrowserRouter([
@@ -33,6 +34,11 @@ const router = createBrowserRouter([
       {
         path: "my-orders",
         element: <MyOrdersPage />,
+      },
+      // (ใหม่) เพิ่ม Route สำหรับหน้าจัดการเมนู
+      {
+        path: "my-store/menus",
+        element: <MenuManagementPage />,
       },
     ],
   },

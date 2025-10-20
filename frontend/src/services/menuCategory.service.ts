@@ -1,0 +1,23 @@
+// @/services/menuCategory.service.ts
+import mainApi from "@/apis/main.api";
+import { APIResponseType } from "@/types/response";
+// สร้าง Type สำหรับ MenuCategory ด้วย
+// src/types/response/menuCategory.response.ts
+
+export interface MenuCategory {
+    id: string;
+    name: string;
+    storeId: string;
+}
+
+export const getCategoriesByStore = async (storeId: string) => {
+    const { data: response } = await mainApi.get<APIResponseType<MenuCategory[]>>(`/v1/stores/${storeId}/categories`);
+    return response.responseObject;
+};
+
+export const createCategory = async ({ storeId, name }: { storeId: string, name: string }) => {
+    const { data: response } = await mainApi.post<APIResponseType<MenuCategory>>(`/v1/stores/${storeId}/categories`, { name });
+    return response.responseObject;
+};
+
+// เพิ่ม service สำหรับ update และ delete ตามต้องการ...

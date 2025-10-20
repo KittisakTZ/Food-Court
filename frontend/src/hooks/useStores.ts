@@ -1,7 +1,8 @@
 // @/hooks/useStores.ts
 
-import { getStores, getStoreById } from "@/services/store.service";
+import { getStores, getStoreById, getMyStore } from "@/services/store.service";
 import { useQuery } from "@tanstack/react-query";
+import { useAuthStore } from "@/zustand/useAuthStore";
 
 // Type ของ Parameter ที่ Hook จะรับเข้ามา
 type UseStoresProps = {
@@ -25,5 +26,17 @@ export const useStore = (storeId: string) => {
         queryFn: () => getStoreById(storeId),
         enabled: !!storeId, // จะเริ่มดึงข้อมูลก็ต่อเมื่อ storeId ไม่ใช่ค่าว่าง
         staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+};
+
+// (ใหม่) Hook สำหรับดึงข้อมูลร้านค้าของ Seller ที่ Login อยู่
+export const useMyStore = () => {
+    const { user } = useAuthStore();
+    return useQuery({
+        queryKey: ['my-store'],
+        queryFn: getMyStore,
+        // จะดึงข้อมูลก็ต่อเมื่อ: Login แล้ว และ Role เป็น SELLER เท่านั้น
+        enabled: !!user && user.role === 'SELLER',
+        staleTime: 1000 * 60 * 15, // 15 minutes cache
     });
 };

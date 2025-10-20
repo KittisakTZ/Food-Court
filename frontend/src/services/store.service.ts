@@ -45,3 +45,11 @@ export const getMenusByStore = async ({ storeId, ...params }: GetMenusParams) =>
     );
     return response.responseObject;
 };
+
+// (ใหม่) ฟังก์ชันดึงข้อมูลร้านค้าของฉัน
+export const getMyStore = async () => {
+    const { data: response } = await mainApi.get<APIResponseType<Store>>(
+        "/v1/stores/my-store"
+    );
+    return response.responseObject;
+};
