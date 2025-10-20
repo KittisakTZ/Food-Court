@@ -19,4 +19,23 @@ export const createMenu = async ({ storeId, formData }: { storeId: string, formD
     return response.responseObject;
 };
 
-// เพิ่ม service สำหรับ updateMenu และ deleteMenu ที่นี่ในภายหลัง...
+// (ใหม่) Type สำหรับ Parameter การอัปเดต
+interface UpdateMenuParams {
+    storeId: string;
+    menuId: string;
+    formData: FormData;
+}
+
+// (ใหม่) ฟังก์ชันอัปเดตเมนู
+export const updateMenu = async ({ storeId, menuId, formData }: UpdateMenuParams) => {
+    const { data: response } = await mainApi.patch<APIResponseType<Menu>>(
+        `/v1/stores/${storeId}/menus/${menuId}`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }
+    );
+    return response.responseObject;
+};

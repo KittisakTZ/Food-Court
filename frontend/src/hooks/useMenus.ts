@@ -1,7 +1,7 @@
 // @/hooks/useMenus.ts
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createMenu } from "@/services/menu.service";
+import { createMenu, updateMenu } from "@/services/menu.service";
 import { getMenusByStore } from "@/services/store.service";
 
 const MENUS_QUERY_KEY = 'menus';
@@ -41,6 +41,22 @@ export const useCreateMenu = () => {
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             alert(`Failed to create menu: ${errorMessage}`);
+        }
+    });
+};
+
+// (ใหม่) Hook สำหรับอัปเดตเมนู
+export const useUpdateMenu = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: updateMenu,
+        onSuccess: (data) => {
+            // เมื่ออัปเดตสำเร็จ, invalidate ทั้ง 'menus' list และ cache ของ 'menu' เดี่ยวๆ (ถ้ามี)
+            queryClient.invalidateQueries({ queryKey: [MENUS_QUERY_KEY, data.storeId] });
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || error.message;
+            alert(`Failed to update menu: ${errorMessage}`);
         }
     });
 };

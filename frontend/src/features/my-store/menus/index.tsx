@@ -6,6 +6,7 @@ import { useMenuCategories, useCreateCategory } from "@/hooks/useMenuCategories"
 import { useMenus } from "@/hooks/useMenus"; // Hook ที่เรามีอยู่แล้ว
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Menu } from "@/types/response/menu.response"; // Import Type
 import { MenuForm } from "../components/MenuForm";
 
 // (สร้าง Component ย่อยๆ เพื่อความสะอาด)
@@ -48,7 +49,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
 
 
 // 2. Component สำหรับแสดงรายการเมนู
-const MenuList = ({ storeId }: { storeId: string }) => {
+const MenuList = ({ storeId, onEdit }: { storeId: string, onEdit: (menu: Menu) => void }) => {
     const { data: menusData, isLoading } = useMenus({ storeId });
 
     if (isLoading) return <p>Loading menus...</p>;
@@ -68,7 +69,10 @@ const MenuList = ({ storeId }: { storeId: string }) => {
                         </div>
                         <div className="text-right">
                             <p className="font-bold">${menu.price.toFixed(2)}</p>
-                            {/* เพิ่มปุ่ม Edit/Delete ที่นี่ */}
+                            {/* (ใหม่) ปุ่ม Edit */}
+                            <button onClick={() => onEdit(menu)} className="text-sm text-blue-600 hover:underline mt-1">
+                                Edit
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -80,48 +84,34 @@ const MenuList = ({ storeId }: { storeId: string }) => {
 
 // Component หลัก
 const MenuManagementFeature = () => {
-    // 2. เรียกใช้ Hook useMyStore
-    const { data: myStore, isLoading: isLoadingStore, isError, error } = useMyStore();
-
-    if (isLoadingStore) {
-        return <div className="text-center p-10">Loading your store information...</div>;
-    }
-
-    // 3. จัดการ Error Case ที่ดีขึ้น
-    if (isError) {
-        // (error as any) เพื่อให้ TypeScript ยอมให้เข้าถึง property ที่อาจจะไม่มี
-        const errorMessage = (error as any)?.response?.data?.message || error.message;
-        if (errorMessage.includes("You do not own a store yet")) {
-            return (
-                <div className="text-center p-10">
-                    <h2 className="text-2xl font-bold">You haven't created a store yet.</h2>
-                    <p className="mt-2 text-gray-600">Please create your store first to manage menus.</p>
-                    {/* (Optional) เพิ่ม Link ไปหน้าสร้างร้านค้า */}
-                </div>
-            );
-        }
-        return <div className="text-center p-10 text-red-500">Error: {errorMessage}</div>;
-    }
-
-    // 4. จัดการ Case ที่ไม่ควรเกิดขึ้น (เผื่อไว้)
-    if (!myStore) {
-        return <div className="text-center p-10">Could not find store data. Please try again.</div>;
-    }
+    const { data: myStore, isLoading: isLoadingStore } = useMyStore();
+    
+    // (ใหม่) State สำหรับเก็บเมนูที่กำลังแก้ไข
+    const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
 
     if (isLoadingStore) return <div>Loading...</div>;
     if (!myStore) return <div>You do not have a store.</div>;
-
+    
+    // Handler เพื่อปิดฟอร์มแก้ไข
+    const handleFormComplete = () => {
+        setEditingMenu(null);
+    };
+    
     return (
         <div className="container mx-auto p-4 md:p-8">
             <h1 className="text-3xl font-bold mb-6">Menu Management for <span className="text-blue-600">{myStore.name}</span></h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                {/* จัด Layout ใหม่ */}
                 <div className="lg:col-span-2 order-2 lg:order-1">
-                    <MenuList storeId={myStore.id} />
+                    <MenuList storeId={myStore.id} onEdit={setEditingMenu} />
                 </div>
                 <div className="lg:col-span-1 order-1 lg:order-2 space-y-6">
                     <CategoryManager storeId={myStore.id} />
-                    <MenuForm storeId={myStore.id} /> {/* <-- นำ Form มาใส่ที่นี่ */}
+                    {/* (แก้ไข) แสดงฟอร์มสร้าง/แก้ไข */}
+                    <MenuForm 
+                        storeId={myStore.id} 
+                        initialData={editingMenu} 
+                        onComplete={handleFormComplete} 
+                    />
                 </div>
             </div>
         </div>
