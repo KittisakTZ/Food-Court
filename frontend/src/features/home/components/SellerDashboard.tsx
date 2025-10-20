@@ -2,7 +2,9 @@
 
 import { useMyStoreOrders, useUpdateOrderStatus } from "@/hooks/useOrders";
 import { Order } from "@/types/response/order.response";
-import { getStatusColor, getStatusName } from "@/utils/statusUtils"; // (เราจะสร้างไฟล์นี้)
+import { getStatusColor, getStatusName } from "@/utils/statusUtils";
+import { useMyStore } from "@/hooks/useStores"; // <-- (1) Import Hook
+import { Link } from "react-router-dom"; // <-- (2) Import Link
 
 // Component สำหรับปุ่ม Action ต่างๆ
 const OrderActions = ({ order }: { order: Order }) => {
@@ -42,9 +44,35 @@ const OrderActions = ({ order }: { order: Order }) => {
 
 // Main Dashboard Component
 export const SellerDashboard = () => {
-    // ดึงเฉพาะ Order ที่ยังต้องจัดการ (Active Queue)
-    const { data, isLoading, isError } = useMyStoreOrders({
-        status: ['PENDING', 'AWAITING_PAYMENT', 'COOKING', 'READY_FOR_PICKUP']
+    // (3) ใช้ useMyStore เพื่อตรวจสอบว่ามีร้านค้าหรือไม่
+    const { data: myStore, isLoading: isLoadingStore, isError } = useMyStore();
+
+    // ---- ส่วนแสดงผลสำหรับ Seller ที่ยังไม่มีร้านค้า ----
+    if (isLoadingStore) {
+        return <div className="text-center p-10">Loading your dashboard...</div>;
+    }
+
+    if (isError || !myStore) {
+        return (
+            <div className="container mx-auto text-center p-10">
+                <h1 className="text-3xl font-bold">Welcome, Seller!</h1>
+                <p className="mt-4 text-lg text-gray-600">You haven't created a store yet. Create one to start selling!</p>
+                <Link to="/my-store/create" className="mt-6 inline-block px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
+                    Create Your Store
+                </Link>
+            </div>
+        );
+    }
+
+    // ---- ส่วนแสดงผลสำหรับ Seller ที่มีร้านค้าแล้ว ----
+    // เราจะสร้าง Component ใหม่เพื่อความสะอาด
+    return <StoreOrderQueue storeName={myStore.name} />;
+};
+
+// (4) (แนะนำ) แยก Logic การแสดงคิวออเดอร์ออกมาเป็น Component ใหม่
+const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
+    const { data, isLoading, isError } = useMyStoreOrders({ 
+        status: ['PENDING', 'AWAITING_PAYMENT', 'COOKING', 'READY_FOR_PICKUP'] 
     });
 
     if (isLoading) return <div>Loading active orders...</div>;

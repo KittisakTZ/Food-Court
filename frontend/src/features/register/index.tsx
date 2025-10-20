@@ -7,6 +7,7 @@ export default function RegisterFeature() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+    const [role, setRole] = useState<'BUYER' | 'SELLER'>('BUYER');
     const navigate = useNavigate();
 
     const handleRegister = async (event: React.FormEvent) => {
@@ -16,7 +17,7 @@ export default function RegisterFeature() {
         }
 
         try {
-            const response = await postRegister({ username, password, email });
+            const response = await postRegister({ username, password, email, role });
             if (response.statusCode === 201) {
                 alert("Registration successful! Please log in.");
                 navigate("/login");
@@ -73,10 +74,35 @@ export default function RegisterFeature() {
                             required
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors duration-300"
-                    >
+                    <div className="pt-2">
+                        <label className="block text-sm font-medium text-gray-600 mb-2">Register as a:</label>
+                        <div className="flex items-center space-x-6">
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="BUYER"
+                                    checked={role === 'BUYER'}
+                                    onChange={() => setRole('BUYER')}
+                                    className="h-4 w-4"
+                                />
+                                <span className="ml-2 text-gray-700">Buyer</span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="SELLER"
+                                    checked={role === 'SELLER'}
+                                    onChange={() => setRole('SELLER')}
+                                    className="h-4 w-4"
+                                />
+                                <span className="ml-2 text-gray-700">Seller</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" className="...">
                         Create Account
                     </button>
                 </form>

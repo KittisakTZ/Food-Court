@@ -14,9 +14,8 @@ export type StorePayload = {
 export const CreateStoreSchema = z.object({
     body: z.object({
         name: z.string().min(1, "Name is required").max(100),
-        description: z.string().optional(),
-        location: z.string().optional(),
-        image: z.string().url().optional(), // สมมติว่า image เป็น URL
+        description: z.string().optional().nullable(),
+        location: z.string().optional().nullable(),
     }),
 });
 

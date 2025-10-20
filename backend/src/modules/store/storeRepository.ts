@@ -35,26 +35,23 @@ export const storeRepository = {
     },
 
     findAllPublic: async (page: number, pageSize: number, searchText?: string) => {
-
-        //กำหนดไทป์ให้ตัวแปร
         const whereClause: Prisma.StoreWhereInput = {
             isApproved: true,
+            isOpen: true, // ยังคงเงื่อนไขนี้ไว้สำหรับ Public
+            ...(searchText && {
+                name: {
+                    contains: searchText,
+                    mode: 'insensitive',
+                }
+            })
         };
-
-        //ใช้ if-block เพื่อเพิ่มเงื่อนไข
-        if (searchText) {
-            whereClause.name = {
-                contains: searchText,
-                mode: 'insensitive',
-            };
-        }
 
         const skip = (page - 1) * pageSize;
 
         return prisma.store.findMany({
             skip: skip,
-            take: pageSize,
-            where: whereClause,
+            take: pageSize, // <-- **ตรวจสอบว่ามีบรรทัดนี้**
+            where: whereClause, 
             orderBy: { name: 'asc' },
             include: { owner: { select: { id: true, username: true } } }
         });

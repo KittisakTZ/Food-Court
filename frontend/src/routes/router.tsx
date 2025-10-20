@@ -9,6 +9,7 @@ import CheckoutPage from "@/pages/checkout";
 import MyOrdersPage from "@/pages/my-orders";
 import MenuManagementPage from "@/pages/my-store/menus";
 import StoreSettingsPage from "@/pages/my-store/settings";
+import CreateStorePage from "@/pages/my-store/create";
 
 
 const router = createBrowserRouter([
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
       {
         path: "my-store/settings",
         element: <StoreSettingsPage />,
+      },
+      {
+        path: "my-store/create",
+        element: <CreateStorePage />,
       },
     ],
   },

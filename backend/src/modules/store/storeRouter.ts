@@ -48,13 +48,21 @@ export const storeRouter = (() => {
 
     // --- Public Route (Static) ---
     // GET /v1/stores - ดึงร้านค้าทั้งหมด (Public)
-    router.get("/", validateRequest(GetStoresQuerySchema), async (req: Request, res: Response) => {
-        const page = parseInt(req.query.page as string);
-        const pageSize = parseInt(req.query.pageSize as string);
-        const searchText = req.query.searchText as string | undefined;
-        const serviceResponse = await storeService.findAllPublic(page, pageSize, searchText);
-        handleServiceResponse(serviceResponse, res);
-    });
+    router.get(
+        "/",
+        validateRequest(GetStoresQuerySchema),
+        async (req: Request, res: Response) => {
+            // ✅ FIX: แปลงค่าเป็น number อย่างชัดเจน
+            // แม้ว่า validateRequest จะ validate แล้ว แต่ค่ายังเป็น string อยู่
+            const page = Number(req.query.page) || 1;
+            const pageSize = Number(req.query.pageSize) || 10;
+            const searchText = req.query.searchText ? String(req.query.searchText) : undefined;
+
+            // ส่งค่าทั้งหมดต่อไปยัง Service
+            const serviceResponse = await storeService.findAllPublic(page, pageSize, searchText);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
 
     // --- Seller Routes (Static) ---
     // GET /v1/stores/my-store - ดึงข้อมูลร้านของ Seller ที่ Login อยู่

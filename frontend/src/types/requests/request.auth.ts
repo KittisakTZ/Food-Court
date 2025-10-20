@@ -10,4 +10,5 @@ export type PayloadRegister = {
     username: string;
     password: string;
     email?: string;
+    role?: 'BUYER' | 'SELLER';
 };
