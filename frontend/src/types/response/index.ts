@@ -10,4 +10,5 @@ export type APIPaginationType<T> = {
   totalCount: number;
   totalPages: number;
   currentPage: number;
+  total?: number;
 };

@@ -1,5 +1,4 @@
 // @/features/my-store/create/index.tsx (ไฟล์ใหม่)
-
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import mainApi from "@/apis/main.api";
@@ -7,12 +6,10 @@ import { useNavigate } from "react-router-dom";
 import { toastService } from "@/services/toast.service";
 
 // Service สำหรับสร้างร้านค้า (อาจจะแยกไปไฟล์ service ก็ได้)
-const createStore = async (formData: FormData) => {
-    const { data: response } = await mainApi.post("/v1/stores", formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response;
-}
+const createStore = async (payload: { name: string; description?: string; location?: string }) => {
+  const { data: response } = await mainApi.post("/v1/stores", payload);
+  return response;
+};
 
 type StoreFormInputs = {
     name: string;
@@ -34,21 +31,19 @@ const CreateStoreFeature = () => {
             queryClient.invalidateQueries({ queryKey: ['my-store'] });
             navigate("/"); // กลับไปหน้า Dashboard
         },
-        onError: (error: any) => {
-            toastService.error(`Failed to create store: ${error.response?.data?.message || error.message}`);
+        onError: (error: unknown) => {
+            toastService.error(`Failed to create store: ${error}`);
         }
     });
 
     const onSubmit: SubmitHandler<StoreFormInputs> = (data) => {
-        const formData = new FormData();
-        formData.append('name', data.name);
-        formData.append('description', data.description);
-        formData.append('location', data.location);
-        if (data.image && data.image.length > 0) {
-            formData.append('image', data.image[0]);
-        }
-        mutate(formData);
+    mutate({
+        name: data.name,
+        description: data.description,
+        location: data.location,
+    });
     };
+
 
     return (
         <div className="container mx-auto p-8 max-w-2xl">

@@ -15,7 +15,7 @@ interface CreateOrderPayload {
 }
 
 export const createOrder = async (payload: CreateOrderPayload) => {
-    const { data: response } = await mainApi.post<APIResponseType<any>>(
+    const { data: response } = await mainApi.post<APIResponseType<Order>>(
         "/v1/orders",
         payload
     );
