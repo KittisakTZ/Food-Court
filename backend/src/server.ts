@@ -24,14 +24,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 
+// ✅ เพิ่ม CORS headers สำหรับ static files (uploads)
+app.use('/uploads', (req, res, next) => {
+    // อนุญาตให้ทุก origin เข้าถึงรูปภาพ (สำหรับ development)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // หรือถ้าต้องการเฉพาะ origin ของคุณ
+    // res.setHeader('Access-Control-Allow-Origin', env.CORS_ORIGIN || 'http://localhost:5173');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+});
+
+// เสิร์ฟ static files
+app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
+
 // Routes
 app.use("/v1/auth", authRouter);
 app.use("/v1/stores", storeRouter);
 app.use("/v1/reviews", reviewRouter);
 app.use("/v1/orders", orderRouter);
 app.use("/v1/cart", cartRouter);
-
-app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
 
 app.use(errorHandler());
 export { app, logger };
