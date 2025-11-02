@@ -12,8 +12,26 @@ import { BiTrendingUp } from "react-icons/bi";
 export const BuyerDashboard = () => {
     const [page, setPage] = useState(1);
     const [searchText, setSearchText] = useState("");
+    const [inputValue, setInputValue] = useState("");
 
     const { data, isLoading, isError, error } = useStores({ page, pageSize: 12, searchText });
+
+    const handleSearch = () => {
+        setSearchText(inputValue);
+        setPage(1); // Reset to first page when searching
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
+    const handleClearSearch = () => {
+        setInputValue("");
+        setSearchText("");
+        setPage(1);
+    };
 
     if (isLoading) {
         return (
@@ -107,25 +125,37 @@ export const BuyerDashboard = () => {
                 {/* Search Section */}
                 <div className="mb-10">
                     <div className="bg-white rounded-3xl shadow-2xl border-2 border-orange-100 p-2 hover:shadow-3xl hover:border-orange-300 transition-all duration-300 transform hover:-translate-y-1">
-                        <div className="relative">
-                            <FiSearch className="absolute left-6 top-1/2 transform -translate-y-1/2 text-orange-400 w-6 h-6 animate-pulse" />
-                            <input
-                                type="text"
-                                placeholder="🔍 ค้นหาร้านอาหาร เช่น ก๋วยเตี้ยว, ข้าวมันไก่, สเต็ก..."
-                                className="w-full pl-16 pr-6 py-5 text-lg border-0 focus:ring-2 focus:ring-orange-400 rounded-2xl outline-none bg-transparent font-medium"
-                                value={searchText}
-                                onChange={(e) => setSearchText(e.target.value)}
-                            />
-                            {searchText && (
-                                <button
-                                    onClick={() => setSearchText("")}
-                                    className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 hover:rotate-90 transition-all duration-300 bg-gray-100 hover:bg-red-100 rounded-full p-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            )}
+                        <div className="relative flex items-center gap-2">
+                            <div className="relative flex-grow">
+                                <FiSearch className="absolute left-6 top-1/2 transform -translate-y-1/2 text-orange-400 w-6 h-6 animate-pulse" />
+                                <input
+                                    type="text"
+                                    placeholder="🔍 ค้นหาร้านอาหาร เช่น ก๋วยเตี้ยว, ข้าวมันไก่, สเต็ก... (กด Enter เพื่อค้นหา)"
+                                    className="w-full pl-16 pr-6 py-5 text-lg border-0 focus:ring-2 focus:ring-orange-400 rounded-2xl outline-none bg-transparent font-medium"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                />
+                                {inputValue && (
+                                    <button
+                                        onClick={handleClearSearch}
+                                        className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 hover:rotate-90 transition-all duration-300 bg-gray-100 hover:bg-red-100 rounded-full p-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* Search Button */}
+                            <button
+                                onClick={handleSearch}
+                                className="px-8 py-5 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold rounded-2xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2 whitespace-nowrap"
+                            >
+                                <FiSearch className="w-5 h-5" />
+                                <span className="hidden sm:inline">ค้นหา</span>
+                            </button>
                         </div>
                     </div>
                     
@@ -135,7 +165,7 @@ export const BuyerDashboard = () => {
                                 ผลการค้นหา: <span className="font-bold text-orange-600">"{searchText}"</span>
                             </p>
                             <span className="px-4 py-2 bg-gradient-to-r from-orange-100 to-yellow-100 text-orange-600 rounded-full text-sm font-bold shadow-md animate-bounce-slow border-2 border-orange-200">
-                                🏪 {data?.total || 0} ร้าน
+                                🏪 {data?.totalCount || 0} ร้าน
                             </span>
                         </div>
                     )}
@@ -159,7 +189,7 @@ export const BuyerDashboard = () => {
                         </p>
                         {searchText && (
                             <button
-                                onClick={() => setSearchText("")}
+                                onClick={handleClearSearch}
                                 className="px-10 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-yellow-600 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 hover:scale-105"
                             >
                                 ✨ ดูร้านค้าทั้งหมด
