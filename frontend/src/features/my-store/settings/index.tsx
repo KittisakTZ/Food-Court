@@ -1,103 +1,325 @@
 // @/features/my-store/settings/index.tsx
-import { useMyStore, useUpdateMyStore, useToggleMyStoreStatus } from "@/hooks/useStores";
+import {
+    useMyStore,
+    useUpdateMyStore,
+    useToggleMyStoreStatus,
+} from "@/hooks/useStores";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useEffect } from "react";
+// *** เพิ่ม useState สำหรับการจัดการ Feedback ***
+import { useEffect, useState } from "react";
+
 type StoreSettingsInputs = {
     name: string;
     description: string;
     location: string;
 };
+
+// *** (UI/UX) สร้าง Component ไอคอน Spinner สำหรับใช้ซ้ำ ***
+const SpinnerIcon = () => (
+    <svg
+        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+    >
+        <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+        ></circle>
+        <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+    </svg>
+);
+
 const StoreSettingsFeature = () => {
     const { data: myStore, isLoading: isLoadingStore, refetch } = useMyStore();
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm<StoreSettingsInputs>();
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        formState: { errors },
+    } = useForm<StoreSettingsInputs>();
+
+    // *** (UX) สร้าง State สำหรับเก็บข้อความ Success หรือ Error ***
+    const [feedback, setFeedback] = useState<{
+        type: "success" | "error";
+        message: string;
+    } | null>(null);
+
+    // *** (UX) ปรับแก้ useUpdateMyStore และ useToggleMyStoreStatus
+    // ให้รับ onSuccess/onError ที่นี่ หรือจะส่งไปใน mutate() ก็ได้
+    // ในตัวอย่างนี้ เราจะส่งเข้าไปใน mutate() ด้านล่าง
     const { mutate: updateStore, isPending: isUpdating } = useUpdateMyStore();
-    const { mutate: toggleStatus, isPending: isTogglingStatus } = useToggleMyStoreStatus();
+    const { mutate: toggleStatus, isPending: isTogglingStatus } =
+        useToggleMyStoreStatus();
 
     useEffect(() => {
         if (myStore) {
-            setValue('name', myStore.name);
-            setValue('description', myStore.description || '');
-            setValue('location', myStore.location || '');
+            setValue("name", myStore.name);
+            setValue("description", myStore.description || "");
+            setValue("location", myStore.location || "");
         }
     }, [myStore, setValue]);
 
-    // **** เพิ่มฟังก์ชัน onSubmit กลับเข้ามาที่นี่ ****
+    // *** (UX) ปรับปรุง onSubmit ให้มีการตั้งค่า Feedback ***
     const onSubmit: SubmitHandler<StoreSettingsInputs> = (data) => {
-        // **ตรวจสอบการเรียก mutate: ต้องเป็น updateStore ที่มาจาก useUpdateMyStore**
-        console.log("Submitting data:", data); // <-- เพิ่ม Log เพื่อดูว่ากำลัง Submit อะไร
-        updateStore(data);
+        setFeedback(null); // เคลียร์ Feedback เก่าก่อน
+        updateStore(data, {
+            onSuccess: () => {
+                setFeedback({
+                    type: "success",
+                    message: "Store information updated successfully!",
+                });
+                // ไม่จำเป็นต้อง refetch() ถ้า hook ของคุณใช้ invalidateQueries
+                // แต่ถ้าต้องการข้อมูลล่าสุดทันที ก็ใส่ refetch() ได้
+            },
+            onError: (error) => {
+                setFeedback({
+                    type: "error",
+                    message: (error as Error).message || "Failed to update store.",
+                });
+            },
+        });
     };
 
+    // *** (UX) ปรับปรุง handleToggleStatus ให้มีการตั้งค่า Feedback ***
     const handleToggleStatus = () => {
         if (myStore) {
-            // เรียก toggleStatus และเมื่อสำเร็จ ให้สั่ง refetch ข้อมูล myStore ใหม่
+            setFeedback(null); // เคลียร์ Feedback เก่า
             toggleStatus(!myStore.isOpen, {
                 onSuccess: () => {
-                    // **บังคับให้ useMyStore ดึงข้อมูลใหม่โดยตรง**
-                    // แทนที่จะรอ invalidate ซึ่งอาจจะช้ากว่า
-                    refetch();
-                }
+                    refetch(); // อันนี้ดีแล้ว ที่เรียก refetch เพื่ออัปเดตสถานะ
+                    setFeedback({
+                        type: "success",
+                        message: "Store status changed successfully!",
+                    });
+                },
+                onError: (error) => {
+                    setFeedback({
+                        type: "error",
+                        message: (error as Error).message || "Failed to change status.",
+                    });
+                },
             });
         }
     };
 
-    // **จัดการสถานะ Loading ให้ครอบคลุม**
-    if (isLoadingStore) return <div>Loading your store settings...</div>;
+    // *** (UI/UX) ปรับปรุงหน้า Loading ให้ดูดีขึ้น ***
+    if (isLoadingStore) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <svg
+                    className="animate-spin h-8 w-8 text-blue-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                    ></circle>
+                    <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                </svg>
+                <span className="ml-3 text-lg text-gray-700">
+                    Loading your store settings...
+                </span>
+            </div>
+        );
+    }
 
-    // ถ้าโหลดเสร็จแล้วแต่ยังไม่มีข้อมูล (อาจจะเกิดตอน refetch)
-    // ให้แสดง UI เดิม แต่ disable ปุ่มต่างๆ ไว้ก่อน
-    if (!myStore) return <div>Store data is unavailable. Please try refreshing.</div>;
+    // *** (UI/UX) ปรับปรุงหน้า Error กรณีไม่มีข้อมูล ***
+    if (!myStore) {
+        return (
+            <div className="flex flex-col justify-center items-center h-64 text-center">
+                <p className="text-xl text-red-600">
+                    Store data is unavailable.
+                </p>
+                <button
+                    onClick={() => refetch()}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    Try Reloading
+                </button>
+            </div>
+        );
+    }
 
+    // ตัวแปรนี้ดีอยู่แล้ว ใช้รวมสถานะ Loading ทั้งหมด
     const isPending = isUpdating || isTogglingStatus;
 
     return (
-        <div className="container mx-auto p-4 md:p-8">
-            <h1 className="text-3xl font-bold mb-6">Store Settings</h1>
+        // *** (UI) ปรับ Layout ภายนอกเล็กน้อย ***
+        <div className="container mx-auto max-w-3xl p-4 md:p-8">
+            {/* (UI) ปรับ Header ให้เด่นชัดขึ้น */}
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-8">
+                Store Settings
+            </h1>
 
-            <div className="max-w-2xl mx-auto">
-                <div className="bg-white p-6 rounded-lg shadow-md border mb-8">
-                    <div className="flex justify-between items-center">
+            <div className="space-y-8">
+                {/* *** (UX) แสดงกล่อง Feedback *** */}
+                {feedback && (
+                    <div
+                        className={`p-4 rounded-lg border ${feedback.type === "success"
+                            ? "bg-green-50 border-green-300 text-green-800"
+                            : "bg-red-50 border-red-300 text-red-800"
+                            }`}
+                        role="alert"
+                    >
+                        <p className="font-semibold">
+                            {feedback.type === "success" ? "Success!" : "Error"}
+                        </p>
+                        <p>{feedback.message}</p>
+                    </div>
+                )}
+
+                {/* *** (UI) ปรับ Card แรก (Store Status) *** */}
+                <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                            <h2 className="text-xl font-semibold">Store Status</h2>
-                            <p className={`font-bold ${myStore.isOpen ? 'text-green-600' : 'text-red-600'}`}>
-                                Your store is currently {myStore.isOpen ? 'OPEN' : 'CLOSED'}
+                            <h2 className="text-xl font-semibold text-gray-800">
+                                Store Status
+                            </h2>
+                            <p className="text-lg">
+                                Your store is currently{" "}
+                                <span
+                                    className={`font-bold ${myStore.isOpen ? "text-green-600" : "text-red-600"
+                                        }`}
+                                >
+                                    {myStore.isOpen ? "OPEN" : "CLOSED"}
+                                </span>
                             </p>
                         </div>
+                        {/* *** (UI/UX) ปรับปรุงปุ่ม Toggle *** */}
                         <button
                             onClick={handleToggleStatus}
-                            disabled={isPending} // ใช้ isPending รวม
-                            className={`px-4 py-2 rounded-md font-semibold text-white ${myStore.isOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} disabled:bg-gray-400`}
+                            disabled={isPending}
+                            className={`inline-flex items-center justify-center px-5 py-2.5 rounded-md font-semibold text-white shadow-sm transition-colors duration-150
+                ${myStore.isOpen
+                                    ? "bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                                    : "bg-green-600 hover:bg-green-700 focus:ring-green-500"
+                                }
+                disabled:bg-gray-400 disabled:cursor-not-allowed
+                focus:outline-none focus:ring-2 focus:ring-offset-2`}
                         >
-                            {isTogglingStatus ? 'Changing...' : (myStore.isOpen ? 'Close Store' : 'Open Store')}
+                            {isTogglingStatus ? (
+                                <>
+                                    <SpinnerIcon />
+                                    Changing...
+                                </>
+                            ) : myStore.isOpen ? (
+                                "Close Store"
+                            ) : (
+                                "Open Store"
+                            )}
                         </button>
                     </div>
                 </div>
 
-                {/* ส่วนของฟอร์มแก้ไขข้อมูล */}
-                <div className="bg-white p-6 rounded-lg shadow-md border">
-                    <h2 className="text-xl font-semibold mb-4">Store Information</h2>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* *** (UI) ปรับ Card ที่สอง (Form) *** */}
+                <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                        Store Information
+                    </h2>
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Store Name</label>
-                            <input id="name" {...register("name", { required: "Name is required" })} className="mt-1 block w-full p-2 border rounded-md" />
-                            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-                        </div>
-                        <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-                            <textarea id="description" {...register("description")} rows={4} className="mt-1 block w-full p-2 border rounded-md" />
-                        </div>
-                        <div>
-                            <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
-                            <input id="location" {...register("location")} className="mt-1 block w-full p-2 border rounded-md" />
+                            {/* (UI) ปรับ Label และ Input */}
+                            <label
+                                htmlFor="name"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Store Name
+                            </label>
+                            <input
+                                id="name"
+                                {...register("name", { required: "Name is required" })}
+                                className="block w-full p-2.5 border border-gray-300 rounded-md shadow-sm 
+                           focus:ring-blue-500 focus:border-blue-500
+                           disabled:bg-gray-50"
+                                disabled={isPending}
+                            />
+                            {errors.name && (
+                                <p className="text-red-600 text-sm mt-1">
+                                    {errors.name.message}
+                                </p>
+                            )}
                         </div>
 
-                        <button type="submit" disabled={isPending} className="...">
-                            {isUpdating ? 'Saving...' : 'Save Changes'}
-                        </button>
+                        <div>
+                            <label
+                                htmlFor="description"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Description
+                            </label>
+                            <textarea
+                                id="description"
+                                {...register("description")}
+                                rows={4}
+                                className="block w-full p-2.5 border border-gray-300 rounded-md shadow-sm 
+                           focus:ring-blue-500 focus:border-blue-500
+                           disabled:bg-gray-50"
+                                disabled={isPending}
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="location"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Location
+                            </label>
+                            <input
+                                id="location"
+                                {...register("location")}
+                                className="block w-full p-2.5 border border-gray-300 rounded-md shadow-sm 
+                           focus:ring-blue-500 focus:border-blue-500
+                           disabled:bg-gray-50"
+                                disabled={isPending}
+                            />
+                        </div>
+
+                        {/* *** (UI/UX) ปรับปรุงปุ่ม Submit *** */}
+                        <div className="pt-2">
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="inline-flex items-center justify-center w-full sm:w-auto px-6 py-2.5
+                           bg-blue-600 text-white font-semibold rounded-md shadow-sm 
+                           hover:bg-blue-700 
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
+                           disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                                {isUpdating ? (
+                                    <>
+                                        <SpinnerIcon />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    "Save Changes"
+                                )}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     );
 };
+
 export default StoreSettingsFeature;

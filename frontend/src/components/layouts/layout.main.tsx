@@ -75,7 +75,7 @@ const MainLayout = () => {
       case 'BUYER':
         return [
           { title: "หน้าหลัก", url: "/", icon: MdDashboard },
-          { title: "ค้นหาร้านค้า", url: "/stores", icon: MdStorefront },
+          //{ title: "ค้นหาร้านค้า", url: "/stores", icon: MdStorefront },
           { title: "ออเดอร์ของฉัน", url: "/my-orders", icon: FaShoppingBag },
         ];
       default:
