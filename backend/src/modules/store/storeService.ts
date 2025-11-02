@@ -160,10 +160,11 @@ export const storeService = {
     findAllAdminPaginated: async (
         page: number,
         pageSize: number,
-        searchText?: string
+        searchText?: string,
+        filterStatus?: string
     ) => {
-        const stores = await storeRepository.findAllAdminPaginated(page, pageSize, searchText);
-        const totalCount = await storeRepository.countAdmin(searchText);
+        const stores = await storeRepository.findAllAdminPaginated(page, pageSize, searchText, filterStatus);
+        const totalCount = await storeRepository.countAdmin(searchText, filterStatus);
 
         return new ServiceResponse(
             ResponseStatus.Success,
@@ -173,6 +174,24 @@ export const storeService = {
                 totalCount: totalCount,
                 totalPages: Math.ceil(totalCount / pageSize),
                 currentPage: page,
+            },
+            StatusCodes.OK
+        );
+    },
+
+    // ดึงสถิติร้านค้าทั้งหมด
+    getStoreStats: async () => {
+        const total = await storeRepository.countAllStores();
+        const approved = await storeRepository.countApprovedStores();
+        const pending = await storeRepository.countPendingStores();
+
+        return new ServiceResponse(
+            ResponseStatus.Success,
+            "Store statistics retrieved successfully.",
+            {
+                total,
+                approved,
+                pending,
             },
             StatusCodes.OK
         );

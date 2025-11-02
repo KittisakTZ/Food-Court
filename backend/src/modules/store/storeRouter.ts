@@ -28,6 +28,7 @@ const GetStoresQuerySchema = z.object({
         page: z.coerce.number().int().positive().optional().default(1),
         pageSize: z.coerce.number().int().positive().optional().default(10),
         searchText: z.string().optional(),
+        filterStatus: z.enum(['all', 'pending', 'approved']).optional(),
     }),
 });
 
@@ -195,8 +196,20 @@ export const storeRouter = (() => {
             const page = Number(req.query.page) || 1;
             const pageSize = Number(req.query.pageSize) || 10;
             const searchText = req.query.searchText ? String(req.query.searchText) : undefined;
+            const filterStatus = req.query.filterStatus ? String(req.query.filterStatus) : undefined;
 
-            const serviceResponse = await storeService.findAllAdminPaginated(page, pageSize, searchText);
+            const serviceResponse = await storeService.findAllAdminPaginated(page, pageSize, searchText, filterStatus);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // GET /v1/stores/admin/stats - Admin ดึงสถิติร้านค้าทั้งหมด
+    router.get(
+        "/admin/stats",
+        authenticateToken,
+        authorizeRoles([Role.ADMIN]),
+        async (req: Request, res: Response) => {
+            const serviceResponse = await storeService.getStoreStats();
             handleServiceResponse(serviceResponse, res);
         }
     );

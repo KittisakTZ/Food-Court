@@ -126,7 +126,7 @@ export const storeRepository = {
 
     // Add these two methods to storeRepository:
 
-    countAdmin: async (searchText?: string) => {
+    countAdmin: async (searchText?: string, filterStatus?: string) => {
         const whereClause: Prisma.StoreWhereInput = {};
 
         if (searchText) {
@@ -136,12 +136,20 @@ export const storeRepository = {
             };
         }
 
+        // เพิ่มการ filter ตาม status
+        if (filterStatus === 'pending') {
+            whereClause.isApproved = false;
+        } else if (filterStatus === 'approved') {
+            whereClause.isApproved = true;
+        }
+        // ถ้าเป็น 'all' หรือไม่มีค่า ไม่ต้องเพิ่มเงื่อนไข
+
         return prisma.store.count({
             where: whereClause,
         });
     },
 
-    findAllAdminPaginated: async (page: number, pageSize: number, searchText?: string) => {
+    findAllAdminPaginated: async (page: number, pageSize: number, searchText?: string, filterStatus?: string) => {
         const whereClause: Prisma.StoreWhereInput = {
             ...(searchText && {
                 name: {
@@ -151,6 +159,14 @@ export const storeRepository = {
             })
         };
 
+        // เพิ่มการ filter ตาม status
+        if (filterStatus === 'pending') {
+            whereClause.isApproved = false;
+        } else if (filterStatus === 'approved') {
+            whereClause.isApproved = true;
+        }
+        // ถ้าเป็น 'all' หรือไม่มีค่า ไม่ต้องเพิ่มเงื่อนไข
+
         const skip = (page - 1) * pageSize;
 
         return prisma.store.findMany({
@@ -159,6 +175,25 @@ export const storeRepository = {
             where: whereClause,
             orderBy: { createdAt: 'desc' },
             include: { owner: { select: { id: true, username: true } } }
+        });
+    },
+
+    // สำหรับนับจำนวนร้านค้าทั้งหมด (ไม่มี filter)
+    countAllStores: async () => {
+        return prisma.store.count();
+    },
+
+    // สำหรับนับจำนวนร้านค้าที่ approved
+    countApprovedStores: async () => {
+        return prisma.store.count({
+            where: { isApproved: true }
+        });
+    },
+
+    // สำหรับนับจำนวนร้านค้าที่ pending
+    countPendingStores: async () => {
+        return prisma.store.count({
+            where: { isApproved: false }
         });
     },
 };
