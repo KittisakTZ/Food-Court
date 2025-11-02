@@ -14,10 +14,12 @@ import { FaUserShield, FaShoppingBag } from "react-icons/fa";
 import { MdDashboard, MdStorefront } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 import { IoFastFoodOutline } from "react-icons/io5";
+import { useQueryClient } from "@tanstack/react-query";
 
 const MainLayout = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, clearAuth, isLoading, setIsLoading } = useAuthStore();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const handleRehydration = () => {
@@ -46,7 +48,7 @@ const MainLayout = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">กำลังโหลด...</h2>
           <p className="text-gray-600">กรุณารอสักครู่</p>
-          
+
           {/* Loading Dots */}
           <div className="flex items-center justify-center gap-2 mt-4">
             <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -61,17 +63,11 @@ const MainLayout = () => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
-  const handleLogout = async () => {
-    try {
-      await getLogout();
-    } catch (error) {
-      console.error("Logout API failed, but clearing client-side auth anyway.", error);
-    } finally {
-      clearAuth();
-      navigate("/login");
-    }
-  };
+
+  const handleLogout = () => {
+        clearAuth();
+        queryClient.clear();
+    };
 
   const generateSidebarItems = () => {
     if (!user) return [];
@@ -141,7 +137,7 @@ const MainLayout = () => {
           </div>
         </SidebarInset>
       </SidebarProvider>
-      
+
       <Cart />
     </div>
   );

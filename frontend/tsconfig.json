@@ -23,7 +23,6 @@
     /* Relaxed to allow build success */
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

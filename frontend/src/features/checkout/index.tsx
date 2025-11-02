@@ -3,9 +3,10 @@
 import { useCartStore } from "@/zustand/useCartStore";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react"; // เอา useMemo มาใช้ด้วย
 import { createOrder } from "@/services/order.service";
-import { toastService } from "@/services/toast.service";
+import { useCreateOrder } from "@/hooks/useOrders"; // Import Hook
+import { toastService } from "@/services/toast.service"; // Import toast
 
 const CheckoutFeature = () => {
   const cart = useCartStore((state) => state.cart);
@@ -22,7 +23,7 @@ const CheckoutFeature = () => {
 
   const [pickupOption, setPickupOption] = useState<"asap" | "scheduled">("asap");
   const [pickupTime, setPickupTime] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutate: placeOrder, isPending: isSubmitting } = useCreateOrder();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -51,36 +52,19 @@ const CheckoutFeature = () => {
 
   const handleConfirmOrder = async () => {
     if (!cart.storeId) return;
-    setIsSubmitting(true);
 
     const payload = {
       storeId: cart.storeId,
-      items: cart.items.map((item) => ({
-        menuId: item.menu.id,
-        quantity: item.quantity,
-      })),
-      scheduledPickupTime: pickupOption === "scheduled" ? pickupTime : undefined,
+      items: cart.items.map(item => ({ menuId: item.menu.id, quantity: item.quantity })),
+      scheduledPickupTime: pickupOption === 'scheduled' ? pickupTime : undefined,
     };
 
-    try {
-      const response = await createOrder(payload);
-      if (response.statusCode === 201) {
-        toastService.success("สั่งอาหารสำเร็จ 🎉 สามารถตรวจสอบได้ที่ 'รายการของฉัน'");
-        navigate("/my-orders");
-      } else {
-        toastService.error(`เกิดข้อผิดพลาด: ${response.message}`);
-      }
-    } catch (error: unknown) {
-      if (typeof error === "object" && error !== null) {
-        console.error("Error logging in:", error);
-        toastService.error(
-          (error as { response?: { data?: { message: string } } }).response
-            ?.data?.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ"
-        );
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    placeOrder(payload, {
+      onSuccess: () => {
+        toastService.success("Order created successfully! You can check its status in 'My Orders'.");
+        navigate('/my-orders');
+      },
+    });
   };
 
   return (
@@ -170,10 +154,10 @@ const CheckoutFeature = () => {
       {/* ปุ่มยืนยัน */}
       <button
         onClick={handleConfirmOrder}
-        disabled={isSubmitting}
-        className="w-full mt-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold text-lg rounded-full transition disabled:bg-gray-400"
+        disabled={isSubmitting} // <-- ใช้ isSubmitting จาก Hook โดยตรง
+        className="w-full mt-8 ... disabled:bg-gray-400"
       >
-        {isSubmitting ? "กำลังสั่งอาหาร..." : "ยืนยันการสั่งอาหาร"}
+        {isSubmitting ? 'Placing Order...' : 'Confirm and Place Order'}
       </button>
     </div>
   );

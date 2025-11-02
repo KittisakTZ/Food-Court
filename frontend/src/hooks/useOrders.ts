@@ -1,9 +1,10 @@
 // @/hooks/useOrders.ts
 
-import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition  } from "@/services/order.service";
+import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, createOrder } from "@/services/order.service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
 import { toastService } from '@/services/toast.service';
+import { useClearCart } from "./useCart";
 
 // ===== HOOK สำหรับ BUYER (โค้ดเดิม) =====
 type UseOrdersProps = {
@@ -76,6 +77,27 @@ export const useMoveOrderPosition = () => {
             alert(`Failed to move order: ${errorMessage}`);
             // ถ้าล้มเหลว, ก็ควร invalidate เพื่อให้ UI กลับไปเป็นลำดับเดิมที่ถูกต้อง
             queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
+        }
+    });
+};
+
+// (ใหม่) Hook สำหรับสร้าง Order ใหม่
+export const useCreateOrder = () => {
+    // ดึง mutate function สำหรับล้างตะกร้ามาใช้
+    const { mutate: clearCart } = useClearCart();
+    
+    return useMutation({
+        mutationFn: createOrder,
+        onSuccess: () => {
+            // **เมื่อสร้าง Order สำเร็จ, ให้เรียกใช้ mutation เพื่อล้างตะกร้า**
+            clearCart();
+            
+            // (Optional) อาจจะไม่ต้อง invalidate 'my-orders' ที่นี่
+            // เพราะเราจะ navigate ไปหน้านั้น ซึ่งมันจะ refetch เองอยู่แล้ว
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || error.message;
+            toastService.error(`Failed to create order: ${errorMessage}`);
         }
     });
 };
