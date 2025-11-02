@@ -7,7 +7,7 @@ export type StorePayload = {
     name: string;
     description?: string | null;
     location?: string | null;
-    image?: string | null;
+    image?: string | null; // <-- ไม่มีการเปลี่ยนแปลง
 };
 
 // Schema สำหรับการสร้างร้านค้า
@@ -22,13 +22,15 @@ export const CreateStoreSchema = z.object({
 // Schema สำหรับการอัปเดตร้านค้า
 export const UpdateStoreSchema = z.object({
     params: z.object({
-        storeId: z.string().cuid("Invalid store ID"), // ID จาก Prisma เป็น CUID
+        storeId: z.string().cuid("Invalid store ID"),
     }),
     body: z.object({
         name: z.string().min(1).max(100).optional(),
         description: z.string().optional().nullable(),
         location: z.string().optional().nullable(),
-        image: z.string().url().optional().nullable(),
+        // 🔄 CHANGED: ทำให้ image เป็น string ธรรมดา ไม่ต้องเป็น URL
+        // เพราะเราจะสร้าง URL ให้เองจากไฟล์ที่อัปโหลด
+        image: z.string().optional().nullable(),
         isOpen: z.boolean().optional(),
     }),
 });

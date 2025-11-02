@@ -3,26 +3,21 @@
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { storeService } from "./storeService";
-import { CreateStoreSchema, StoreIdParamSchema, ToggleStoreStatusSchema } from "./storeModel";
+import { CreateStoreSchema, StoreIdParamSchema, ToggleStoreStatusSchema, UpdateStoreSchema } from "./storeModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
 import { Role } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { storeRepository } from "./storeRepository";
 import { z } from "zod";
+import upload from '@common/utils/upload';
 
 // --- Nested Routers ---
 import { menuCategoryRouter } from "@modules/menu-category/menuCategoryRouter";
 import { menuRouter } from "@modules/menu/menuRouter";
 import { sellerOrderRouter } from "@modules/order/orderRouter";
 
-// --- Schemas for this Router ---
-const MyStoreUpdateBodySchema = z.object({
-    name: z.string().min(1, "Name is required").max(100).optional(),
-    description: z.string().max(1000).optional().nullable(),
-    location: z.string().max(255).optional().nullable(),
-});
-
+// --- Schemas ---
 const GetStoresQuerySchema = z.object({
     query: z.object({
         page: z.coerce.number().int().positive().optional().default(1),
@@ -36,41 +31,27 @@ const GetStoresQuerySchema = z.object({
 export const storeRouter = (() => {
     const router = express.Router();
 
-    // ====================================================================
-    // 1. NESTED ROUTERS - การ "ส่งต่อ" Request ไปยัง Router อื่น
-    // ====================================================================
+    // ... (Nested Routers และ Public GET /)
     router.use("/:storeId/categories", menuCategoryRouter);
     router.use("/:storeId/menus", menuRouter);
     router.use("/my-store/orders", authenticateToken, authorizeRoles([Role.SELLER]), sellerOrderRouter);
 
-    // ====================================================================
-    // 2. STATIC PATHS - Route ที่มี Path ตายตัว ต้องอยู่ก่อน Dynamic Paths
-    // ====================================================================
-
-    // --- Public Route (Static) ---
-    // GET /v1/stores - ดึงร้านค้าทั้งหมด (Public)
     router.get(
         "/",
         validateRequest(GetStoresQuerySchema),
         async (req: Request, res: Response) => {
-            // ✅ FIX: แปลงค่าเป็น number อย่างชัดเจน
-            // แม้ว่า validateRequest จะ validate แล้ว แต่ค่ายังเป็น string อยู่
             const page = Number(req.query.page) || 1;
             const pageSize = Number(req.query.pageSize) || 10;
             const searchText = req.query.searchText ? String(req.query.searchText) : undefined;
-
-            // ส่งค่าทั้งหมดต่อไปยัง Service
             const serviceResponse = await storeService.findAllPublic(page, pageSize, searchText);
             handleServiceResponse(serviceResponse, res);
         }
     );
 
-    // --- Seller Routes (Static) ---
-    // GET /v1/stores/my-store - ดึงข้อมูลร้านของ Seller ที่ Login อยู่
     router.get("/my-store", authenticateToken, authorizeRoles([Role.SELLER]), async (req: Request, res: Response) => {
         if (!req.token) {
             res.sendStatus(StatusCodes.UNAUTHORIZED);
-            return;
+            return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
         }
         const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
         const serviceResponse = await storeService.findMyStore(userForService);
@@ -82,24 +63,42 @@ export const storeRouter = (() => {
         "/my-store",
         authenticateToken,
         authorizeRoles([Role.SELLER]),
-        validateRequest(z.object({ body: MyStoreUpdateBodySchema })),
-        async (req: Request, res: Response) => {
-            if (!req.token) {
-                res.sendStatus(StatusCodes.UNAUTHORIZED);
-                return;
+        upload.single('image'),
+        async (req: Request, res: Response) => { // <-- Error เกิดขึ้นที่นี่
+            try {
+                const validatedBody = UpdateStoreSchema.shape.body.parse(req.body);
+
+                if (!req.token) {
+                    // 🔄 CHANGED: ไม่ return res.sendStatus(...)
+                    res.sendStatus(StatusCodes.UNAUTHORIZED);
+                    return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
+                }
+                const userStore = await storeRepository.findByOwnerId(req.token.payload.uuid);
+                if (!userStore) {
+                    // 🔄 CHANGED: ไม่ return res.status(...)
+                    res.status(StatusCodes.NOT_FOUND).json({ message: "You do not own a store." });
+                    return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
+                }
+
+                const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+                const serviceResponse = await storeService.update(userStore.id, validatedBody, userForService, req.file);
+                handleServiceResponse(serviceResponse, res);
+            } catch (error) {
+                if (error instanceof z.ZodError) {
+                    // 🔄 CHANGED: ไม่ return res.status(...)
+                    res.status(StatusCodes.BAD_REQUEST).json({
+                        message: "Invalid input",
+                        errors: error.errors,
+                    });
+                    return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
+                }
+                // 🔄 CHANGED: ไม่ return res.status(...)
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An unexpected error occurred." });
+                return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
             }
-            const userStore = await storeRepository.findByOwnerId(req.token.payload.uuid);
-            if (!userStore) {
-                res.status(StatusCodes.NOT_FOUND).json({ message: "You do not own a store." });
-                return;
-            }
-            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
-            const serviceResponse = await storeService.update(userStore.id, req.body, userForService);
-            handleServiceResponse(serviceResponse, res);
         }
     );
 
-    // PATCH /v1/stores/my-store/status - Seller เปิด/ปิดร้าน
     router.patch(
         "/my-store/status",
         authenticateToken,
@@ -108,12 +107,12 @@ export const storeRouter = (() => {
         async (req: Request, res: Response) => {
             if (!req.token) {
                 res.sendStatus(StatusCodes.UNAUTHORIZED);
-                return;
+                return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
             }
             const userStore = await storeRepository.findByOwnerId(req.token.payload.uuid);
             if (!userStore) {
                 res.status(StatusCodes.NOT_FOUND).json({ message: "You do not own a store yet." });
-                return;
+                return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
             }
             const { isOpen } = req.body;
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
@@ -122,45 +121,54 @@ export const storeRouter = (() => {
         }
     );
 
-    // --- Admin Routes (Static) ---
-    // GET /v1/stores/admin/all - Admin ดึงร้านค้าทั้งหมด
     router.get("/admin/all", authenticateToken, authorizeRoles([Role.ADMIN]), async (req: Request, res: Response) => {
         const serviceResponse = await storeService.findAllAdmin();
         handleServiceResponse(serviceResponse, res);
     });
 
-    // --- Create Route (Static) ---
     // POST /v1/stores - Seller สร้างร้านค้าใหม่
     router.post(
         "/",
         authenticateToken,
         authorizeRoles([Role.SELLER]),
-        validateRequest(CreateStoreSchema),
-        async (req: Request, res: Response) => {
-            if (!req.token) {
-                res.sendStatus(StatusCodes.UNAUTHORIZED);
-                return;
+        upload.single('image'),
+        async (req: Request, res: Response) => { // <-- Error เกิดขึ้นที่นี่ด้วย
+            try {
+                const validatedBody = CreateStoreSchema.shape.body.parse(req.body);
+
+                if (!req.token) {
+                    // 🔄 CHANGED: ไม่ return res.sendStatus(...)
+                    res.sendStatus(StatusCodes.UNAUTHORIZED);
+                    return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
+                }
+                const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+                const serviceResponse = await storeService.create(validatedBody, userForService, req.file);
+                handleServiceResponse(serviceResponse, res);
+            } catch (error) {
+                if (error instanceof z.ZodError) {
+                    // 🔄 CHANGED: ไม่ return res.status(...)
+                    res.status(StatusCodes.BAD_REQUEST).json({
+                        message: "Invalid input",
+                        errors: error.errors,
+                    });
+                    return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
+                }
+                // 🔄 CHANGED: ไม่ return res.status(...)
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An unexpected error occurred." });
+                return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
             }
-            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
-            const serviceResponse = await storeService.create(req.body, userForService);
-            handleServiceResponse(serviceResponse, res);
         }
     );
 
-    // =====================================================================
-    // 3. DYNAMIC PATHS - Route ที่มี Parameters ต้องอยู่ล่างสุดเพื่อไม่ให้ "ดัก" Route อื่น
-    // =====================================================================
 
-    // --- Public Route (Dynamic) ---
-    // GET /v1/stores/:storeId - ดึงข้อมูลร้านค้าเดียว (Public)
+    // ... (ส่วนที่เหลือของ router เหมือนเดิม)
+
     router.get("/:storeId", validateRequest(StoreIdParamSchema), async (req: Request, res: Response) => {
         const { storeId } = req.params;
         const serviceResponse = await storeService.findById(storeId);
         handleServiceResponse(serviceResponse, res);
     });
 
-    // --- Admin Routes (Dynamic) ---
-    // PATCH /v1/stores/admin/approve/:storeId - Admin อนุมัติร้านค้า
     router.patch(
         "/admin/approve/:storeId",
         authenticateToken,
@@ -173,7 +181,6 @@ export const storeRouter = (() => {
         }
     );
 
-    // PATCH /v1/stores/admin/reject/:storeId - Admin ยกเลิกการอนุมัติ
     router.patch(
         "/admin/reject/:storeId",
         authenticateToken,
@@ -186,7 +193,6 @@ export const storeRouter = (() => {
         }
     );
 
-    // GET /v1/stores/admin/paginated - Admin ดึงร้านค้าทั้งหมดแบบแบ่งหน้า
     router.get(
         "/admin/paginated",
         authenticateToken,
@@ -197,13 +203,11 @@ export const storeRouter = (() => {
             const pageSize = Number(req.query.pageSize) || 10;
             const searchText = req.query.searchText ? String(req.query.searchText) : undefined;
             const filterStatus = req.query.filterStatus ? String(req.query.filterStatus) : undefined;
-
             const serviceResponse = await storeService.findAllAdminPaginated(page, pageSize, searchText, filterStatus);
             handleServiceResponse(serviceResponse, res);
         }
     );
 
-    // GET /v1/stores/admin/stats - Admin ดึงสถิติร้านค้าทั้งหมด
     router.get(
         "/admin/stats",
         authenticateToken,
@@ -213,6 +217,7 @@ export const storeRouter = (() => {
             handleServiceResponse(serviceResponse, res);
         }
     );
+
 
     return router;
 })();

@@ -7,42 +7,43 @@ import { StorePayload } from "./storeModel";
 import { User, Role } from "@prisma/client";
 
 export const storeService = {
-    // สร้างร้านค้า
-    create: async (payload: StorePayload, user: { id: string, role: Role }) => {
-        // ตรวจสอบ: ผู้ใช้ต้องมี Role 'SELLER' เท่านั้น
+    // 🔄 CHANGED: เพิ่ม parameter 'file' เข้ามา
+    create: async (payload: StorePayload, user: { id: string, role: Role }, file?: Express.Multer.File) => {
         if (user.role !== Role.SELLER) {
             return new ServiceResponse(ResponseStatus.Failed, "Only sellers can create stores.", null, StatusCodes.FORBIDDEN);
         }
 
-        // ตรวจสอบ: Seller 1 คน มีได้แค่ 1 ร้าน (ตาม Schema ที่ ownerId unique)
         const existingStoreByOwner = await storeRepository.findByOwnerId(user.id);
         if (existingStoreByOwner) {
             return new ServiceResponse(ResponseStatus.Failed, "You already own a store.", null, StatusCodes.CONFLICT);
         }
 
-        // ตรวจสอบ: ชื่อร้านค้าต้องไม่ซ้ำ
         const existingStoreByName = await storeRepository.findByName(payload.name);
         if (existingStoreByName) {
             return new ServiceResponse(ResponseStatus.Failed, "Store name is already taken.", null, StatusCodes.CONFLICT);
         }
 
-        const newStore = await storeRepository.create(payload, user.id);
+        // ✅ ADDED: จัดการไฟล์รูปภาพที่อัปโหลดเข้ามา
+        if (file) {
+            // สร้าง URL เต็มของรูปภาพ
+            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
+        }
+
+        await storeRepository.create(payload, user.id);
         return new ServiceResponse(ResponseStatus.Success, "Store created successfully. Waiting for approval.", null, StatusCodes.CREATED);
     },
 
-    // อัปเดตร้านค้า
-    update: async (storeId: string, payload: Partial<StorePayload>, user: { id: string, role: Role }) => {
+    // 🔄 CHANGED: เพิ่ม parameter 'file' เข้ามา
+    update: async (storeId: string, payload: Partial<StorePayload>, user: { id: string, role: Role }, file?: Express.Multer.File) => {
         const store = await storeRepository.findById(storeId);
         if (!store) {
             return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
         }
 
-        // **การตรวจสอบสิทธิ์:** ผู้ใช้ต้องเป็นเจ้าของร้าน หรือเป็น ADMIN
         if (store.ownerId !== user.id && user.role !== Role.ADMIN) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to update this store.", null, StatusCodes.FORBIDDEN);
         }
 
-        // (Optional) ตรวจสอบชื่อซ้ำ ถ้ามีการส่ง name มา
         if (payload.name) {
             const existingStore = await storeRepository.findByName(payload.name);
             if (existingStore && existingStore.id !== storeId) {
@@ -50,21 +51,24 @@ export const storeService = {
             }
         }
 
+        // ✅ ADDED: จัดการไฟล์รูปภาพที่อัปโหลดเข้ามา (สำหรับการอัปเดต)
+        if (file) {
+            // TODO: อาจจะเพิ่ม logic ลบไฟล์รูปเก่าที่ server หากมี
+            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
+        }
+
         const updatedStore = await storeRepository.update(storeId, payload);
         return new ServiceResponse(ResponseStatus.Success, "Store updated successfully.", updatedStore, StatusCodes.OK);
     },
 
-    // ดึงข้อมูลร้านค้าทั้งหมด
+    // ... (ส่วนที่เหลือของ service เหมือนเดิม)
     findAllPublic: async (
         page: number,
         pageSize: number,
         searchText?: string
     ) => {
 
-        // <--- (2) ส่ง searchText ไปยัง Repository
         const stores = await storeRepository.findAllPublic(page, pageSize, searchText);
-
-        // <--- (3) ส่ง searchText ไปยังการนับด้วย (สำคัญมาก)
         const totalCount = await storeRepository.countPublic(searchText);
 
         return new ServiceResponse(
@@ -80,13 +84,11 @@ export const storeService = {
         );
     },
 
-    // (ใหม่) Service สำหรับ Admin เพื่อดึงร้านค้าทั้งหมด
     findAllAdmin: async () => {
         const stores = await storeRepository.findAllAdmin();
         return new ServiceResponse(ResponseStatus.Success, "All stores retrieved successfully for admin.", stores, StatusCodes.OK);
     },
 
-    // ดึงข้อมูลร้านค้าเดียว
     findById: async (storeId: string) => {
         const store = await storeRepository.findById(storeId);
         if (!store) {
@@ -95,7 +97,6 @@ export const storeService = {
         return new ServiceResponse(ResponseStatus.Success, "Store found.", store, StatusCodes.OK);
     },
 
-    // (ใหม่) Service สำหรับ Admin เพื่อ "อนุมัติ" ร้านค้า
     approveStore: async (storeId: string) => {
         const store = await storeRepository.findById(storeId);
         if (!store) {
@@ -106,11 +107,10 @@ export const storeService = {
             return new ServiceResponse(ResponseStatus.Failed, "Store has already been approved.", null, StatusCodes.BAD_REQUEST);
         }
 
-        const approvedStore = await storeRepository.update(storeId, { isApproved: true });
+        await storeRepository.update(storeId, { isApproved: true });
         return new ServiceResponse(ResponseStatus.Success, "Store approved successfully.", null, StatusCodes.OK);
     },
 
-    // (ใหม่) Service สำหรับ Admin เพื่อ "ปฏิเสธ/ยกเลิกอนุมัติ" ร้านค้า (เผื่อไว้)
     rejectStore: async (storeId: string) => {
         const store = await storeRepository.findById(storeId);
         if (!store) {
@@ -125,19 +125,16 @@ export const storeService = {
         return new ServiceResponse(ResponseStatus.Success, "Store approval has been revoked.", rejectedStore, StatusCodes.OK);
     },
 
-    // (ใหม่) Service สำหรับดึงข้อมูลร้านค้าของ ID ที่ login อยู่ (My Store)
     findMyStore: async (user: { id: string }) => {
         const store = await storeRepository.findByOwnerId(user.id);
 
         if (!store) {
-            // ในกรณีที่ Seller login เข้ามาแต่ยังไม่มีร้านค้า (อาจจะยังไม่ได้สร้าง)
             return new ServiceResponse(ResponseStatus.Failed, "You do not own a store yet.", null, StatusCodes.NOT_FOUND);
         }
 
         return new ServiceResponse(ResponseStatus.Success, "Your store information retrieved successfully.", store, StatusCodes.OK);
     },
 
-    // (ใหม่) Service สำหรับเปลี่ยนสถานะ เปิด/ปิด ร้าน
     toggleStoreStatus: async (storeId: string, isOpen: boolean, user: { id: string, role: Role }) => {
         const store = await storeRepository.findById(storeId);
 
@@ -145,18 +142,16 @@ export const storeService = {
             return new ServiceResponse(ResponseStatus.Failed, "Store not found.", null, StatusCodes.NOT_FOUND);
         }
 
-        // ตรวจสอบสิทธิ์: ผู้ใช้ต้องเป็นเจ้าของร้านเท่านั้น (ยังคงเงื่อนไขนี้ไว้)
         if (store.ownerId !== user.id) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to change this store's status.", null, StatusCodes.FORBIDDEN);
         }
 
-        const updatedStore = await storeRepository.update(storeId, { isOpen: isOpen });
+        await storeRepository.update(storeId, { isOpen: isOpen });
         const message = isOpen ? "Store is now open." : "Store is now closed.";
 
         return new ServiceResponse(ResponseStatus.Success, message, null, StatusCodes.OK);
     },
 
-    // Add this method to storeService:
     findAllAdminPaginated: async (
         page: number,
         pageSize: number,
@@ -179,7 +174,6 @@ export const storeService = {
         );
     },
 
-    // ดึงสถิติร้านค้าทั้งหมด
     getStoreStats: async () => {
         const total = await storeRepository.countAllStores();
         const approved = await storeRepository.countApprovedStores();
