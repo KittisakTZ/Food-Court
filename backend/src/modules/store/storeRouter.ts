@@ -34,14 +34,14 @@ const GetStoresQuerySchema = z.object({
 
 export const storeRouter = (() => {
     const router = express.Router();
-    
+
     // ====================================================================
     // 1. NESTED ROUTERS - การ "ส่งต่อ" Request ไปยัง Router อื่น
     // ====================================================================
     router.use("/:storeId/categories", menuCategoryRouter);
     router.use("/:storeId/menus", menuRouter);
     router.use("/my-store/orders", authenticateToken, authorizeRoles([Role.SELLER]), sellerOrderRouter);
-    
+
     // ====================================================================
     // 2. STATIC PATHS - Route ที่มี Path ตายตัว ต้องอยู่ก่อน Dynamic Paths
     // ====================================================================
@@ -75,7 +75,7 @@ export const storeRouter = (() => {
         const serviceResponse = await storeService.findMyStore(userForService);
         handleServiceResponse(serviceResponse, res);
     });
-    
+
     // PATCH /v1/stores/my-store - Seller อัปเดตข้อมูลร้านของตัวเอง
     router.patch(
         "/my-store",
@@ -97,7 +97,7 @@ export const storeRouter = (() => {
             handleServiceResponse(serviceResponse, res);
         }
     );
-    
+
     // PATCH /v1/stores/my-store/status - Seller เปิด/ปิดร้าน
     router.patch(
         "/my-store/status",
@@ -149,7 +149,7 @@ export const storeRouter = (() => {
     // =====================================================================
     // 3. DYNAMIC PATHS - Route ที่มี Parameters ต้องอยู่ล่างสุดเพื่อไม่ให้ "ดัก" Route อื่น
     // =====================================================================
-    
+
     // --- Public Route (Dynamic) ---
     // GET /v1/stores/:storeId - ดึงข้อมูลร้านค้าเดียว (Public)
     router.get("/:storeId", validateRequest(StoreIdParamSchema), async (req: Request, res: Response) => {
@@ -157,7 +157,7 @@ export const storeRouter = (() => {
         const serviceResponse = await storeService.findById(storeId);
         handleServiceResponse(serviceResponse, res);
     });
-    
+
     // --- Admin Routes (Dynamic) ---
     // PATCH /v1/stores/admin/approve/:storeId - Admin อนุมัติร้านค้า
     router.patch(
@@ -171,7 +171,7 @@ export const storeRouter = (() => {
             handleServiceResponse(serviceResponse, res);
         }
     );
-    
+
     // PATCH /v1/stores/admin/reject/:storeId - Admin ยกเลิกการอนุมัติ
     router.patch(
         "/admin/reject/:storeId",
@@ -181,6 +181,22 @@ export const storeRouter = (() => {
         async (req: Request, res: Response) => {
             const { storeId } = req.params;
             const serviceResponse = await storeService.rejectStore(storeId);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // GET /v1/stores/admin/paginated - Admin ดึงร้านค้าทั้งหมดแบบแบ่งหน้า
+    router.get(
+        "/admin/paginated",
+        authenticateToken,
+        authorizeRoles([Role.ADMIN]),
+        validateRequest(GetStoresQuerySchema),
+        async (req: Request, res: Response) => {
+            const page = Number(req.query.page) || 1;
+            const pageSize = Number(req.query.pageSize) || 10;
+            const searchText = req.query.searchText ? String(req.query.searchText) : undefined;
+
+            const serviceResponse = await storeService.findAllAdminPaginated(page, pageSize, searchText);
             handleServiceResponse(serviceResponse, res);
         }
     );

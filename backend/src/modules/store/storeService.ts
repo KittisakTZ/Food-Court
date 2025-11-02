@@ -41,7 +41,7 @@ export const storeService = {
         if (store.ownerId !== user.id && user.role !== Role.ADMIN) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to update this store.", null, StatusCodes.FORBIDDEN);
         }
-        
+
         // (Optional) ตรวจสอบชื่อซ้ำ ถ้ามีการส่ง name มา
         if (payload.name) {
             const existingStore = await storeRepository.findByName(payload.name);
@@ -154,5 +154,27 @@ export const storeService = {
         const message = isOpen ? "Store is now open." : "Store is now closed.";
 
         return new ServiceResponse(ResponseStatus.Success, message, null, StatusCodes.OK);
+    },
+
+    // Add this method to storeService:
+    findAllAdminPaginated: async (
+        page: number,
+        pageSize: number,
+        searchText?: string
+    ) => {
+        const stores = await storeRepository.findAllAdminPaginated(page, pageSize, searchText);
+        const totalCount = await storeRepository.countAdmin(searchText);
+
+        return new ServiceResponse(
+            ResponseStatus.Success,
+            "All stores retrieved successfully for admin.",
+            {
+                data: stores,
+                totalCount: totalCount,
+                totalPages: Math.ceil(totalCount / pageSize),
+                currentPage: page,
+            },
+            StatusCodes.OK
+        );
     },
 };

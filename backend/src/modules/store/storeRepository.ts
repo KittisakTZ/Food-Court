@@ -51,7 +51,7 @@ export const storeRepository = {
         return prisma.store.findMany({
             skip: skip,
             take: pageSize, // <-- **ตรวจสอบว่ามีบรรทัดนี้**
-            where: whereClause, 
+            where: whereClause,
             orderBy: { name: 'asc' },
             include: { owner: { select: { id: true, username: true } } }
         });
@@ -121,6 +121,44 @@ export const storeRepository = {
     delete: async (storeId: string) => {
         return prisma.store.delete({
             where: { id: storeId },
+        });
+    },
+
+    // Add these two methods to storeRepository:
+
+    countAdmin: async (searchText?: string) => {
+        const whereClause: Prisma.StoreWhereInput = {};
+
+        if (searchText) {
+            whereClause.name = {
+                contains: searchText,
+                mode: 'insensitive',
+            };
+        }
+
+        return prisma.store.count({
+            where: whereClause,
+        });
+    },
+
+    findAllAdminPaginated: async (page: number, pageSize: number, searchText?: string) => {
+        const whereClause: Prisma.StoreWhereInput = {
+            ...(searchText && {
+                name: {
+                    contains: searchText,
+                    mode: 'insensitive',
+                }
+            })
+        };
+
+        const skip = (page - 1) * pageSize;
+
+        return prisma.store.findMany({
+            skip: skip,
+            take: pageSize,
+            where: whereClause,
+            orderBy: { createdAt: 'desc' },
+            include: { owner: { select: { id: true, username: true } } }
         });
     },
 };
