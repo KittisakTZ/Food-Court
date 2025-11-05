@@ -8,8 +8,10 @@ type OrderCreationData = {
     buyerId: string;
     storeId: string;
     totalAmount: number;
-    position: number;
+    position: number;           // ค่าสำหรับเรียงลำดับโดยรวม
     scheduledPickup?: Date | null;
+    queueNumber: number;        // หมายเลขคิวรายวัน (เช่น 1, 2, 3)
+    orderDate: Date;            // วันที่ของออเดอร์ (YYYY-MM-DD)
     items: Array<{
         menuId: string;
         quantity: number;
@@ -29,6 +31,8 @@ export const orderRepository = {
                     position: data.position,
                     totalAmount: data.totalAmount,
                     scheduledPickup: data.scheduledPickup,
+                    queueNumber: data.queueNumber, // เพิ่มหมายเลขคิว
+                    orderDate: data.orderDate,
                 },
             });
 
@@ -190,5 +194,54 @@ export const orderRepository = {
                 data: { position: newPosition }
             });
         });
+    },
+
+    getNextDailyQueueNumber: async (storeId: string) => {
+        // ✨ FIX 1: สร้างวันที่โดยคำนึงถึง Timezone (ตัวอย่างสำหรับประเทศไทย GMT+7) ✨
+        // วิธีนี้จะช่วยให้แน่ใจว่า "วันนี้" คือ "วันนี้" ของประเทศไทยจริงๆ
+        const nowInThailand = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+
+        // 2. สร้างวันที่เริ่มต้น (เที่ยงคืน) และสิ้นสุด (สุดท้ายของวัน) ของ "วันนี้"
+        const startOfDay = new Date(nowInThailand);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(nowInThailand);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        // 3. หา Order ที่มี "หมายเลขคิว" สูงสุดของ "วันนี้"
+        // โดยใช้เงื่อนไข "ระหว่าง" (between) ซึ่งแม่นยำกว่า
+        const latestOrderOfToday = await prisma.order.findFirst({
+            where: {
+                storeId: storeId,
+                createdAt: {
+                    gte: startOfDay,
+                    lte: endOfDay,
+                },
+            },
+            orderBy: {
+                queueNumber: 'desc',
+            },
+            select: {
+                queueNumber: true
+            }
+        });
+
+        // 4. หา position สูงสุดที่มีอยู่ทั้งหมด (ส่วนนี้ยังเหมือนเดิม)
+        const maxPositionResult = await prisma.order.aggregate({
+            _max: { position: true },
+            where: { storeId: storeId },
+        });
+
+        // 5. คำนวณคิวถัดไป
+        const nextQueueNumber = latestOrderOfToday ? latestOrderOfToday.queueNumber + 1 : 1;
+        const maxPosition = maxPositionResult._max.position || 0;
+
+        return {
+            nextQueueNumber,
+            // ✨ FIX 3: ส่ง `startOfDay` กลับไปเพื่อบันทึกลง `orderDate` ✨
+            // เพื่อให้ทุกออเดอร์ของวันเดียวกันมีค่า `orderDate` เหมือนกันเป๊ะๆ
+            orderDate: startOfDay,
+            maxPosition
+        };
     },
 };

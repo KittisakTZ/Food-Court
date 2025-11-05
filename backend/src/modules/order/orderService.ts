@@ -85,23 +85,27 @@ export const orderService = {
                 });
             }
 
-            // **(ใหม่) Logic การกำหนด Position เริ่มต้น**
-            // หา position ที่มากที่สุดในร้านนั้นๆ แล้วบวก 1
-            const maxPosition = await orderRepository.findMaxPositionInStore(payload.storeId);
-            const newPosition = maxPosition + 1;
+            // **(ลบ Logic เดิม) Logic การกำหนด Position เริ่มต้น**
+            // const maxPosition = await orderRepository.findMaxPositionInStore(payload.storeId);
+            // const newPosition = maxPosition + 1;
+
+            // ✨ (Logic ใหม่) การกำหนด "หมายเลขคิวรายวัน" ✨
+            const { nextQueueNumber, orderDate, maxPosition } = await orderRepository.getNextDailyQueueNumber(payload.storeId);
 
             // 1.4 สร้างข้อมูลสำหรับส่งให้ Repository
             const orderCreationData = {
                 buyerId: user.id,
                 storeId: payload.storeId,
-                position: newPosition,
+                position: maxPosition + 1, // position ยังคงเพิ่มไปเรื่อยๆ สำหรับการเรียงลำดับโดยรวม
+                queueNumber: nextQueueNumber, // ใช้หมายเลขคิวรายวัน
+                orderDate: orderDate,         // บันทึกวันที่
                 scheduledPickup: scheduledPickupDate,
                 totalAmount: totalAmount,
                 items: itemsForRepo,
             };
 
             // 1.5 เรียกใช้ Transaction เพื่อสร้าง Order
-            const newOrder = await orderRepository.createOrderTransaction(orderCreationData);
+            const newOrder = await orderRepository.createOrderTransaction(orderCreationData); // ต้องไปแก้ Type ที่ Repository ด้วย
             return new ServiceResponse(ResponseStatus.Success, "Order created successfully.", newOrder, StatusCodes.CREATED);
 
         } catch (error) {

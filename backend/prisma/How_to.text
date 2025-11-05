@@ -1,0 +1,10 @@
+DROP DATABASE foodcourt_db;
+CREATE DATABASE foodcourt_db;
+
+npx prisma migrate dev --name init-final-database --create-only
+
+npx prisma migrate dev
+
+กด ctrl+c เพื่อยกเลิกการสร้างใหม่
+
+npx prisma generate

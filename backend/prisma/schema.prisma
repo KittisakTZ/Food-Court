@@ -98,6 +98,8 @@ model Order {
   isReviewed       Boolean     @default(false)
   totalAmount      Float       @default(0)
   position         Float
+  queueNumber      Int // หมายเลขคิวของวันนั้นๆ เช่น 1, 2, 3
+  orderDate        DateTime    @db.Date // วันที่ของออเดอร์ (เก็บเฉพาะ YYYY-MM-DD)
   paymentQrCode    String?
   paymentExpiresAt DateTime?
   scheduledPickup  DateTime?
@@ -109,7 +111,7 @@ model Order {
 
   orderItems OrderItem[]
 
-  @@index([storeId]) // เพิ่ม Index ให้ storeId เพื่อประสิทธิภาพ
+  @@index([storeId, orderDate]) // เพิ่ม Index ให้ storeId เพื่อประสิทธิภาพ
 }
 
 model OrderItem {

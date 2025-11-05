@@ -33,17 +33,17 @@ const OrderActions = ({ order }: { order: Order }) => {
         case 'PENDING':
             return (
                 <div className="flex flex-wrap justify-end gap-2">
-                    <button 
-                        onClick={() => handleUpdate('APPROVE')} 
-                        disabled={isPending} 
+                    <button
+                        onClick={() => handleUpdate('APPROVE')}
+                        disabled={isPending}
                         className="flex items-center gap-2 px-5 py-2.5 text-sm bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 disabled:from-gray-300 disabled:to-gray-400 transition-all shadow-md hover:shadow-lg font-semibold hover:scale-105 active:scale-95"
                     >
                         <FiCheck className="w-4 h-4" />
                         อนุมัติ
                     </button>
-                    <button 
-                        onClick={() => handleUpdate('REJECT')} 
-                        disabled={isPending} 
+                    <button
+                        onClick={() => handleUpdate('REJECT')}
+                        disabled={isPending}
                         className="flex items-center gap-2 px-5 py-2.5 text-sm bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 disabled:from-gray-300 disabled:to-gray-400 transition-all shadow-md hover:shadow-lg font-semibold hover:scale-105 active:scale-95"
                     >
                         <FiX className="w-4 h-4" />
@@ -53,9 +53,9 @@ const OrderActions = ({ order }: { order: Order }) => {
             );
         case 'AWAITING_PAYMENT':
             return (
-                <button 
-                    onClick={() => handleUpdate('CONFIRM_PAYMENT')} 
-                    disabled={isPending} 
+                <button
+                    onClick={() => handleUpdate('CONFIRM_PAYMENT')}
+                    disabled={isPending}
                     className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 transition-all shadow-md hover:shadow-lg font-semibold hover:scale-105 active:scale-95"
                 >
                     <FiDollarSign className="w-4 h-4" />
@@ -64,9 +64,9 @@ const OrderActions = ({ order }: { order: Order }) => {
             );
         case 'COOKING':
             return (
-                <button 
-                    onClick={() => handleUpdate('PREPARE_COMPLETE')} 
-                    disabled={isPending} 
+                <button
+                    onClick={() => handleUpdate('PREPARE_COMPLETE')}
+                    disabled={isPending}
                     className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl hover:from-yellow-600 hover:to-orange-600 disabled:from-gray-300 disabled:to-gray-400 transition-all shadow-md hover:shadow-lg font-semibold hover:scale-105 active:scale-95"
                 >
                     <MdRestaurant className="w-4 h-4" />
@@ -75,9 +75,9 @@ const OrderActions = ({ order }: { order: Order }) => {
             );
         case 'READY_FOR_PICKUP':
             return (
-                <button 
-                    onClick={() => handleUpdate('CUSTOMER_PICKED_UP')} 
-                    disabled={isPending} 
+                <button
+                    onClick={() => handleUpdate('CUSTOMER_PICKED_UP')}
+                    disabled={isPending}
                     className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 transition-all shadow-md hover:shadow-lg font-semibold hover:scale-105 active:scale-95"
                 >
                     <FiPackage className="w-4 h-4" />
@@ -90,7 +90,7 @@ const OrderActions = ({ order }: { order: Order }) => {
 }
 
 // Component หลัก
-export const DraggableOrderCard = ({ order, isFirst, isLast }: { order: Order, isFirst: boolean, isLast: boolean }) => {
+export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast }: { order: Order, queueDisplayNumber: number, isFirst: boolean, isLast: boolean }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: order.id });
     const { mutate: moveOrder, isPending } = useMoveOrderPosition();
     const [jumpPosition, setJumpPosition] = useState<string>("");
@@ -121,9 +121,9 @@ export const DraggableOrderCard = ({ order, isFirst, isLast }: { order: Order, i
         <div ref={setNodeRef} style={style} className="relative group">
             <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border-2 border-gray-100 hover:border-orange-300 hover:shadow-2xl transition-all duration-300">
                 {/* Drag Handle */}
-                <div 
-                    {...attributes} 
-                    {...listeners} 
+                <div
+                    {...attributes}
+                    {...listeners}
                     className="absolute top-4 sm:top-6 left-2 sm:left-4 text-gray-300 cursor-grab active:cursor-grabbing hover:text-orange-500 transition-colors p-2 hover:bg-orange-50 rounded-lg"
                 >
                     <FaGripVertical className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -134,17 +134,20 @@ export const DraggableOrderCard = ({ order, isFirst, isLast }: { order: Order, i
                     <div className="flex items-start justify-between flex-wrap gap-2 sm:gap-3">
                         <div className="flex items-center gap-2 sm:gap-4">
                             <div className="relative">
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-400 via-orange-500 to-yellow-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg transform hover:scale-105 transition-transform">
-                                    {order.position}
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-400 via-orange-500 to-yellow-500 ...">
+                                    {/* ✨ FIX: ใช้ prop ที่ส่งเข้ามา ✨ */}
+                                    {queueDisplayNumber}
                                 </div>
                                 <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
                                     <FiShoppingBag className="w-2 h-2 sm:w-3 sm:h-3 text-white" />
                                 </div>
                             </div>
                             <div>
-                                <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-1">คิว {order.position}</h3>
-                                <p className="text-[10px] sm:text-xs text-gray-500 font-mono bg-gray-100 px-2 py-0.5 sm:py-1 rounded-md inline-block">
-                                    {order.id.substring(0, 8)}...
+                                {/* ✨ FIX: ใช้ prop ที่ส่งเข้ามา ✨ */}
+                                <h3 className="text-base sm:text-xl font-bold text-gray-800 mb-1">คิว {queueDisplayNumber}</h3>
+                                {/* (แนะนำ) อาจจะแสดง queueNumber จริงไว้ด้วยก็ได้ */}
+                                <p className="text-[10px] sm:text-xs text-gray-500 ...">
+                                    Order No: {order.queueNumber} ({order.id.substring(0, 4)}...)
                                 </p>
                             </div>
                         </div>
@@ -177,8 +180,8 @@ export const DraggableOrderCard = ({ order, isFirst, isLast }: { order: Order, i
                             <div className="flex-1 min-w-0">
                                 <p className="text-[10px] sm:text-xs font-semibold text-purple-600 mb-0.5 sm:mb-1">เวลานัดรับ</p>
                                 <p className="text-sm sm:text-base font-bold text-gray-800">
-                                    {new Date(order.scheduledPickup).toLocaleString('th-TH', { 
-                                        hour: '2-digit', 
+                                    {new Date(order.scheduledPickup).toLocaleString('th-TH', {
+                                        hour: '2-digit',
                                         minute: '2-digit',
                                         day: '2-digit',
                                         month: 'short'
@@ -236,17 +239,17 @@ export const DraggableOrderCard = ({ order, isFirst, isLast }: { order: Order, i
                 <div className="flex flex-col gap-3 sm:gap-4 pt-4 sm:pt-5 border-t-2 border-gray-100">
                     {/* Queue Controls - แสดงแบบ compact */}
                     <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-2 sm:p-3 border border-gray-200">
-                        <button 
-                            onClick={() => handleMove(order.position - 1)} 
-                            disabled={isFirst || isPending} 
+                        <button
+                            onClick={() => handleMove(order.position - 1)}
+                            disabled={isFirst || isPending}
                             className="p-2 rounded-lg bg-white hover:bg-orange-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md border border-gray-200 hover:border-orange-300 flex-1 sm:flex-none"
                             title="เลื่อนขึ้น"
                         >
                             <FaArrowUp className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600 mx-auto" />
                         </button>
-                        <button 
-                            onClick={() => handleMove(order.position + 1)} 
-                            disabled={isLast || isPending} 
+                        <button
+                            onClick={() => handleMove(order.position + 1)}
+                            disabled={isLast || isPending}
                             className="p-2 rounded-lg bg-white hover:bg-orange-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md border border-gray-200 hover:border-orange-300 flex-1 sm:flex-none"
                             title="เลื่อนลง"
                         >

@@ -166,10 +166,13 @@ const KanbanColumn = ({
               items={orderIds}
               strategy={verticalListSortingStrategy}
             >
+              {/* ✨ FIX: แก้ไขตรงนี้ ✨ */}
               {orders.map((order, index) => (
                 <DraggableOrderCard
                   key={order.id}
                   order={order}
+                  // ✨ เพิ่ม prop ที่ขาดไป ✨
+                  queueDisplayNumber={index + 1}
                   isFirst={index === 0}
                   isLast={index === orders.length - 1}
                 />
@@ -338,11 +341,10 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <div className="flex gap-2 bg-white/20 backdrop-blur-sm rounded-xl p-2">
               <button
                 onClick={() => setViewMode("kanban")}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  viewMode === "kanban"
-                    ? "bg-white text-orange-600 shadow-lg"
-                    : "text-white hover:bg-white/10"
-                }`}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${viewMode === "kanban"
+                  ? "bg-white text-orange-600 shadow-lg"
+                  : "text-white hover:bg-white/10"
+                  }`}
               >
                 <svg
                   className="w-5 h-5 inline-block mr-2"
@@ -361,11 +363,10 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  viewMode === "list"
-                    ? "bg-white text-orange-600 shadow-lg"
-                    : "text-white hover:bg-white/10"
-                }`}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${viewMode === "list"
+                  ? "bg-white text-orange-600 shadow-lg"
+                  : "text-white hover:bg-white/10"
+                  }`}
               >
                 <svg
                   className="w-5 h-5 inline-block mr-2"
@@ -595,6 +596,8 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                     <DraggableOrderCard
                       key={order.id}
                       order={order}
+                      // ✨ FIX: ส่ง index เข้าไปเป็น prop ใหม่ชื่อ queueDisplayNumber ✨
+                      queueDisplayNumber={index + 1}
                       isFirst={index === 0}
                       isLast={index === filteredOrders.length - 1}
                     />
@@ -609,15 +612,15 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                 {searchQuery
                   ? "ไม่พบออเดอร์ที่ค้นหา"
                   : selectedStatus === "ALL"
-                  ? "ยังไม่มีออเดอร์"
-                  : "ไม่พบออเดอร์ในสถานะนี้"}
+                    ? "ยังไม่มีออเดอร์"
+                    : "ไม่พบออเดอร์ในสถานะนี้"}
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
                 {searchQuery
                   ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง"
                   : selectedStatus === "ALL"
-                  ? "เมื่อมีลูกค้าสั่งอาหาร ออเดอร์จะแสดงที่นี่"
-                  : "ลองเปลี่ยนการกรองเพื่อดูสถานะอื่น"}
+                    ? "เมื่อมีลูกค้าสั่งอาหาร ออเดอร์จะแสดงที่นี่"
+                    : "ลองเปลี่ยนการกรองเพื่อดูสถานะอื่น"}
               </p>
               {(searchQuery || selectedStatus !== "ALL") && (
                 <button
@@ -676,7 +679,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                   const pages = [];
                   const totalPages = ordersData.totalPages;
                   const currentPage = ordersData.currentPage;
-                  
+
                   // Always show first page
                   if (currentPage > 3) {
                     pages.push(
@@ -707,11 +710,10 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                       <button
                         key={i}
                         onClick={() => setPage(i)}
-                        className={`px-3 py-2 border-2 rounded-lg transition-all font-semibold min-w-[40px] ${
-                          i === currentPage
-                            ? "border-orange-500 bg-orange-500 text-white shadow-md"
-                            : "border-gray-200 hover:border-orange-400 hover:bg-orange-50"
-                        }`}
+                        className={`px-3 py-2 border-2 rounded-lg transition-all font-semibold min-w-[40px] ${i === currentPage
+                          ? "border-orange-500 bg-orange-500 text-white shadow-md"
+                          : "border-gray-200 hover:border-orange-400 hover:bg-orange-50"
+                          }`}
                       >
                         {i}
                       </button>
