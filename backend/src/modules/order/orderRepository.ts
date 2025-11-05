@@ -36,6 +36,7 @@ export const orderRepository = {
             const orderItemsData = data.items.map(item => ({
                 ...item,
                 orderId: newOrder.id,
+                storeId: newOrder.storeId,
             }));
 
             // 3. สร้าง OrderItems ทั้งหมดในครั้งเดียว

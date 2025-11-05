@@ -14,135 +14,146 @@ enum Role {
 }
 
 enum OrderStatus {
-  PENDING         // รอ Seller ตรวจสอบ
-  REJECTED        // Seller ปฏิเสธ
+  PENDING // รอ Seller ตรวจสอบ
+  REJECTED // Seller ปฏิเสธ
   AWAITING_PAYMENT // รอ Buyer ชำระเงิน
-  PAID            // สถานะเดิมของคุณ ผมขอเก็บไว้ก่อน อาจจะได้ใช้ในอนาคต
-  COOKING         // กำลังเตรียมของ (ชื่อใหม่ที่สื่อความหมายดี)
+  PAID // สถานะเดิมของคุณ ผมขอเก็บไว้ก่อน อาจจะได้ใช้ในอนาคต
+  COOKING // กำลังเตรียมของ (ชื่อใหม่ที่สื่อความหมายดี)
   READY_FOR_PICKUP // พร้อมให้มารับ (ชื่อใหม่)
-  COMPLETED       // สถานะเดิมของคุณ อาจจะหมายถึง Buyer รับของไปแล้ว
-  CANCELLED       // Buyer ไม่จ่ายเงิน หรือยกเลิก
+  COMPLETED // สถานะเดิมของคุณ อาจจะหมายถึง Buyer รับของไปแล้ว
+  CANCELLED // Buyer ไม่จ่ายเงิน หรือยกเลิก
 }
 
 model User {
-  id         String   @id @default(cuid())
-  username   String   @unique
-  password   String
-  email      String?  @unique
-  role       Role     @default(BUYER)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  store      Store?
-  cart       Cart?
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  email     String?  @unique
+  role      Role     @default(BUYER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store     Store?
+  cart      Cart?
 
+  orders  Order[]
+  reviews Review[]
+}
+
+model Store {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  location    String?
+  image       String?
+  isApproved  Boolean  @default(false)
+  isOpen      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  ownerId     String   @unique
+  avgRating   Float    @default(0) // <-- เพิ่ม field นี้
+  reviewCount Int      @default(0) // <-- เพิ่ม field นี้
+  owner       User     @relation(fields: [ownerId], references: [id])
+
+  categories MenuCategory[]
+  menus      Menu[]
   orders     Order[]
   reviews    Review[]
 }
 
-model Store {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  description   String?
-  location      String?
-  image         String?
-  isApproved    Boolean  @default(false)
-  isOpen        Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  ownerId       String   @unique 
-  avgRating     Float    @default(0) // <-- เพิ่ม field นี้
-  reviewCount   Int      @default(0) // <-- เพิ่ม field นี้
-  owner         User     @relation(fields: [ownerId], references: [id])
-
-  categories    MenuCategory[]
-  menus         Menu[]
-  orders        Order[]
-  reviews       Review[]
-}
-
 model MenuCategory {
-  id          String   @id @default(cuid())
-  name        String
+  id   String @id @default(cuid())
+  name String
 
-  storeId     String
-  store       Store    @relation(fields: [storeId], references: [id])
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
 
-  menus       Menu[]
+  menus Menu[]
 }
 
 model Menu {
-  id            String   @id @default(cuid())
-  name          String
-  description   String?
-  price         Float
-  image         String?
-  isAvailable   Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  categoryId    String?
-  category      MenuCategory? @relation(fields: [categoryId], references: [id])
-  storeId       String
-  store         Store    @relation(fields: [storeId], references: [id])
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  image       String?
+  isAvailable Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  categoryId  String?
+  category    MenuCategory? @relation(fields: [categoryId], references: [id])
+  storeId     String
+  store       Store         @relation(fields: [storeId], references: [id])
 
-  orderItems    OrderItem[]
-  CartItems    CartItem[]
+  orderItems OrderItem[]
+  CartItems  CartItem[]
 }
 
 model Order {
-  id              String       @id @default(cuid())
-  buyerId         String
-  buyer           User         @relation(fields: [buyerId], references: [id])
-  storeId         String
-  store           Store        @relation(fields: [storeId], references: [id])
-  status          OrderStatus  @default(PENDING)
-  isReviewed      Boolean      @default(false)
-  totalAmount     Float        @default(0)
-  position        Float        
-  paymentQrCode   String?      // <-- (ใหม่) Field สำหรับเก็บ QR Code (อาจจะเป็น URL หรือ Base64)
-  paymentExpiresAt DateTime?    // <-- (ใหม่) Field สำหรับเก็บเวลาหมดอายุของการชำระเงิน
-  scheduledPickup DateTime?
-  paidAt          DateTime?
-  confirmedAt     DateTime?
-  completedAt     DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id               String      @id @default(cuid()) // <-- กลับมาใช้ @id เหมือนเดิม ง่ายที่สุด
+  buyerId          String
+  buyer            User        @relation(fields: [buyerId], references: [id])
+  storeId          String // <-- Partition Key
+  store            Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  status           OrderStatus @default(PENDING)
+  isReviewed       Boolean     @default(false)
+  totalAmount      Float       @default(0)
+  position         Float
+  paymentQrCode    String?
+  paymentExpiresAt DateTime?
+  scheduledPickup  DateTime?
+  paidAt           DateTime?
+  confirmedAt      DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
-  orderItems      OrderItem[]
+  orderItems OrderItem[]
+
+  @@index([storeId]) // เพิ่ม Index ให้ storeId เพื่อประสิทธิภาพ
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
-  menuId    String
-  menu      Menu     @relation(fields: [menuId], references: [id])
-  quantity  Int
-  subtotal  Float
+  id       String @id @default(cuid())
+  orderId  String
+  // (ใหม่และสำคัญ) เพิ่ม storeId ที่นี่เพื่อใช้เป็น Partition Key ของตาราง OrderItem
+  // และทำให้การ Join มีประสิทธิภาพ
+  storeId  String
+  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade) // <-- ความสัมพันธ์กลับมาเป็นแบบฟิลด์เดียว ง่ายๆ
+  menuId   String
+  menu     Menu   @relation(fields: [menuId], references: [id])
+  quantity Int
+  subtotal Float
+
+  // ไม่ต้องใช้ @@foreignKey ที่ไม่มีอยู่จริง
+  // ไม่ต้องใช้ @@id แบบ composite
+
+  @@index([storeId]) // เพิ่ม Index ให้ storeId
+  @@index([orderId]) // เพิ่ม Index ให้ orderId
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  rating      Int
-  comment     String?
-  isVisible   Boolean  @default(false)
-  storeId     String
-  store       Store    @relation(fields: [storeId], references: [id])
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  isVisible Boolean  @default(false)
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 // (ใหม่) โมเดลสำหรับตะกร้าสินค้า
 // User 1 คน จะมี Cart ได้แค่ 1 อัน
 model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique // **สำคัญ:** ทำให้ User 1 คนมีได้แค่ Cart เดียว
-  user      User       @relation(fields: [userId], references: [id])
-  storeId   String?    // (ใหม่) ID ของร้านค้าที่กำลังสั่งอยู่
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id @default(cuid())
+  userId    String   @unique // **สำคัญ:** ทำให้ User 1 คนมีได้แค่ Cart เดียว
+  user      User     @relation(fields: [userId], references: [id])
+  storeId   String? // (ใหม่) ID ของร้านค้าที่กำลังสั่งอยู่
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  items     CartItem[]
+  items CartItem[]
 
   @@map("carts") // (Optional) ตั้งชื่อตาราง
 }
@@ -156,8 +167,7 @@ model CartItem {
   menu      Menu     @relation(fields: [menuId], references: [id])
   quantity  Int
   createdAt DateTime @default(now())
-  
-  @@unique([cartId, menuId]) // **สำคัญ:** ป้องกันไม่ให้มี Menu เดียวกันซ้ำ 2 แถวใน Cart เดียว
 
+  @@unique([cartId, menuId]) // **สำคัญ:** ป้องกันไม่ให้มี Menu เดียวกันซ้ำ 2 แถวใน Cart เดียว
   @@map("cart_items") // (Optional) ตั้งชื่อตาราง
 }

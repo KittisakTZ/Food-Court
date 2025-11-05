@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Start seeding...')
 
-  const password = '123456'
+  const password = '123123'
   const hashPassword = await bcrypt.hash(password, 10)
 
   // 🔹 บัญชีผู้ใช้หลัก

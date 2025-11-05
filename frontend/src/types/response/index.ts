@@ -1,3 +1,4 @@
+// @/types/response/index.ts
 export type APIResponseType<T> = {
   success: boolean;
   message: string;
