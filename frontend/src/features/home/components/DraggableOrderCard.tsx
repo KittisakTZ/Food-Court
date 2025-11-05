@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { FiCheck, FiX, FiDollarSign, FiPackage, FiClock, FiUser } from "react-icons/fi";
 import { MdRestaurant } from "react-icons/md";
 
-// Component สำหรับปุ่ม Action
+// Component สำหรับปุ่ม Action (ปรับปรุง Icon)
 const OrderActions = ({ order }: { order: Order }) => {
     const { mutate: updateStatus, isPending } = useUpdateOrderStatus();
 
@@ -29,6 +29,8 @@ const OrderActions = ({ order }: { order: Order }) => {
         }
     };
 
+    const commonButtonClass = "px-4 py-3 rounded-lg transition-all font-bold shadow-sm flex items-center justify-center gap-2 disabled:bg-gray-300";
+
     switch (order.status) {
         case 'PENDING':
             return (
@@ -36,16 +38,18 @@ const OrderActions = ({ order }: { order: Order }) => {
                     <button
                         onClick={() => handleUpdate('APPROVE')}
                         disabled={isPending}
-                        className="px-4 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:bg-gray-300 transition-all font-bold shadow-sm"
+                        className={`${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
                     >
-                        ✓ อนุมัติ
+                        <FiCheck className="w-5 h-5" /> 
+                        <span>อนุมัติ</span>
                     </button>
                     <button
                         onClick={() => handleUpdate('REJECT')}
                         disabled={isPending}
-                        className="px-4 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-500 disabled:bg-gray-300 transition-all font-bold shadow-sm"
+                        className={`${commonButtonClass} bg-gray-400 text-white hover:bg-gray-500`}
                     >
-                        ✕ ปฏิเสธ
+                        <FiX className="w-5 h-5" />
+                        <span>ปฏิเสธ</span>
                     </button>
                 </div>
             );
@@ -54,9 +58,9 @@ const OrderActions = ({ order }: { order: Order }) => {
                 <button
                     onClick={() => handleUpdate('CONFIRM_PAYMENT')}
                     disabled={isPending}
-                    className="w-full px-4 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:bg-gray-300 transition-all font-bold shadow-sm"
+                    className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
                 >
-                    💳 ยืนยันชำระเงิน
+                    💳 <span>ยืนยันชำระเงิน</span>
                 </button>
             );
         case 'COOKING':
@@ -64,9 +68,10 @@ const OrderActions = ({ order }: { order: Order }) => {
                 <button
                     onClick={() => handleUpdate('PREPARE_COMPLETE')}
                     disabled={isPending}
-                    className="w-full px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-300 transition-all font-bold shadow-sm"
+                    className={`w-full ${commonButtonClass} bg-orange-500 text-white hover:bg-orange-600`}
                 >
-                    ✓ อาหารพร้อม
+                    <FiPackage className="w-5 h-5" /> 
+                    <span>อาหารพร้อม</span>
                 </button>
             );
         case 'READY_FOR_PICKUP':
@@ -74,9 +79,10 @@ const OrderActions = ({ order }: { order: Order }) => {
                 <button
                     onClick={() => handleUpdate('CUSTOMER_PICKED_UP')}
                     disabled={isPending}
-                    className="w-full px-4 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:bg-gray-300 transition-all font-bold shadow-sm"
+                    className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
                 >
-                    ✓ ลูกค้ารับแล้ว
+                    <FiCheck className="w-5 h-5" /> 
+                    <span>ลูกค้ารับแล้ว</span>
                 </button>
             );
         default:
@@ -117,7 +123,8 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
 
     return (
         <div ref={setNodeRef} style={style}>
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-orange-200 hover:border-orange-400 hover:shadow-xl transition-all overflow-hidden">
+            {/* ปรับเงา และขอบเล็กน้อย */}
+            <div className="bg-white rounded-xl shadow-md border-2 border-orange-200 hover:border-orange-400 hover:shadow-lg transition-all overflow-hidden">
 
                 {/* HEADER - Queue Number & Customer */}
                 <div className="bg-gradient-to-r from-orange-500 to-orange-400 p-4">
@@ -131,13 +138,14 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                             >
                                 <FaGripVertical className="w-6 h-6" />
                             </div>
-                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border-4 border-orange-300">
+                            {/* [คิว] */}
+                            <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg border-4 border-orange-300">
                                 <span className="text-orange-600 font-black text-4xl">{queueDisplayNumber}</span>
                             </div>
                             <div>
                                 <div className="flex items-center gap-2 text-white mb-1">
                                     <FiUser className="w-5 h-5" />
-                                    <span className="font-bold text-lg">{order.buyer?.username ?? 'ลูกค้า'}</span>
+                                    <span className="font-semibold text-base">{order.buyer?.username ?? 'ลูกค้า'}</span>
                                 </div>
                                 {order.scheduledPickup && (
                                     <div className="flex items-center gap-2 text-orange-100">
@@ -155,7 +163,8 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
 
                         {/* Right Side - Status & Time */}
                         <div className="text-right">
-                            <div className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold mb-2 ${getStatusColor(order.status)} shadow-sm`}>
+                            {/* [สถานะ] */}
+                            <div className={`inline-block px-3 py-1.5 rounded-lg text-sm font-bold mb-2 ${getStatusColor(order.status)} shadow-sm`}>
                                 {getStatusName(order.status)}
                             </div>
                             {order.scheduledPickup && (
@@ -173,63 +182,65 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                     </div>
                 </div>
 
-                {/* ORDER ITEMS */}
-                <div className="p-4 bg-orange-50">
-                    <div className="space-y-3"> {/* เพิ่ม space-y เล็กน้อย */}
+                {/* ORDER ITEMS - ใช้ bg-neutral-50 ให้ดูเหมือนกระดาษ */}
+                <div className="p-4 bg-neutral-50">
+                    <div className="space-y-3">
                         {order.orderItems.map((item) => (
-                            <div key={item.id} className="bg-white rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm border border-orange-100 hover:shadow-md transition-shadow">
+                            <div 
+                                key={item.id} 
+                                // เพิ่ม hover effect ให้รายการอาหารย่อย
+                                className="bg-white rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm border border-orange-100 hover:shadow-lg hover:border-orange-200 transition-all"
+                            >
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                                    {/* รูปภาพอาหาร */}
+                                    {/* --- [รูปอาหาร] เพิ่มเงาและวงแหวน --- */}
                                     <img
-                                        // สมมติว่า URL รูปภาพอยู่ที่ item.menu.image
                                         src={item.menu.image || 'https://via.placeholder.com/150'}
                                         alt={item.menu.name}
-                                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border-2 border-gray-100"
+                                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0 shadow-md ring-2 ring-orange-100"
                                         onError={(e) => {
-                                            // Fallback image หากรูปภาพหลักโหลดไม่สำเร็จ
                                             e.currentTarget.src = 'https://via.placeholder.com/150';
                                         }}
                                     />
 
-                                    {/* ชื่อเมนู + ราคา */}
+                                    {/* [ชื่อเมนู + ราคา] */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-gray-800 truncate mb-1">{item.menu.name}</p>
-                                        <p className="text-sm text-gray-500 font-medium">
+                                        <p className="font-bold text-gray-800 truncate mb-0.5 text-lg">{item.menu.name}</p>
+                                        <p className="text-base text-gray-600 font-medium">
                                             ราคา: <span className="text-teal-600 font-bold">฿{item.menu.price.toFixed(0)}</span>
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* จำนวน */}
-                                <div className="text-right flex-shrink-0">
+                                {/* --- [จำนวน] ปรับขนาด label --- */}
+                                <div className="text-right flex-shrink-0 pl-2">
                                     <span className="text-gray-500 text-sm">จำนวน:</span>
-                                    <p className="text-gray-800 font-bold text-lg">{item.quantity}</p>
+                                    <p className="text-gray-900 font-black text-2xl">{item.quantity}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* TOTAL */}
-                <div className="bg-gradient-to-r from-teal-500 to-teal-400 px-4 py-4">
+                {/* --- [TOTAL] - เปลี่ยนเป็นขอบประ (เหมือนใบเสร็จ) --- */}
+                <div className="bg-neutral-50 px-4 py-3 border-t-2 border-dashed border-gray-300">
                     <div className="flex items-center justify-between">
-                        <div className="text-white">
-                            <div className="text-sm font-semibold opacity-90">รวมทั้งหมด {totalItems} ชิ้น</div>
+                        <div className="text-gray-600">
+                            <div className="text-xs font-medium">รวมทั้งหมด {totalItems} ชิ้น</div>
                             <div className="text-xs opacity-75">ยอดชำระ</div>
                         </div>
-                        <div className="text-white font-black text-3xl">
+                        <div className="text-gray-800 font-bold text-xl">
                             ฿{order.totalAmount.toFixed(0)}
                         </div>
                     </div>
                 </div>
 
                 {/* ACTION BUTTONS */}
-                <div className="p-4 bg-white border-t-2 border-orange-100">
+                <div className="p-4 bg-white border-t border-gray-100">
                     <OrderActions order={order} />
                 </div>
 
                 {/* QUEUE MANAGEMENT */}
-                <div className="bg-orange-50 px-4 py-3 border-t-2 border-orange-100">
+                <div className="bg-neutral-50 px-4 py-3 border-t-2 border-orange-100">
                     <div className="flex items-center justify-center gap-2">
                         <button
                             onClick={() => handleMove(order.position - 1)}
