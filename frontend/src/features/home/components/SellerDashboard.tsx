@@ -589,14 +589,15 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             >
               <SortableContext
                 items={filteredOrders.map((o) => o.id)}
-                strategy={verticalListSortingStrategy}
+                strategy={verticalListSortingStrategy} 
+                // หมายเหตุ: strategy นี้อาจจะต้องปรับเปลี่ยนถ้าต้องการให้การลากวางทำงานได้ดีขึ้นในรูปแบบ grid
               >
-                <div className="space-y-4">
+                {/* ▼▼▼ แก้ไขจาก space-y-4 เป็น grid layout ▼▼▼ */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredOrders.map((order, index) => (
                     <DraggableOrderCard
                       key={order.id}
                       order={order}
-                      // ✨ FIX: ส่ง index เข้าไปเป็น prop ใหม่ชื่อ queueDisplayNumber ✨
                       queueDisplayNumber={index + 1}
                       isFirst={index === 0}
                       isLast={index === filteredOrders.length - 1}
