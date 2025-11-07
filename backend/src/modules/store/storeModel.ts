@@ -2,6 +2,11 @@
 
 import { z } from "zod";
 
+const PromptPaySchema = z.string()
+    .regex(/^(?:\d{10}|\d{13})$/, "Invalid PromptPay ID format. Must be a 10-digit phone number or 13-digit ID card number.")
+    .optional()
+    .nullable();
+
 // Payload สำหรับการสร้างและอัปเดตร้านค้า
 export type StorePayload = {
     name: string;
@@ -16,6 +21,7 @@ export const CreateStoreSchema = z.object({
         name: z.string().min(1, "Name is required").max(100),
         description: z.string().optional().nullable(),
         location: z.string().optional().nullable(),
+        promptPayId: PromptPaySchema, // ✨ (เพิ่ม)
     }),
 });
 
@@ -28,8 +34,7 @@ export const UpdateStoreSchema = z.object({
         name: z.string().min(1).max(100).optional(),
         description: z.string().optional().nullable(),
         location: z.string().optional().nullable(),
-        // 🔄 CHANGED: ทำให้ image เป็น string ธรรมดา ไม่ต้องเป็น URL
-        // เพราะเราจะสร้าง URL ให้เองจากไฟล์ที่อัปโหลด
+        promptPayId: PromptPaySchema, // ✨ (เพิ่ม)
         image: z.string().optional().nullable(),
         isOpen: z.boolean().optional(),
     }),

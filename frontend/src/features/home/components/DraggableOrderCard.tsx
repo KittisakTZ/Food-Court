@@ -40,7 +40,7 @@ const OrderActions = ({ order }: { order: Order }) => {
                         disabled={isPending}
                         className={`${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
                     >
-                        <FiCheck className="w-5 h-5" /> 
+                        <FiCheck className="w-5 h-5" />
                         <span>อนุมัติ</span>
                     </button>
                     <button
@@ -53,14 +53,24 @@ const OrderActions = ({ order }: { order: Order }) => {
                     </button>
                 </div>
             );
+        // ✨ (ปรับปรุง) สถานะนี้ ร้านค้าไม่ต้องทำอะไร รอให้ลูกค้าจ่ายเงิน
         case 'AWAITING_PAYMENT':
+            return (
+                <div className="text-center p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
+                    <p className="font-semibold">รอการชำระเงินจากลูกค้า</p>
+                </div>
+            );
+
+        // ✨ (เพิ่ม) สถานะใหม่สำหรับตรวจสอบสลิป
+        case 'AWAITING_CONFIRMATION':
             return (
                 <button
                     onClick={() => handleUpdate('CONFIRM_PAYMENT')}
                     disabled={isPending}
                     className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
                 >
-                    💳 <span>ยืนยันชำระเงิน</span>
+                    <FiCheck className="w-5 h-5" />
+                    <span>ยืนยันการชำระเงิน</span>
                 </button>
             );
         case 'COOKING':
@@ -70,7 +80,7 @@ const OrderActions = ({ order }: { order: Order }) => {
                     disabled={isPending}
                     className={`w-full ${commonButtonClass} bg-orange-500 text-white hover:bg-orange-600`}
                 >
-                    <FiPackage className="w-5 h-5" /> 
+                    <FiPackage className="w-5 h-5" />
                     <span>อาหารพร้อม</span>
                 </button>
             );
@@ -81,7 +91,7 @@ const OrderActions = ({ order }: { order: Order }) => {
                     disabled={isPending}
                     className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
                 >
-                    <FiCheck className="w-5 h-5" /> 
+                    <FiCheck className="w-5 h-5" />
                     <span>ลูกค้ารับแล้ว</span>
                 </button>
             );
@@ -182,12 +192,27 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                     </div>
                 </div>
 
+                {/* ✨ (เพิ่ม) ส่วนแสดงผลพิเศษสำหรับ Payment */}
+                {(order.status === 'AWAITING_CONFIRMATION' && order.paymentSlip) && (
+                    <div className="p-4 bg-yellow-50 border-b-2 border-dashed border-gray-300">
+                        <h4 className="font-bold text-yellow-800 mb-2">ตรวจสอบสลิปการโอนเงิน</h4>
+                        <a 
+                            href={order.paymentSlip} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-block bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-all"
+                        >
+                            📄 ดูสลิปที่แนบมา
+                        </a>
+                    </div>
+                )}
+
                 {/* ORDER ITEMS - ใช้ bg-neutral-50 ให้ดูเหมือนกระดาษ */}
                 <div className="p-4 bg-neutral-50">
                     <div className="space-y-3">
                         {order.orderItems.map((item) => (
-                            <div 
-                                key={item.id} 
+                            <div
+                                key={item.id}
                                 // เพิ่ม hover effect ให้รายการอาหารย่อย
                                 className="bg-white rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm border border-orange-100 hover:shadow-lg hover:border-orange-200 transition-all"
                             >

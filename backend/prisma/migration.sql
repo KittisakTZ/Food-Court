@@ -36,6 +36,7 @@ CREATE TABLE "Store" (
     "description" TEXT,
     "location" TEXT,
     "image" TEXT,
+    "promptPayId" TEXT,
     "isApproved" BOOLEAN NOT NULL DEFAULT false,
     "isOpen" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -162,6 +163,7 @@ CREATE INDEX "OrderItem_orderId_idx" ON "OrderItem"("orderId");
 CREATE INDEX "Order_storeId_orderDate_idx" ON "Order"("storeId", "orderDate");
 CREATE UNIQUE INDEX "carts_userId_key" ON "carts"("userId");
 CREATE UNIQUE INDEX "cart_items_cartId_menuId_key" ON "cart_items"("cartId", "menuId");
+CREATE UNIQUE INDEX "MenuCategory_name_storeId_key" ON "MenuCategory"("name", "storeId");
 
 -- AddForeignKey
 ALTER TABLE "Store" ADD CONSTRAINT "Store_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

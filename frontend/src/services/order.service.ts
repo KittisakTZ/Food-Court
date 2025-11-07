@@ -11,10 +11,12 @@ interface CreateOrderPayload {
         menuId: string;
         quantity: number;
     }[];
+    paymentMethod: 'PROMPTPAY' | 'CASH_ON_PICKUP'; // <-- ต้องมีบรรทัดนี้
     scheduledPickupTime?: string;
 }
 
 export const createOrder = async (payload: CreateOrderPayload) => {
+    // โค้ดส่วนนี้มักจะถูกต้องอยู่แล้ว เพราะมันแค่ส่ง payload ไปตรงๆ
     const { data: response } = await mainApi.post<APIResponseType<Order>>(
         "/v1/orders",
         payload
@@ -85,6 +87,24 @@ export const moveOrderPosition = async ({ orderId, newPosition }: MoveOrderParam
     const { data: response } = await mainApi.patch<APIResponseType<null>>(
         `/v1/stores/my-store/orders/${orderId}/move`,
         { newPosition }
+    );
+    return response;
+};
+
+// (เพิ่ม service ใหม่)
+export const uploadPaymentSlip = async ({ orderId, slipFile }: { orderId: string, slipFile: File }) => {
+    const formData = new FormData();
+    formData.append('slip', slipFile); // 'slip' ต้องตรงกับชื่อ field ใน middleware upload.single('slip')
+
+    // ต้องระบุ header 'Content-Type': 'multipart/form-data'
+    const { data: response } = await mainApi.post<APIResponseType<null>>(
+        `/v1/orders/${orderId}/slip`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        }
     );
     return response;
 };

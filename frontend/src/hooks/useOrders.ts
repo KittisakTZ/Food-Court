@@ -1,6 +1,6 @@
 // @/hooks/useOrders.ts
 
-import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, createOrder } from "@/services/order.service";
+import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, createOrder, uploadPaymentSlip } from "@/services/order.service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
 import { toastService } from '@/services/toast.service';
@@ -98,6 +98,23 @@ export const useCreateOrder = () => {
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             toastService.error(`Failed to create order: ${errorMessage}`);
+        }
+    });
+};
+
+// (เพิ่ม hook ใหม่)
+export const useUploadSlip = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: uploadPaymentSlip,
+        onSuccess: () => {
+            toastService.success("Slip uploaded successfully! Please wait for confirmation.");
+            // Invalidate query 'my-orders' เพื่อให้สถานะอัปเดตเป็น AWAITING_CONFIRMATION
+            queryClient.invalidateQueries({ queryKey: ['my-orders'] });
+        },
+        onError: (error: any) => {
+            const errorMessage = error.response?.data?.message || error.message;
+            toastService.error(`Failed to upload slip: ${errorMessage}`);
         }
     });
 };

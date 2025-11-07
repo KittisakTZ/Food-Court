@@ -60,7 +60,7 @@ interface UpdateStorePayload {
     name?: string;
     description?: string;
     location?: string;
-    // เราจะแยกการอัปเดต image ไปทำต่างหากในอนาคตเพราะซับซ้อนกว่า
+    promptPayId?: string; // ✨
 }
 
 // (ใหม่) ฟังก์ชันสำหรับ Seller อัปเดตข้อมูลร้านของตัวเอง

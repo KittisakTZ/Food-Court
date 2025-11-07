@@ -14,10 +14,12 @@ export const CreateOrderSchema = z.object({
     body: z.object({
         storeId: z.string().cuid("Invalid store ID"),
         items: z.array(OrderItemSchema).min(1, "Order must contain at least one item"),
-        // ✨ (เพิ่ม) ให้ Client ส่งวิธีการชำระเงินมาด้วย
+        
+        // ✨ [จุดตรวจสอบ] เช็คให้แน่ใจว่าคุณได้เพิ่มบรรทัดนี้เข้าไปแล้ว ✨
         paymentMethod: z.nativeEnum(PaymentMethod, {
-            errorMap: () => ({ message: "Invalid payment method" }),
+            errorMap: () => ({ message: "Invalid payment method specified" }),
         }),
+        
         scheduledPickupTime: z.string()
             .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format. Please use HH:mm (24-hour).")
             .optional(),

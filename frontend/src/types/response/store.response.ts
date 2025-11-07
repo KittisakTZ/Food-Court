@@ -7,6 +7,7 @@ export interface Store {
     description: string | null;
     location: string | null;
     image: string | null;
+    promptPayId: string | null;
     isApproved: boolean;
     isOpen: boolean;
     avgRating: number;

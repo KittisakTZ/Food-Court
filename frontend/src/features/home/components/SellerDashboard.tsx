@@ -1,3 +1,5 @@
+// @/features/home/components/SellerDashboard.tsx
+
 import { useMyStoreOrders } from "@/hooks/useOrders";
 import { useMyStore } from "@/hooks/useStores";
 import { Link } from "react-router-dom";
@@ -20,18 +22,22 @@ import {
   FiSearch,
   FiRefreshCw,
   FiX,
+  FiCheck, // Import FiCheck
 } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { Order } from "@/types/response/order.response";
 
+// (ปรับปรุง) อัปเดต Type `OrderStatus` ให้รวมสถานะใหม่
 type OrderStatus =
   | "PENDING"
   | "AWAITING_PAYMENT"
+  | "AWAITING_CONFIRMATION"
   | "COOKING"
   | "READY_FOR_PICKUP";
+
 type ViewMode = "kanban" | "list";
 
-// Status Configuration
+// (ปรับปรุง) เพิ่ม Config สำหรับสถานะใหม่
 const STATUS_CONFIG = {
   PENDING: {
     label: "รอดำเนินการ",
@@ -48,6 +54,14 @@ const STATUS_CONFIG = {
     bgColor: "bg-blue-100",
     textColor: "text-blue-800",
     borderColor: "border-blue-300",
+  },
+  AWAITING_CONFIRMATION: {
+    label: "รอตรวจสอบสลิป",
+    icon: <FiCheck className="w-4 h-4" />,
+    color: "purple",
+    bgColor: "bg-purple-100",
+    textColor: "text-purple-800",
+    borderColor: "border-purple-300",
   },
   COOKING: {
     label: "กำลังทำอาหาร",
@@ -131,6 +145,7 @@ const KanbanColumn = ({
     {
       yellow: "from-yellow-500 to-orange-500",
       blue: "from-blue-500 to-cyan-500",
+      purple: "from-purple-500 to-indigo-500", // Add purple for the new status
       orange: "from-orange-500 to-red-500",
       green: "from-green-500 to-emerald-500",
     }[color] || "from-gray-500 to-gray-600";
@@ -166,12 +181,10 @@ const KanbanColumn = ({
               items={orderIds}
               strategy={verticalListSortingStrategy}
             >
-              {/* ✨ FIX: แก้ไขตรงนี้ ✨ */}
               {orders.map((order, index) => (
                 <DraggableOrderCard
                   key={order.id}
                   order={order}
-                  // ✨ เพิ่ม prop ที่ขาดไป ✨
                   queueDisplayNumber={index + 1}
                   isFirst={index === 0}
                   isLast={index === orders.length - 1}
@@ -194,7 +207,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
 
   const statusFilter =
     selectedStatus === "ALL"
-      ? ["PENDING", "AWAITING_PAYMENT", "COOKING", "READY_FOR_PICKUP"]
+      ? ["PENDING", "AWAITING_PAYMENT", "AWAITING_CONFIRMATION", "COOKING", "READY_FOR_PICKUP"]
       : [selectedStatus];
 
   const {
@@ -206,7 +219,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
   } = useMyStoreOrders({
     page,
     pageSize,
-    status: statusFilter as OrderStatus[],
+    status: statusFilter as any, // Use `as any` or adjust the hook's type
   });
 
   const { mutate: moveOrder } = useMoveOrderPosition();
@@ -220,7 +233,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
     return orders.filter(
       (order) =>
         order.id.toLowerCase().includes(query) ||
-        order.buyer.username?.toLowerCase().includes(query)
+        (order.buyer && order.buyer.username?.toLowerCase().includes(query))
     );
   }, [ordersData, searchQuery]);
 
@@ -229,6 +242,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
     return {
       pending: filteredOrders.filter((o) => o.status === "PENDING"),
       awaitingPayment: filteredOrders.filter((o) => o.status === "AWAITING_PAYMENT"),
+      awaitingConfirmation: filteredOrders.filter((o) => o.status === "AWAITING_CONFIRMATION"),
       cooking: filteredOrders.filter((o) => o.status === "COOKING"),
       readyForPickup: filteredOrders.filter((o) => o.status === "READY_FOR_PICKUP"),
     };
@@ -307,6 +321,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
   const statsFromCurrentPage = {
     pending: categorizedOrders.pending.length,
     awaitingPayment: categorizedOrders.awaitingPayment.length,
+    awaitingConfirmation: categorizedOrders.awaitingConfirmation.length,
     cooking: categorizedOrders.cooking.length,
     readyForPickup: categorizedOrders.readyForPickup.length,
   };
@@ -327,8 +342,6 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               </p>
             </div>
           </div>
-
-          {/* View Mode Toggle & Refresh */}
           <div className="flex gap-2">
             <button
               onClick={handleRefresh}
@@ -346,19 +359,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                   : "text-white hover:bg-white/10"
                   }`}
               >
-                <svg
-                  className="w-5 h-5 inline-block mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-                  />
-                </svg>
+                <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
                 บอร์ด
               </button>
               <button
@@ -368,19 +369,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                   : "text-white hover:bg-white/10"
                   }`}
               >
-                <svg
-                  className="w-5 h-5 inline-block mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
+                <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                 รายการ
               </button>
             </div>
@@ -388,7 +377,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <button
             onClick={() => handleStatusChange("PENDING")}
             className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
@@ -406,6 +395,14 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               {statsFromCurrentPage.awaitingPayment}
             </p>
             <p className="text-sm text-orange-100">รอชำระเงิน</p>
+          </button>
+          <button
+            onClick={() => handleStatusChange("AWAITING_CONFIRMATION")}
+            className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+          >
+            <FiCheck className="w-6 h-6 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{statsFromCurrentPage.awaitingConfirmation}</p>
+            <p className="text-sm text-orange-100">รอตรวจสอบ</p>
           </button>
           <button
             onClick={() => handleStatusChange("COOKING")}
@@ -431,7 +428,6 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
       {/* Search and Filter Bar */}
       <div className="mb-6 bg-white rounded-2xl shadow-lg p-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          {/* Search Box */}
           <div className="md:col-span-5 relative">
             <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -450,8 +446,6 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               </button>
             )}
           </div>
-
-          {/* Status Filter */}
           <div className="md:col-span-4 relative">
             <FiFilter className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
             <select
@@ -464,12 +458,11 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               <option value="ALL">ทั้งหมด</option>
               <option value="PENDING">รอดำเนินการ</option>
               <option value="AWAITING_PAYMENT">รอชำระเงิน</option>
+              <option value="AWAITING_CONFIRMATION">รอตรวจสอบสลิป</option>
               <option value="COOKING">กำลังทำอาหาร</option>
               <option value="READY_FOR_PICKUP">พร้อมรับ</option>
             </select>
           </div>
-
-          {/* Page Size Selector */}
           <div className="md:col-span-3 relative">
             <select
               value={pageSize}
@@ -483,12 +476,10 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             </select>
           </div>
         </div>
-
-        {/* Active Filters Display */}
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           {selectedStatus !== "ALL" && (
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-800 rounded-lg text-sm font-semibold">
-              {STATUS_CONFIG[selectedStatus].label}
+              {STATUS_CONFIG[selectedStatus]?.label || selectedStatus}
               <button
                 onClick={() => handleStatusChange("ALL")}
                 className="hover:bg-orange-200 rounded-full p-0.5 transition-all"
@@ -518,43 +509,12 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
       {viewMode === "kanban" && (
         <>
           {filteredOrders.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              <KanbanColumn
-                title="รอดำเนินการ"
-                icon={<FiClock className="w-6 h-6" />}
-                color="yellow"
-                orders={categorizedOrders.pending}
-                onDragEnd={handleDragEnd}
-                selectedStatus={selectedStatus}
-                status="PENDING"
-              />
-              <KanbanColumn
-                title="รอชำระเงิน"
-                icon={<FiDollarSign className="w-6 h-6" />}
-                color="blue"
-                orders={categorizedOrders.awaitingPayment}
-                onDragEnd={handleDragEnd}
-                selectedStatus={selectedStatus}
-                status="AWAITING_PAYMENT"
-              />
-              <KanbanColumn
-                title="กำลังทำอาหาร"
-                icon={<MdRestaurant className="w-6 h-6" />}
-                color="orange"
-                orders={categorizedOrders.cooking}
-                onDragEnd={handleDragEnd}
-                selectedStatus={selectedStatus}
-                status="COOKING"
-              />
-              <KanbanColumn
-                title="พร้อมรับ"
-                icon={<FiPackage className="w-6 h-6" />}
-                color="green"
-                orders={categorizedOrders.readyForPickup}
-                onDragEnd={handleDragEnd}
-                selectedStatus={selectedStatus}
-                status="READY_FOR_PICKUP"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
+              <KanbanColumn title="รอดำเนินการ" icon={<FiClock className="w-6 h-6" />} color="yellow" orders={categorizedOrders.pending} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="PENDING" />
+              <KanbanColumn title="รอชำระเงิน" icon={<FiDollarSign className="w-6 h-6" />} color="blue" orders={categorizedOrders.awaitingPayment} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="AWAITING_PAYMENT" />
+              <KanbanColumn title="รอตรวจสอบสลิป" icon={<FiCheck className="w-6 h-6" />} color="purple" orders={categorizedOrders.awaitingConfirmation} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="AWAITING_CONFIRMATION" />
+              <KanbanColumn title="กำลังทำอาหาร" icon={<MdRestaurant className="w-6 h-6" />} color="orange" orders={categorizedOrders.cooking} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="COOKING" />
+              <KanbanColumn title="พร้อมรับ" icon={<FiPackage className="w-6 h-6" />} color="green" orders={categorizedOrders.readyForPickup} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="READY_FOR_PICKUP" />
             </div>
           ) : (
             <div className="text-center py-20 bg-white rounded-3xl shadow-lg border-2 border-dashed border-gray-200">
@@ -563,9 +523,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                 {searchQuery ? "ไม่พบออเดอร์ที่ค้นหา" : "ไม่มีออเดอร์"}
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
-                {searchQuery
-                  ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง"
-                  : "ยังไม่มีออเดอร์ใหม่ในขณะนี้"}
+                {searchQuery ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง" : "ยังไม่มีออเดอร์ใหม่ในขณะนี้"}
               </p>
               {searchQuery && (
                 <button
@@ -589,10 +547,8 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             >
               <SortableContext
                 items={filteredOrders.map((o) => o.id)}
-                strategy={verticalListSortingStrategy} 
-                // หมายเหตุ: strategy นี้อาจจะต้องปรับเปลี่ยนถ้าต้องการให้การลากวางทำงานได้ดีขึ้นในรูปแบบ grid
+                strategy={verticalListSortingStrategy}
               >
-                {/* ▼▼▼ แก้ไขจาก space-y-4 เป็น grid layout ▼▼▼ */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredOrders.map((order, index) => (
                     <DraggableOrderCard
@@ -643,141 +599,52 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
       {ordersData && ordersData.totalPages > 1 && (
         <div className="mt-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl shadow-lg p-6">
-            {/* Page Info */}
             <div className="text-sm text-gray-600 font-medium">
-              แสดงหน้า <span className="font-bold text-gray-900">{ordersData.currentPage}</span> จาก{" "}
-              <span className="font-bold text-gray-900">{ordersData.totalPages}</span> หน้า
-              <span className="text-gray-400 ml-2">
-                (ทั้งหมด {totalOrders} รายการ)
-              </span>
+              แสดงหน้า <span className="font-bold text-gray-900">{ordersData.currentPage}</span> จาก <span className="font-bold text-gray-900">{ordersData.totalPages}</span> หน้า
+              <span className="text-gray-400 ml-2">(ทั้งหมด {totalOrders} รายการ)</span>
             </div>
-
-            {/* Pagination Controls */}
             <div className="flex items-center gap-2">
-              {/* First Page */}
-              <button
-                onClick={() => setPage(1)}
-                disabled={page === 1}
-                className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm"
-                title="หน้าแรก"
-              >
-                ««
-              </button>
-
-              {/* Previous Page */}
-              <button
-                onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                disabled={page === 1}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold"
-              >
-                <FiChevronLeft className="w-4 h-4" />
-                ก่อนหน้า
-              </button>
-
-              {/* Page Numbers */}
+              <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm" title="หน้าแรก">««</button>
+              <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold"><FiChevronLeft className="w-4 h-4" />ก่อนหน้า</button>
               <div className="hidden sm:flex items-center gap-1">
                 {(() => {
                   const pages = [];
                   const totalPages = ordersData.totalPages;
                   const currentPage = ordersData.currentPage;
-
-                  // Always show first page
                   if (currentPage > 3) {
-                    pages.push(
-                      <button
-                        key={1}
-                        onClick={() => setPage(1)}
-                        className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-all font-semibold min-w-[40px]"
-                      >
-                        1
-                      </button>
-                    );
+                    pages.push(<button key={1} onClick={() => setPage(1)} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-all font-semibold min-w-[40px]">1</button>);
                     if (currentPage > 4) {
-                      pages.push(
-                        <span key="dots1" className="px-2 text-gray-400">
-                          ...
-                        </span>
-                      );
+                      pages.push(<span key="dots1" className="px-2 text-gray-400">...</span>);
                     }
                   }
-
-                  // Show pages around current page
-                  for (
-                    let i = Math.max(1, currentPage - 2);
-                    i <= Math.min(totalPages, currentPage + 2);
-                    i++
-                  ) {
+                  for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
                     pages.push(
                       <button
                         key={i}
                         onClick={() => setPage(i)}
-                        className={`px-3 py-2 border-2 rounded-lg transition-all font-semibold min-w-[40px] ${i === currentPage
-                          ? "border-orange-500 bg-orange-500 text-white shadow-md"
-                          : "border-gray-200 hover:border-orange-400 hover:bg-orange-50"
-                          }`}
+                        className={`px-3 py-2 border-2 rounded-lg transition-all font-semibold min-w-[40px] ${i === currentPage ? "border-orange-500 bg-orange-500 text-white shadow-md" : "border-gray-200 hover:border-orange-400 hover:bg-orange-50"}`}
                       >
                         {i}
                       </button>
                     );
                   }
-
-                  // Always show last page
                   if (currentPage < totalPages - 2) {
                     if (currentPage < totalPages - 3) {
-                      pages.push(
-                        <span key="dots2" className="px-2 text-gray-400">
-                          ...
-                        </span>
-                      );
+                      pages.push(<span key="dots2" className="px-2 text-gray-400">...</span>);
                     }
-                    pages.push(
-                      <button
-                        key={totalPages}
-                        onClick={() => setPage(totalPages)}
-                        className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-all font-semibold min-w-[40px]"
-                      >
-                        {totalPages}
-                      </button>
-                    );
+                    pages.push(<button key={totalPages} onClick={() => setPage(totalPages)} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-all font-semibold min-w-[40px]">{totalPages}</button>);
                   }
-
                   return pages;
                 })()}
               </div>
-
-              {/* Mobile page indicator */}
-              <div className="sm:hidden px-4 py-2 bg-gray-100 rounded-lg font-bold text-gray-700">
-                {page} / {ordersData.totalPages}
-              </div>
-
-              {/* Next Page */}
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page === ordersData.totalPages}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold"
-              >
-                ถัดไป
-                <FiChevronRight className="w-4 h-4" />
-              </button>
-
-              {/* Last Page */}
-              <button
-                onClick={() => setPage(ordersData.totalPages)}
-                disabled={page === ordersData.totalPages}
-                className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm"
-                title="หน้าสุดท้าย"
-              >
-                »»
-              </button>
+              <div className="sm:hidden px-4 py-2 bg-gray-100 rounded-lg font-bold text-gray-700">{page} / {ordersData.totalPages}</div>
+              <button onClick={() => setPage((p) => p + 1)} disabled={page === ordersData.totalPages} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold">ถัดไป<FiChevronRight className="w-4 h-4" /></button>
+              <button onClick={() => setPage(ordersData.totalPages)} disabled={page === ordersData.totalPages} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm" title="หน้าสุดท้าย">»»</button>
             </div>
           </div>
-
-          {/* Quick Jump */}
           {ordersData.totalPages > 5 && (
             <div className="mt-4 flex items-center justify-center gap-3">
-              <label className="text-sm font-semibold text-gray-700">
-                ไปที่หน้า:
-              </label>
+              <label className="text-sm font-semibold text-gray-700">ไปที่หน้า:</label>
               <input
                 type="number"
                 min={1}
@@ -791,9 +658,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                 }}
                 className="w-20 px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 font-semibold text-center"
               />
-              <span className="text-sm text-gray-500">
-                / {ordersData.totalPages}
-              </span>
+              <span className="text-sm text-gray-500">/ {ordersData.totalPages}</span>
             </div>
           )}
         </div>

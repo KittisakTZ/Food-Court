@@ -1,17 +1,18 @@
 // @modules/order/orderRepository.ts
 
 import prisma from "@src/db";
-import { Order, OrderItem, OrderStatus, Prisma } from "@prisma/client";
+import { Order, OrderItem, OrderStatus, Prisma, PaymentMethod } from "@prisma/client";
 
 // Type สำหรับข้อมูลที่จำเป็นในการสร้าง Order
 type OrderCreationData = {
     buyerId: string;
     storeId: string;
     totalAmount: number;
-    position: number;           // ค่าสำหรับเรียงลำดับโดยรวม
+    position: number;
     scheduledPickup?: Date | null;
-    queueNumber: number;        // หมายเลขคิวรายวัน (เช่น 1, 2, 3)
-    orderDate: Date;            // วันที่ของออเดอร์ (YYYY-MM-DD)
+    queueNumber: number;
+    orderDate: Date;
+    paymentMethod: PaymentMethod; // <--- เพิ่มฟิลด์นี้เข้ามา
     items: Array<{
         menuId: string;
         quantity: number;
@@ -31,8 +32,9 @@ export const orderRepository = {
                     position: data.position,
                     totalAmount: data.totalAmount,
                     scheduledPickup: data.scheduledPickup,
-                    queueNumber: data.queueNumber, // เพิ่มหมายเลขคิว
+                    queueNumber: data.queueNumber,
                     orderDate: data.orderDate,
+                    paymentMethod: data.paymentMethod, // <--- เพิ่มฟิลด์นี้ตอนสร้างข้อมูล
                 },
             });
 
@@ -50,8 +52,16 @@ export const orderRepository = {
 
             // 4. ดึงข้อมูล Order ที่สมบูรณ์พร้อม Items กลับไป
             const completeOrder = await tx.order.findUniqueOrThrow({
-                where: { id: newOrder.id },
-                include: { orderItems: true }
+                where: {
+                    id: newOrder.id
+                },
+                include: {
+                    orderItems: {
+                        include: {
+                            menu: true
+                        }
+                    }
+                }
             });
 
             return completeOrder;

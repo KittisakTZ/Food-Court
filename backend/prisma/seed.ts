@@ -37,9 +37,10 @@ async function main() {
   // --- 3. CREATE SELLERS AND THEIR STORES ---
   console.log('🏪 Creating sellers and stores...')
   const sellersData = [
-    { username: 'seller1', email: 'seller1@foodcourt.com', storeName: 'ข้าวมันไก่คุณศรี' },
-    { username: 'seller2', email: 'seller2@foodcourt.com', storeName: 'ก๋วยเตี๋ยวเรืออยุธยา' },
-    { username: 'seller3', email: 'seller3@foodcourt.com', storeName: 'ชาไข่มุกคุณนุ่น' },
+    // ✨ (ปรับปรุง) เพิ่ม key: promptPayId เข้าไป
+    { username: 'seller1', email: 'seller1@foodcourt.com', storeName: 'ข้าวมันไก่คุณศรี', promptPayId: '0812345671' },
+    { username: 'seller2', email: 'seller2@foodcourt.com', storeName: 'ก๋วยเตี๋ยวเรืออยุธยา', promptPayId: '0812345672' },
+    { username: 'seller3', email: 'seller3@foodcourt.com', storeName: 'ชาไข่มุกคุณนุ่น', promptPayId: '0812345673' },
   ]
 
   for (const s of sellersData) {
@@ -60,19 +61,21 @@ async function main() {
       where: { name: s.storeName },
       update: {
         ownerId: seller.id,
+        promptPayId: s.promptPayId, // ✨ (เพิ่ม) เพิ่มการอัปเดตเผื่อรันซ้ำ
       },
       create: {
         name: s.storeName,
         description: `ร้าน ${s.storeName} ประจำโรงอาหาร`,
         location: 'โรงอาหารกลาง DPU',
         image: '/uploads/default_store.png',
+        promptPayId: s.promptPayId, // ✨ (เพิ่ม) เพิ่มตอนสร้างข้อมูลใหม่
         isApproved: true,
         isOpen: true,
         ownerId: seller.id,
       },
     })
 
-    // ✨ [SOLUTION] เรียกฟังก์ชันสร้าง Partition ของ PostgreSQL ทันที
+    // ✨ [SOLUTION] ที่เคยทำไว้ยังคงอยู่เหมือนเดิม ไม่ต้องเอาออก
     console.log(`  └─ 🗂️  Creating partitions for store: ${store.name}`);
     await prisma.$executeRaw`SELECT create_store_partitions(${store.id})`;
 
@@ -85,9 +88,9 @@ async function main() {
       create: { name: 'อาหารจานเดียว', storeId: store.id },
     })
     const drinkCategory = await prisma.menuCategory.upsert({
-        where: { name_storeId: { name: 'เครื่องดื่ม', storeId: store.id } },
-        update: {},
-        create: { name: 'เครื่องดื่ม', storeId: store.id },
+      where: { name_storeId: { name: 'เครื่องดื่ม', storeId: store.id } },
+      update: {},
+      create: { name: 'เครื่องดื่ม', storeId: store.id },
     })
 
     // (ส่วนที่เหลือของไฟล์เหมือนเดิมทุกประการ)
@@ -265,7 +268,7 @@ async function main() {
       },
     },
   })
-  
+
   // --- ออร์เดอร์ที่ 3: ออร์เดอร์ที่เสร็จสมบูรณ์แล้วจากเมื่อวาน (COMPLETED) ---
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -299,49 +302,49 @@ async function main() {
   // --- ออร์เดอร์ที่ 4: เพิ่งสร้าง, รอร้านยืนยัน (PENDING) ---
   await prisma.order.create({
     data: {
-        buyerId: buyer.id,
-        storeId: khaoManKaiStore.id,
-        status: OrderStatus.PENDING,
-        paymentMethod: PaymentMethod.PROMPTPAY,
-        totalAmount: 40,
-        position: 3,
-        queueNumber: 3,
-        orderDate: today,
-        createdAt: new Date(Date.now() - 60 * 1000),
-        orderItems: {
-            create: {
-                storeId: khaoManKaiStore.id,
-                menuId: khaoManKaiMenus[0].id,
-                quantity: 1,
-                subtotal: 40,
-            },
+      buyerId: buyer.id,
+      storeId: khaoManKaiStore.id,
+      status: OrderStatus.PENDING,
+      paymentMethod: PaymentMethod.PROMPTPAY,
+      totalAmount: 40,
+      position: 3,
+      queueNumber: 3,
+      orderDate: today,
+      createdAt: new Date(Date.now() - 60 * 1000),
+      orderItems: {
+        create: {
+          storeId: khaoManKaiStore.id,
+          menuId: khaoManKaiMenus[0].id,
+          quantity: 1,
+          subtotal: 40,
         },
+      },
     }
   });
 
   // --- ออร์เดอร์ที่ 5: ร้านยืนยันแล้ว, รอจ่ายเงิน (AWAITING_PAYMENT) ---
   await prisma.order.create({
     data: {
-        buyerId: buyer.id,
-        storeId: noodleStore.id,
-        status: OrderStatus.AWAITING_PAYMENT,
-        paymentMethod: PaymentMethod.PROMPTPAY,
-        totalAmount: 50,
-        position: 4,
-        queueNumber: 4,
-        orderDate: today,
-        createdAt: new Date(Date.now() - 2 * 60 * 1000),
-        confirmedAt: new Date(Date.now() - 30 * 1000),
-        paymentQrCode: `https://promptpay.io/0812345678/50.00.png`,
-        paymentExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
-        orderItems: {
-            create: {
-                storeId: noodleStore.id,
-                menuId: noodleMenus[1].id,
-                quantity: 1,
-                subtotal: 50,
-            },
+      buyerId: buyer.id,
+      storeId: noodleStore.id,
+      status: OrderStatus.AWAITING_PAYMENT,
+      paymentMethod: PaymentMethod.PROMPTPAY,
+      totalAmount: 50,
+      position: 4,
+      queueNumber: 4,
+      orderDate: today,
+      createdAt: new Date(Date.now() - 2 * 60 * 1000),
+      confirmedAt: new Date(Date.now() - 30 * 1000),
+      paymentQrCode: `https://promptpay.io/0812345678/50.00.png`,
+      paymentExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      orderItems: {
+        create: {
+          storeId: noodleStore.id,
+          menuId: noodleMenus[1].id,
+          quantity: 1,
+          subtotal: 50,
         },
+      },
     }
   });
 

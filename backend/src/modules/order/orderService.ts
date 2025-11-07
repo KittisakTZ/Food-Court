@@ -6,6 +6,7 @@ import { orderRepository } from "./orderRepository";
 import prisma from "@src/db";
 import { OrderStatus, Role, PaymentMethod } from "@prisma/client";
 import { paymentGateway } from "@common/utils/paymentGateway"; // Import QR Code service (ตัวจำลอง)
+import { env } from "@common/utils/envConfig";
 
 // Type สำหรับข้อมูลที่ Frontend ส่งมาเพื่อสร้าง Order
 type CreateOrderPayload = {
@@ -171,13 +172,18 @@ export const orderService = {
 
                 // ✨ (Logic ใหม่) แยกตามประเภทการจ่ายเงิน
                 if (order.paymentMethod === 'PROMPTPAY') {
-                    // --- Flow PromptPay ---
-                    const storePromptPayId = "099-999-9999"; // TODO: ดึงข้อมูลนี้มาจาก Model Store ในอนาคต
-                    if (!storePromptPayId) {
-                        return new ServiceResponse(ResponseStatus.Failed, "Store has not configured PromptPay yet.", null, StatusCodes.BAD_REQUEST);
+                    // ✨ (ปรับปรุง) ดึงข้อมูลร้านค้าเต็มรูปแบบเพื่อเอา promptPayId
+                    const storeWithPaymentInfo = await prisma.store.findUnique({
+                        where: { id: store.id },
+                        select: { promptPayId: true }
+                    });
+
+                    if (!storeWithPaymentInfo?.promptPayId) {
+                        return new ServiceResponse(ResponseStatus.Failed, "This store has not configured its PromptPay account yet.", null, StatusCodes.BAD_REQUEST);
                     }
-                    const qrCode = await paymentGateway.generateQrCode(storePromptPayId, order.totalAmount);
-                    const paymentExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 นาที
+
+                    const qrCode = await paymentGateway.generateQrCode(storeWithPaymentInfo.promptPayId, order.totalAmount);
+                    const paymentExpiresAt = new Date(Date.now() + env.PAYMENT_QR_CODE_EXPIRATION_MINUTES * 60 * 1000); // 15 mins
 
                     await orderRepository.updateOrder(orderId, {
                         status: 'AWAITING_PAYMENT',

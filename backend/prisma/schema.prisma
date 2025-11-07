@@ -53,6 +53,7 @@ model Store {
   description String?
   location    String?
   image       String?
+  promptPayId String?
   isApproved  Boolean  @default(false)
   isOpen      Boolean  @default(false)
   createdAt   DateTime @default(now())

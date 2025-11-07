@@ -1,22 +1,11 @@
 // @common/utils/paymentGateway.ts
+import { env } from "@common/utils/envConfig"; // ✨ (เพิ่ม)
 
-/**
- * จำลอง Payment Gateway
- * ในโลกจริง ส่วนนี้อาจจะเรียก API ของ Third-party จริงๆ
- */
 export const paymentGateway = {
-    /**
-     * สร้าง QR Code สำหรับ PromptPay โดยใช้ promptpay.io
-     * @param promptPayId - เบอร์โทรศัพท์ หรือเลขบัตรประชาชน
-     * @param amount - จำนวนเงิน
-     * @returns URL ของรูปภาพ QR Code
-     */
     generateQrCode: async (promptPayId: string, amount: number): Promise<string> => {
-        // ทำการ format amount ให้มีทศนิยม 2 ตำแหน่งเสมอ
         const formattedAmount = amount.toFixed(2);
-        const qrCodeUrl = `https://promptpay.io/${promptPayId}/${formattedAmount}.png`;
-        // ในสถานการณ์จริง อาจมีการตรวจสอบความถูกต้องของ ID หรือเรียก API อื่นๆ
-        // แต่สำหรับ promptpay.io แค่นี้ก็เพียงพอ
+        // ✨ (ปรับปรุง) ใช้ค่าจาก env แทน Hardcode
+        const qrCodeUrl = `${env.PROMPTPAY_API_BASE_URL}/${promptPayId}/${formattedAmount}.png`;
         return Promise.resolve(qrCodeUrl);
     }
 };

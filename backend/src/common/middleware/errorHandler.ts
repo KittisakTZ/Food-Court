@@ -1,17 +1,32 @@
-import { ErrorRequestHandler, RequestHandler } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
+import { ServiceResponse, ResponseStatus } from '@common/models/serviceResponse';
 import { StatusCodes } from 'http-status-codes';
 
-const unexpectedRequest: RequestHandler = (_req, res) => {
-  res.sendStatus(StatusCodes.NOT_FOUND);
+const errorHandler = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return (err: Error, req: Request, res: Response, next: NextFunction) => {
+        console.error('💥 UNHANDLED ERROR: ', err);
+
+        // จัดการ ZodError โดยเฉพาะ
+        if (err instanceof ZodError) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: ResponseStatus.Failed,
+                message: 'Invalid input data.',
+                errors: err.flatten().fieldErrors,
+            });
+        }
+
+        // จัดการ Error ทั่วไป
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Failed,
+            'An unexpected error occurred on the server.',
+            null,
+            StatusCodes.INTERNAL_SERVER_ERROR
+        );
+        
+        return res.status(serviceResponse.statusCode).json(serviceResponse);
+    };
 };
 
-const addErrorToRequestLog: ErrorRequestHandler = (err, _req, res, next) => {
-  res.locals.err = err;
-  next(err);
-};
-
-const defaultErrorRequestHandler: ErrorRequestHandler = (_err, _req, res) => {
-  res.sendStatus(StatusCodes.INTERNAL_SERVER_ERROR);
-};
-
-export default () => [unexpectedRequest, addErrorToRequestLog, defaultErrorRequestHandler];
+export default errorHandler;

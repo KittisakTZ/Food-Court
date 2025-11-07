@@ -6,11 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { useCreateOrder } from "@/hooks/useOrders";
 import { toastService } from "@/services/toast.service";
-import { FiShoppingBag, FiClock, FiCheckCircle, FiChevronLeft, FiCalendar, FiZap } from "react-icons/fi";
+import { FiShoppingBag, FiClock, FiCheckCircle, FiChevronLeft, FiCalendar, FiZap, FiDollarSign } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
 import { BiDish, BiTime } from "react-icons/bi";
-import { MdStorefront, MdDeliveryDining } from "react-icons/md";
-import { IoFastFoodOutline } from "react-icons/io5";
 
 const CheckoutFeature = () => {
   const cart = useCartStore((state) => state.cart);
@@ -28,6 +26,7 @@ const CheckoutFeature = () => {
   const [pickupOption, setPickupOption] = useState<"asap" | "scheduled">("asap");
   const [pickupHour, setPickupHour] = useState("");
   const [pickupMinute, setPickupMinute] = useState("10");
+  const [paymentMethod, setPaymentMethod] = useState<'PROMPTPAY' | 'CASH_ON_PICKUP'>('PROMPTPAY');
   const { mutate: placeOrder, isPending: isSubmitting } = useCreateOrder();
 
   // Get current date and time
@@ -56,15 +55,15 @@ const CheckoutFeature = () => {
   // Get available minutes based on selected hour
   const getAvailableMinutes = () => {
     if (!pickupHour) return availableMinutes;
-    
+
     const current = getCurrentDateTime();
     const selectedHour = parseInt(pickupHour);
-    
+
     // If selected hour is current hour, filter out past minutes
     if (selectedHour === current.hour) {
       return availableMinutes.filter(min => parseInt(min) > current.minute);
     }
-    
+
     return availableMinutes;
   };
 
@@ -73,6 +72,36 @@ const CheckoutFeature = () => {
       navigate("/login", { replace: true });
     }
   }, [isAuthenticated, navigate]);
+
+  const handleConfirmOrder = async () => {
+    if (!cart.storeId) return;
+
+    // ตรวจสอบว่าเวลาที่เลือกไม่เป็นเวลาในอดีต
+    if (pickupOption === 'scheduled' && pickupHour && pickupMinute) {
+      const now = new Date();
+      const selectedDateTime = new Date();
+      selectedDateTime.setHours(parseInt(pickupHour), parseInt(pickupMinute), 0, 0);
+
+      if (selectedDateTime <= now) {
+        toastService.error("กรุณาเลือกเวลาที่อยู่ในอนาคต ⏰");
+        return;
+      }
+    }
+
+    const payload = {
+      storeId: cart.storeId,
+      items: cart.items.map(item => ({ menuId: item.menu.id, quantity: item.quantity })),
+      scheduledPickupTime: pickupOption === 'scheduled' ? `${pickupHour}:${pickupMinute}` : undefined,
+      paymentMethod: paymentMethod, // <-- เช็คว่าบรรทัดนี้ถูกเพิ่มเข้าไปใน Object payload แล้ว
+    };
+
+    placeOrder(payload, {
+      onSuccess: () => {
+        toastService.success("สั่งอาหารสำเร็จ! ตรวจสอบสถานะได้ที่ 'คำสั่งซื้อของฉัน' ✅");
+        navigate('/my-orders');
+      },
+    });
+  };
 
   // Loading/Redirect State
   if (!isAuthenticated) {
@@ -120,35 +149,6 @@ const CheckoutFeature = () => {
     );
   }
 
-  const handleConfirmOrder = async () => {
-    if (!cart.storeId) return;
-
-    // ตรวจสอบว่าเวลาที่เลือกไม่เป็นเวลาในอดีต
-    if (pickupOption === 'scheduled' && pickupHour && pickupMinute) {
-      const now = new Date();
-      const selectedDateTime = new Date();
-      selectedDateTime.setHours(parseInt(pickupHour), parseInt(pickupMinute), 0, 0);
-      
-      if (selectedDateTime <= now) {
-        toastService.error("กรุณาเลือกเวลาที่อยู่ในอนาคต ⏰");
-        return;
-      }
-    }
-
-    const payload = {
-      storeId: cart.storeId,
-      items: cart.items.map(item => ({ menuId: item.menu.id, quantity: item.quantity })),
-      scheduledPickupTime: pickupOption === 'scheduled' ? `${pickupHour}:${pickupMinute}` : undefined,
-    };
-
-    placeOrder(payload, {
-      onSuccess: () => {
-        toastService.success("สั่งอาหารสำเร็จ! ตรวจสอบสถานะได้ที่ 'คำสั่งซื้อของฉัน' ✅");
-        navigate('/my-orders');
-      },
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 py-8">
       <div className="container mx-auto p-4 md:p-8 max-w-4xl">
@@ -166,7 +166,7 @@ const CheckoutFeature = () => {
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
@@ -262,9 +262,8 @@ const CheckoutFeature = () => {
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   {/* ASAP Option */}
-                  <label className={`relative cursor-pointer group transition-all ${
-                    pickupOption === "asap" ? "scale-105" : ""
-                  }`}>
+                  <label className={`relative cursor-pointer group transition-all ${pickupOption === "asap" ? "scale-105" : ""
+                    }`}>
                     <input
                       type="radio"
                       name="pickupOption"
@@ -293,9 +292,8 @@ const CheckoutFeature = () => {
                   </label>
 
                   {/* Scheduled Option */}
-                  <label className={`relative cursor-pointer group transition-all ${
-                    pickupOption === "scheduled" ? "scale-105" : ""
-                  }`}>
+                  <label className={`relative cursor-pointer group transition-all ${pickupOption === "scheduled" ? "scale-105" : ""
+                    }`}>
                     <input
                       type="radio"
                       name="pickupOption"
@@ -332,9 +330,9 @@ const CheckoutFeature = () => {
                       <p className="text-sm text-gray-600 mb-1">วันที่รับอาหาร:</p>
                       <p className="text-lg font-bold text-blue-600 flex items-center gap-2">
                         <FiCalendar className="w-5 h-5" />
-                        📅 {new Date().toLocaleDateString('th-TH', { 
-                          year: 'numeric', 
-                          month: 'long', 
+                        📅 {new Date().toLocaleDateString('th-TH', {
+                          year: 'numeric',
+                          month: 'long',
                           day: 'numeric',
                           weekday: 'long'
                         })} (วันนี้)
@@ -355,7 +353,6 @@ const CheckoutFeature = () => {
                         value={pickupHour}
                         onChange={(e) => {
                           setPickupHour(e.target.value);
-                          // Reset minute if selected hour is current hour and current minute selection is invalid
                           const availableMins = getAvailableMinutes();
                           if (!availableMins.includes(pickupMinute)) {
                             setPickupMinute(availableMins[0] || "10");
@@ -407,9 +404,9 @@ const CheckoutFeature = () => {
                           ⏰ {pickupHour}:{pickupMinute} น.
                         </p>
                         <p className="text-sm text-gray-600 mt-2">
-                          📅 {new Date().toLocaleDateString('th-TH', { 
-                            year: 'numeric', 
-                            month: 'long', 
+                          📅 {new Date().toLocaleDateString('th-TH', {
+                            year: 'numeric',
+                            month: 'long',
                             day: 'numeric',
                             weekday: 'long'
                           })}
@@ -420,11 +417,47 @@ const CheckoutFeature = () => {
                 )}
               </div>
             </div>
+
+            {/* Payment Method Options */}
+            <div className="bg-white rounded-3xl shadow-xl border-2 border-purple-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-gradient-to-r from-purple-100 to-indigo-100 p-6 border-b-2 border-purple-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
+                    <FiDollarSign className="w-6 h-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    เลือกวิธีชำระเงิน 💳
+                  </h2>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* PromptPay Option */}
+                  <label className={`relative cursor-pointer group transition-all ${paymentMethod === "PROMPTPAY" ? "scale-105" : ""}`}>
+                    <input type="radio" name="paymentMethod" value="PROMPTPAY" checked={paymentMethod === "PROMPTPAY"} onChange={() => setPaymentMethod("PROMPTPAY")} className="peer sr-only" />
+                    <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-purple-500 peer-checked:bg-gradient-to-br peer-checked:from-purple-50 peer-checked:to-indigo-50 hover:border-purple-300 hover:shadow-lg group-hover:scale-105">
+                      <p className="font-bold text-gray-800 text-lg">QR PromptPay</p>
+                      <p className="text-sm text-gray-600 mt-1">ชำระเงินผ่าน QR Code หลังจากร้านค้ายืนยันออร์เดอร์</p>
+                      {paymentMethod === "PROMPTPAY" && (<div className="mt-4 flex items-center gap-2 text-purple-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
+                    </div>
+                  </label>
+                  {/* Cash on Pickup Option */}
+                  <label className={`relative cursor-pointer group transition-all ${paymentMethod === "CASH_ON_PICKUP" ? "scale-105" : ""}`}>
+                    <input type="radio" name="paymentMethod" value="CASH_ON_PICKUP" checked={paymentMethod === "CASH_ON_PICKUP"} onChange={() => setPaymentMethod("CASH_ON_PICKUP")} className="peer sr-only" />
+                    <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-green-500 peer-checked:bg-gradient-to-br peer-checked:from-green-50 peer-checked:to-emerald-50 hover:border-green-300 hover:shadow-lg group-hover:scale-105">
+                      <p className="font-bold text-gray-800 text-lg">จ่ายเงินสดหน้าร้าน</p>
+                      <p className="text-sm text-gray-600 mt-1">ชำระเงินสดเมื่อมารับอาหารที่ร้าน</p>
+                      {paymentMethod === "CASH_ON_PICKUP" && (<div className="mt-4 flex items-center gap-2 text-green-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-3xl shadow-xl border-2 border-green-200 overflow-hidden sticky top-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <div className="bg-white rounded-3xl shadow-xl border-2 border-green-200 overflow-hidden sticky top-6 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -433,23 +466,19 @@ const CheckoutFeature = () => {
                   <h3 className="text-2xl font-bold">สรุปคำสั่งซื้อ</h3>
                 </div>
               </div>
-
               <div className="p-6 space-y-4">
                 {/* Subtotal */}
                 <div className="flex justify-between items-center text-gray-700">
                   <span className="font-semibold">ค่าอาหาร</span>
                   <span className="text-lg font-bold">฿{totalPrice.toFixed(0)}</span>
                 </div>
-
                 {/* Delivery Fee */}
                 <div className="flex justify-between items-center text-gray-700">
                   <span className="font-semibold">ค่าจัดส่ง</span>
                   <span className="text-lg font-bold text-green-600">ฟรี! 🎉</span>
                 </div>
-
                 {/* Divider */}
                 <div className="border-t-2 border-gray-200 my-4"></div>
-
                 {/* Total */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-2xl border-2 border-green-200">
                   <div className="flex justify-between items-center">
@@ -457,7 +486,6 @@ const CheckoutFeature = () => {
                     <span className="text-3xl font-bold text-green-600">฿{totalPrice.toFixed(0)}</span>
                   </div>
                 </div>
-
                 {/* Confirm Button */}
                 <button
                   onClick={handleConfirmOrder}
@@ -476,7 +504,6 @@ const CheckoutFeature = () => {
                     </>
                   )}
                 </button>
-
                 {/* Info Text */}
                 <p className="text-xs text-gray-500 text-center mt-4 leading-relaxed">
                   เมื่อกดยืนยัน คำสั่งซื้อจะถูกส่งไปยังร้านค้าทันที
