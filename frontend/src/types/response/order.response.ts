@@ -25,4 +25,7 @@ export interface Order {
     paymentQrCode: string | null;
     paymentSlip: string | null;
     paymentExpiresAt: string | null;
+    paidAt: string | null;
+    confirmedAt: string | null;
+    completedAt: string | null;
 }

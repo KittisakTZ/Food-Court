@@ -17,24 +17,24 @@ type StoreFormInputs = {
 
 // 🔄 CHANGED: ฟังก์ชันเรียก API ถูกปรับให้รับ StoreFormInputs และสร้าง FormData ภายใน
 const createStore = async (payload: StoreFormInputs) => {
-  // 1. สร้าง FormData object
-  const formData = new FormData();
+    // 1. สร้าง FormData object
+    const formData = new FormData();
 
-  // 2. เพิ่มข้อมูล text ลงไป
-  formData.append('name', payload.name);
-  formData.append('description', payload.description);
-  formData.append('location', payload.location);
+    // 2. เพิ่มข้อมูล text ลงไป
+    formData.append('name', payload.name);
+    formData.append('description', payload.description);
+    formData.append('location', payload.location);
 
-  // 3. ตรวจสอบและเพิ่มไฟล์รูปภาพ (ถ้ามี)
-  // Backend คาดหวัง field ที่ชื่อว่า 'image'
-  if (payload.image && payload.image.length > 0) {
-    formData.append('image', payload.image[0]);
-  }
-  
-  // 4. ส่ง request แบบ multipart/form-data
-  // Axios จะตั้งค่า Content-Type ให้โดยอัตโนมัติเมื่อเราส่ง FormData
-  const { data: response } = await mainApi.post("/v1/stores", formData);
-  return response;
+    // 3. ตรวจสอบและเพิ่มไฟล์รูปภาพ (ถ้ามี)
+    // Backend คาดหวัง field ที่ชื่อว่า 'image'
+    if (payload.image && payload.image.length > 0) {
+        formData.append('image', payload.image[0]);
+    }
+
+    // 4. ส่ง request แบบ multipart/form-data
+    // Axios จะตั้งค่า Content-Type ให้โดยอัตโนมัติเมื่อเราส่ง FormData
+    const { data: response } = await mainApi.post("/v1/stores", formData);
+    return response;
 };
 
 
@@ -95,7 +95,7 @@ const CreateStoreFeature = () => {
                     <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">สร้างร้านค้าของคุณ</h1>
                     <p className="text-gray-500 mt-2">กรอกข้อมูลร้านค้าและส่งเพื่อรอการอนุมัติ</p>
                 </div>
-                
+
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     {/* Image Upload Section */}
                     <div>
@@ -130,7 +130,7 @@ const CreateStoreFeature = () => {
                             )}
                         </div>
                     </div>
-                    
+
                     {/* Text Inputs */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700">ชื่อร้านค้า</label>
@@ -145,7 +145,7 @@ const CreateStoreFeature = () => {
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700">ที่ตั้ง</label>
                         <input id="location" {...register("location")} className="mt-1 block w-full p-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500" />
                     </div>
-                    
+
                     {/* Submit Button */}
                     <button type="submit" disabled={isPending} className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-lg rounded-xl disabled:from-gray-400 disabled:to-gray-500 hover:from-orange-600 hover:to-yellow-600 transition-all duration-300 shadow-lg hover:shadow-xl">
                         {isPending ? 'กำลังสร้างร้านค้า...' : 'ส่งเพื่อรอการอนุมัติ'}
