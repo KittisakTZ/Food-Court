@@ -1,6 +1,6 @@
 // @/hooks/useOrders.ts
 
-import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, createOrder, uploadPaymentSlip } from "@/services/order.service";
+import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, createOrder, uploadPaymentSlip, getOrderById } from "@/services/order.service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
 import { toastService } from '@/services/toast.service';
@@ -116,5 +116,19 @@ export const useUploadSlip = () => {
             const errorMessage = error.response?.data?.message || error.message;
             toastService.error(`Failed to upload slip: ${errorMessage}`);
         }
+    });
+};
+
+// ✨ (เพิ่ม) Hook สำหรับดึงข้อมูลออร์เดอร์เดียว
+export const useOrder = (orderId?: string) => {
+    return useQuery({
+        // Key จะมี orderId เพื่อให้ React Query แยก cache ของแต่ละออร์เดอร์ได้
+        queryKey: ['order', orderId], 
+        // เรียกใช้ service ใหม่ที่เราสร้าง
+        queryFn: () => getOrderById(orderId!), // a non-null assertion (!) is safe here because of the `enabled` option
+        // `enabled` เป็น option ที่สำคัญมาก:
+        // Hook นี้จะทำงาน (เรียก API) ก็ต่อเมื่อ `orderId` มีค่า (ไม่ใช่ undefined)
+        enabled: !!orderId, 
+        staleTime: 1000 * 60, // Cache for 1 minute
     });
 };

@@ -10,6 +10,7 @@ import MyOrdersPage from "@/pages/my-orders";
 import MenuManagementPage from "@/pages/my-store/menus";
 import StoreSettingsPage from "@/pages/my-store/settings";
 import CreateStorePage from "@/pages/my-store/create";
+import OrderDetailPage from "@/features/my-orders/order-detail";
 
 
 const router = createBrowserRouter([
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
         path: "my-store/create",
         element: <CreateStorePage />,
       },
+      {
+        path: "my-orders/:orderId",
+        element: <OrderDetailPage/>,
+      }
     ],
   },
   {

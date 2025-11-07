@@ -108,3 +108,11 @@ export const uploadPaymentSlip = async ({ orderId, slipFile }: { orderId: string
     );
     return response;
 };
+
+// ✨ (เพิ่ม) ฟังก์ชันสำหรับดึงข้อมูลออร์เดอร์เดียว
+export const getOrderById = async (orderId: string) => {
+    const { data: response } = await mainApi.get<APIResponseType<Order>>(
+        `/v1/orders/${orderId}`
+    );
+    return response.responseObject;
+};

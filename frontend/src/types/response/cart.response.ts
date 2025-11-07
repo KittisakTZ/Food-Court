@@ -1,12 +1,14 @@
 import { Menu } from "./menu.response";
 
 export interface CartItem {
-    id: string; // ID ของ CartItem
-    cartId: string;
+    id: string;
+    cartId?: string; // ทำให้เป็น Optional เพราะใน OrderItem ไม่มี cartId
+    orderId?: string; // อาจจะเพิ่มเข้าไปเพื่อความสมบูรณ์
     menuId: string;
     quantity: number;
-    createdAt: string;
-    menu: Menu; // ข้อมูลเมนูที่ nested มา
+    createdAt?: string; // ทำให้เป็น Optional
+    menu: Menu;
+    subtotal: number; // ✨ เพิ่มฟิลด์นี้เข้ามา
 }
 
 export interface Cart {
