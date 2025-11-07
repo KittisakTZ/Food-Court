@@ -1,3 +1,4 @@
+//schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,12 +17,19 @@ enum Role {
 enum OrderStatus {
   PENDING // รอ Seller ตรวจสอบ
   REJECTED // Seller ปฏิเสธ
-  AWAITING_PAYMENT // รอ Buyer ชำระเงิน
+  AWAITING_PAYMENT // รอ Buyer ชำระเงิน (สำหรับ PromptPay)
+  AWAITING_CONFIRMATION // ✨ (ใหม่) รอ Seller ตรวจสอบสลิป
   PAID // สถานะเดิมของคุณ ผมขอเก็บไว้ก่อน อาจจะได้ใช้ในอนาคต
-  COOKING // กำลังเตรียมของ (ชื่อใหม่ที่สื่อความหมายดี)
-  READY_FOR_PICKUP // พร้อมให้มารับ (ชื่อใหม่)
-  COMPLETED // สถานะเดิมของคุณ อาจจะหมายถึง Buyer รับของไปแล้ว
-  CANCELLED // Buyer ไม่จ่ายเงิน หรือยกเลิก
+  COOKING // กำลังเตรียมของ
+  READY_FOR_PICKUP // พร้อมให้มารับ
+  COMPLETED // ลูกค้ารับของไปแล้ว
+  CANCELLED // Buyer ยกเลิก
+}
+
+// ✨ (ใหม่) เพิ่ม Enum สำหรับประเภทการชำระเงิน
+enum PaymentMethod {
+  PROMPTPAY
+  CASH_ON_PICKUP // จ่ายเงินสดหน้าร้าน
 }
 
 model User {
@@ -68,6 +76,8 @@ model MenuCategory {
   store   Store  @relation(fields: [storeId], references: [id])
 
   menus Menu[]
+
+  @@unique([name, storeId]) // ✨ เพิ่มบรรทัดนี้
 }
 
 model Menu {
@@ -89,29 +99,35 @@ model Menu {
 }
 
 model Order {
-  id               String      @id @default(cuid()) // <-- กลับมาใช้ @id เหมือนเดิม ง่ายที่สุด
-  buyerId          String
-  buyer            User        @relation(fields: [buyerId], references: [id])
-  storeId          String // <-- Partition Key
-  store            Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  status           OrderStatus @default(PENDING)
-  isReviewed       Boolean     @default(false)
-  totalAmount      Float       @default(0)
-  position         Float
-  queueNumber      Int // หมายเลขคิวของวันนั้นๆ เช่น 1, 2, 3
-  orderDate        DateTime    @db.Date // วันที่ของออเดอร์ (เก็บเฉพาะ YYYY-MM-DD)
-  paymentQrCode    String?
-  paymentExpiresAt DateTime?
-  scheduledPickup  DateTime?
-  paidAt           DateTime?
-  confirmedAt      DateTime?
-  completedAt      DateTime?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id          String      @id @default(cuid())
+  buyerId     String
+  buyer       User        @relation(fields: [buyerId], references: [id])
+  storeId     String
+  store       Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  status      OrderStatus @default(PENDING)
+  totalAmount Float       @default(0)
+
+  // --- ✨ Fields ใหม่ที่เกี่ยวข้องกับการจ่ายเงิน ---
+  paymentMethod    PaymentMethod? // ประเภทการชำระเงิน
+  paymentQrCode    String? // URL หรือข้อมูล QR Code
+  paymentSlip      String? // URL ของรูปสลิปที่ลูกค้าอัปโหลด
+  paymentExpiresAt DateTime? // เวลาหมดอายุของ QR Code
+
+  // --- Fields ที่มีอยู่แล้ว ---
+  isReviewed      Boolean   @default(false)
+  position        Float
+  queueNumber     Int
+  orderDate       DateTime  @db.Date
+  scheduledPickup DateTime?
+  paidAt          DateTime?
+  confirmedAt     DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   orderItems OrderItem[]
 
-  @@index([storeId, orderDate]) // เพิ่ม Index ให้ storeId เพื่อประสิทธิภาพ
+  @@index([storeId, orderDate])
 }
 
 model OrderItem {

@@ -16,6 +16,7 @@ import { authorizeRoles } from "@common/middleware/authorizeRoles";
 import { Role } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { z } from "zod"; // Import z
+import upload from '@common/utils/upload';
 
 // ===== Router หลักสำหรับ /v1/orders (ส่วนใหญ่สำหรับ Buyer) =====
 export const orderRouter = (() => {
@@ -52,6 +53,27 @@ export const orderRouter = (() => {
     );
 
     // --- Dynamic Paths (อยู่ล่าง) ---
+    // ✨ (ใหม่) POST /v1/orders/:orderId/slip - สำหรับ Buyer อัปโหลดสลิป
+    router.post(
+        "/:orderId/slip",
+        authenticateToken,
+        authorizeRoles([Role.BUYER]),
+        validateRequest(OrderIdParamSchema), // ใช้ Schema เดิมเพื่อ validate orderId
+        upload.single('slip'), // Middleware ของ Multer สำหรับรับไฟล์เดียวชื่อ 'slip'
+        async (req: Request, res: Response) => {
+            if (!req.token) { res.sendStatus(StatusCodes.UNAUTHORIZED); return; }
+            if (!req.file) {
+                res.status(StatusCodes.BAD_REQUEST).json({ message: "Payment slip image is required." });
+                return;
+            }
+            const { orderId } = req.params;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+            // เรียก Service ใหม่ที่เราจะสร้าง
+            const serviceResponse = await orderService.uploadPaymentSlip(orderId, userForService, req.file);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+    
     // PATCH /v1/orders/:orderId/cancel
     router.patch(
         "/:orderId/cancel",

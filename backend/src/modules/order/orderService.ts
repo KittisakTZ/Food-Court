@@ -4,13 +4,14 @@ import { StatusCodes } from "http-status-codes";
 import { ServiceResponse, ResponseStatus } from "@common/models/serviceResponse";
 import { orderRepository } from "./orderRepository";
 import prisma from "@src/db";
-import { OrderStatus, Role } from "@prisma/client";
+import { OrderStatus, Role, PaymentMethod } from "@prisma/client";
 import { paymentGateway } from "@common/utils/paymentGateway"; // Import QR Code service (ตัวจำลอง)
 
 // Type สำหรับข้อมูลที่ Frontend ส่งมาเพื่อสร้าง Order
 type CreateOrderPayload = {
     storeId: string;
     items: Array<{ menuId: string; quantity: number }>;
+    paymentMethod: PaymentMethod; // ✨ เพิ่ม type
     scheduledPickupTime?: string;
 };
 
@@ -96,16 +97,16 @@ export const orderService = {
             const orderCreationData = {
                 buyerId: user.id,
                 storeId: payload.storeId,
-                position: maxPosition + 1, // position ยังคงเพิ่มไปเรื่อยๆ สำหรับการเรียงลำดับโดยรวม
-                queueNumber: nextQueueNumber, // ใช้หมายเลขคิวรายวัน
-                orderDate: orderDate,         // บันทึกวันที่
+                paymentMethod: payload.paymentMethod, // <-- เพิ่มตรงนี้
+                position: maxPosition + 1,
+                queueNumber: nextQueueNumber,
+                orderDate: orderDate,
                 scheduledPickup: scheduledPickupDate,
                 totalAmount: totalAmount,
                 items: itemsForRepo,
             };
 
-            // 1.5 เรียกใช้ Transaction เพื่อสร้าง Order
-            const newOrder = await orderRepository.createOrderTransaction(orderCreationData); // ต้องไปแก้ Type ที่ Repository ด้วย
+            const newOrder = await orderRepository.createOrderTransaction(orderCreationData);
             return new ServiceResponse(ResponseStatus.Success, "Order created successfully.", newOrder, StatusCodes.CREATED);
 
         } catch (error) {
@@ -167,53 +168,83 @@ export const orderService = {
                 if (order.status !== 'PENDING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot approve an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
-                // สมมติว่าร้านค้ามี PromptPay ID (ในอนาคตดึงมาจาก store.promptPayId)
-                const storePromptPayId = "0812345678";
-                const qrCode = await paymentGateway.generateQrCode(storePromptPayId, order.totalAmount);
-                const paymentExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 นาที
 
-                const updatedOrder = await orderRepository.updateOrder(orderId, {
-                    status: 'AWAITING_PAYMENT',
-                    paymentQrCode: qrCode,
-                    paymentExpiresAt: paymentExpiresAt,
-                });
-                return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting payment.", null, StatusCodes.OK);
+                // ✨ (Logic ใหม่) แยกตามประเภทการจ่ายเงิน
+                if (order.paymentMethod === 'PROMPTPAY') {
+                    // --- Flow PromptPay ---
+                    const storePromptPayId = "099-999-9999"; // TODO: ดึงข้อมูลนี้มาจาก Model Store ในอนาคต
+                    if (!storePromptPayId) {
+                        return new ServiceResponse(ResponseStatus.Failed, "Store has not configured PromptPay yet.", null, StatusCodes.BAD_REQUEST);
+                    }
+                    const qrCode = await paymentGateway.generateQrCode(storePromptPayId, order.totalAmount);
+                    const paymentExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 นาที
+
+                    await orderRepository.updateOrder(orderId, {
+                        status: 'AWAITING_PAYMENT',
+                        paymentQrCode: qrCode,
+                        paymentExpiresAt: paymentExpiresAt,
+                        confirmedAt: new Date(), // บันทึกเวลาที่ร้านกดยืนยัน
+                    });
+                    return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting payment.", null, StatusCodes.OK);
+
+                } else if (order.paymentMethod === 'CASH_ON_PICKUP') {
+                    // --- Flow จ่ายหน้าร้าน ---
+                    // เมื่อร้านค้ากด Approve ก็เริ่มทำอาหารได้เลย
+                    await orderRepository.updateOrder(orderId, {
+                        status: 'COOKING',
+                        confirmedAt: new Date(),
+                    });
+                    return new ServiceResponse(ResponseStatus.Success, "Order approved and moved to cooking.", null, StatusCodes.OK);
+                }
+                // กรณีไม่มี paymentMethod (เผื่อข้อมูลเก่า)
+                return new ServiceResponse(ResponseStatus.Failed, "Invalid payment method for this order.", null, StatusCodes.BAD_REQUEST);
+
 
             case 'REJECT':
+                // Logic เหมือนเดิม
                 if (order.status !== 'PENDING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot reject an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
-                const rejectedOrder = await orderRepository.updateOrder(orderId, { status: 'REJECTED' });
+                await orderRepository.updateOrder(orderId, { status: 'REJECTED' });
                 return new ServiceResponse(ResponseStatus.Success, "Order has been rejected.", null, StatusCodes.OK);
 
             case 'CONFIRM_PAYMENT':
-                if (order.status !== 'AWAITING_PAYMENT') {
+                // ✨ (ปรับปรุง Logic) Action นี้ใช้สำหรับยืนยัน "สลิป"
+                if (order.status !== 'AWAITING_CONFIRMATION') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot confirm payment for an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
-                const paidOrder = await orderRepository.updateOrder(orderId, {
+                if (!order.paymentSlip) {
+                    return new ServiceResponse(ResponseStatus.Failed, "No payment slip has been uploaded for this order.", null, StatusCodes.BAD_REQUEST);
+                }
+                await orderRepository.updateOrder(orderId, {
                     status: 'COOKING',
                     paidAt: new Date(),
-                    paymentQrCode: null,
+                    paymentQrCode: null, // ล้าง QR Code และวันหมดอายุออกไป
                     paymentExpiresAt: null,
                 });
                 return new ServiceResponse(ResponseStatus.Success, "Payment confirmed. Order is now cooking.", null, StatusCodes.OK);
 
             case 'PREPARE_COMPLETE':
+                // Logic เหมือนเดิม
                 if (order.status !== 'COOKING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot complete an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
-                const completedOrder = await orderRepository.updateOrder(orderId, { status: 'READY_FOR_PICKUP' });
+                await orderRepository.updateOrder(orderId, { status: 'READY_FOR_PICKUP' });
                 return new ServiceResponse(ResponseStatus.Success, "Order is ready for pickup.", null, StatusCodes.OK);
 
-            // (ใหม่) Case สำหรับปิด Order
             case 'CUSTOMER_PICKED_UP':
                 if (order.status !== 'READY_FOR_PICKUP') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot complete an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
-                const finishedOrder = await orderRepository.updateOrder(orderId, {
+                // ✨ (ปรับปรุง) สำหรับเคสจ่ายเงินสด ให้บันทึกเวลาจ่ายเงินตอนนี้
+                const updateData: { status: OrderStatus, completedAt: Date, paidAt?: Date } = {
                     status: 'COMPLETED',
-                    completedAt: new Date(), // บันทึกเวลาที่จบสมบูรณ์
-                });
+                    completedAt: new Date(),
+                };
+                if (order.paymentMethod === 'CASH_ON_PICKUP' && !order.paidAt) {
+                    updateData.paidAt = new Date();
+                }
+                await orderRepository.updateOrder(orderId, updateData);
                 return new ServiceResponse(ResponseStatus.Success, "Order has been completed.", null, StatusCodes.OK);
 
             default:
@@ -354,6 +385,42 @@ export const orderService = {
                 null,
                 StatusCodes.INTERNAL_SERVER_ERROR
             );
+        }
+    },
+
+    // ✨ (Service ใหม่) สำหรับ Buyer อัปโหลดสลิป
+    uploadPaymentSlip: async (orderId: string, user: UserPayload, file: Express.Multer.File): Promise<ServiceResponse<null>> => {
+        try {
+            const order = await orderRepository.findOrderById(orderId);
+
+            // 1. ตรวจสอบสิทธิ์
+            if (!order) {
+                return new ServiceResponse(ResponseStatus.Failed, "Order not found.", null, StatusCodes.NOT_FOUND);
+            }
+            if (order.buyerId !== user.id) {
+                return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to access this order.", null, StatusCodes.FORBIDDEN);
+            }
+
+            // 2. ตรวจสอบสถานะและประเภทการจ่ายเงิน
+            if (order.status !== 'AWAITING_PAYMENT') {
+                return new ServiceResponse(ResponseStatus.Failed, `You can only upload a slip for orders that are awaiting payment. Current status: ${order.status}`, null, StatusCodes.BAD_REQUEST);
+            }
+
+            // 3. สร้าง URL ของไฟล์ที่อัปโหลด
+            // (ต้องตั้งค่า server.ts ให้ serve static file จาก /uploads ด้วย)
+            const fileUrl = `${process.env.APP_URL}/uploads/${file.filename}`;
+
+            // 4. อัปเดต Order
+            await orderRepository.updateOrder(orderId, {
+                paymentSlip: fileUrl,
+                status: 'AWAITING_CONFIRMATION', // เปลี่ยนสถานะเป็น "รอร้านค้าตรวจสอบ"
+            });
+
+            return new ServiceResponse(ResponseStatus.Success, "Payment slip uploaded successfully. Please wait for the store to confirm.", null, StatusCodes.OK);
+
+        } catch (error) {
+            const errorMessage = "Error uploading slip: " + (error as Error).message;
+            return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     },
 };

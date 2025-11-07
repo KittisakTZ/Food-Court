@@ -1,7 +1,7 @@
 // @modules/order/orderModel.ts
 
 import { z } from "zod";
-import { OrderStatus } from "@prisma/client"; // Import เข้ามา
+import { OrderStatus, PaymentMethod } from "@prisma/client";
 
 // Schema สำหรับ Item แต่ละรายการที่สั่ง
 const OrderItemSchema = z.object({
@@ -14,6 +14,10 @@ export const CreateOrderSchema = z.object({
     body: z.object({
         storeId: z.string().cuid("Invalid store ID"),
         items: z.array(OrderItemSchema).min(1, "Order must contain at least one item"),
+        // ✨ (เพิ่ม) ให้ Client ส่งวิธีการชำระเงินมาด้วย
+        paymentMethod: z.nativeEnum(PaymentMethod, {
+            errorMap: () => ({ message: "Invalid payment method" }),
+        }),
         scheduledPickupTime: z.string()
             .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format. Please use HH:mm (24-hour).")
             .optional(),
@@ -33,8 +37,14 @@ export const SellerUpdateOrderStatusSchema = z.object({
         orderId: z.string().cuid("Invalid order ID"),
     }),
     body: z.object({
-        // เพิ่ม Action ใหม่เข้าไป
-        action: z.enum(["APPROVE", "REJECT", "CONFIRM_PAYMENT", "PREPARE_COMPLETE", "CUSTOMER_PICKED_UP"]),
+        // ✨ (ปรับปรุง) เพิ่ม Action สำหรับการจ่ายเงินหน้าร้าน
+        action: z.enum([
+            "APPROVE",
+            "REJECT",
+            "CONFIRM_PAYMENT", // ยืนยันสลิป PromptPay
+            "PREPARE_COMPLETE",
+            "CUSTOMER_PICKED_UP", // ลูกค้ารับของ (และอาจจะจ่ายเงินสด)
+        ]),
     }),
 });
 

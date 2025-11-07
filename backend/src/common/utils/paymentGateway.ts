@@ -1,14 +1,22 @@
 // @common/utils/paymentGateway.ts
 
-// Service จำลองสำหรับสร้าง QR Code
+/**
+ * จำลอง Payment Gateway
+ * ในโลกจริง ส่วนนี้อาจจะเรียก API ของ Third-party จริงๆ
+ */
 export const paymentGateway = {
-    // ในอนาคต ฟังก์ชันนี้จะรับข้อมูล PromptPay ของร้านค้าและจำนวนเงิน
-    // แล้ว return เป็น URL ของรูป QR Code หรือ Base64 string
-    generateQrCode: async (storePromptPayId: string, amount: number): Promise<string> => {
-        console.log(`Generating QR Code for ${storePromptPayId} with amount ${amount}...`);
-        // *** นี่คือส่วนจำลอง ***
-        // ในการใช้งานจริง จะเรียก library qrcode ที่นี่
-        // ตอนนี้เราจะ return URL รูปภาพ QR Code จำลองไปก่อน
-        return `https://quickchart.io/qr?text=promptpay://${storePromptPayId}/${amount}&size=200`;
+    /**
+     * สร้าง QR Code สำหรับ PromptPay โดยใช้ promptpay.io
+     * @param promptPayId - เบอร์โทรศัพท์ หรือเลขบัตรประชาชน
+     * @param amount - จำนวนเงิน
+     * @returns URL ของรูปภาพ QR Code
+     */
+    generateQrCode: async (promptPayId: string, amount: number): Promise<string> => {
+        // ทำการ format amount ให้มีทศนิยม 2 ตำแหน่งเสมอ
+        const formattedAmount = amount.toFixed(2);
+        const qrCodeUrl = `https://promptpay.io/${promptPayId}/${formattedAmount}.png`;
+        // ในสถานการณ์จริง อาจมีการตรวจสอบความถูกต้องของ ID หรือเรียก API อื่นๆ
+        // แต่สำหรับ promptpay.io แค่นี้ก็เพียงพอ
+        return Promise.resolve(qrCodeUrl);
     }
-}
+};

@@ -3,6 +3,8 @@ CREATE DATABASE foodcourt_db;
 
 npx prisma migrate dev --name init-final-database --create-only
 
+replace .sql(upgraded)
+
 npx prisma migrate dev
 
 กด ctrl+c เพื่อยกเลิกการสร้างใหม่
