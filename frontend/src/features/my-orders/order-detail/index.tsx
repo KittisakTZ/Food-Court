@@ -3,8 +3,11 @@ import { useOrder } from "@/hooks/useOrders";
 import { Order } from "@/types/response/order.response";
 import { ProgressBar, Step } from "react-step-progress-bar";
 import "react-step-progress-bar/styles.css";
-import { FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiChevronLeft, FiCalendar, FiCreditCard, FiHash, FiUser } from "react-icons/fi";
+import { FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiChevronLeft, FiCalendar, FiCreditCard, FiHash, FiUser, FiStar } from "react-icons/fi";
 import { MdRestaurant, MdStorefront } from "react-icons/md";
+import { useState } from "react";
+import ReviewForm from "./ReviewForm";
+import { Button } from "@/components/ui/button";
 
 // --- Configuration & Helper Functions ---
 
@@ -105,6 +108,7 @@ const OrderTimeline = ({ order }: { order: Order }) => {
 const OrderDetailPage = () => {
     const { orderId } = useParams<{ orderId: string }>();
     const { data: order, isLoading, isError } = useOrder(orderId);
+    const [isReviewing, setIsReviewing] = useState(false);
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen"><p>Loading order details...</p></div>;
@@ -115,6 +119,41 @@ const OrderDetailPage = () => {
 
     const statusConfig = getStatusConfig(order.status);
     const isPaid = !!order.paidAt;
+
+    const ReviewSection = () => {
+        if (order.status !== 'COMPLETED') {
+            return null; // Do not show review section if order is not completed
+        }
+
+        if (order.isReviewed) {
+            return (
+                <div className="mt-6 bg-green-50 border border-green-200 text-green-800 p-4 rounded-2xl text-center">
+                    <p className="font-semibold">คุณได้รีวิวออร์เดอร์นี้แล้ว</p>
+                </div>
+            );
+        }
+
+        if (isReviewing) {
+            return (
+                <div className="mt-6">
+                    <ReviewForm
+                        storeId={order.store.id}
+                        orderId={order.id}
+                        onCancel={() => setIsReviewing(false)}
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <div className="mt-6 text-center">
+                <Button onClick={() => setIsReviewing(true)} size="lg">
+                    <FiStar className="mr-2" />
+                    เขียนรีวิว
+                </Button>
+            </div>
+        );
+    };
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -181,6 +220,9 @@ const OrderDetailPage = () => {
                         <OrderTimeline order={order} />
                     </div>
                 </div>
+
+                {/* Review Section */}
+                <ReviewSection />
             </div>
         </div>
     );

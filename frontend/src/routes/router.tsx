@@ -11,6 +11,7 @@ import MenuManagementPage from "@/pages/my-store/menus";
 import StoreSettingsPage from "@/pages/my-store/settings";
 import CreateStorePage from "@/pages/my-store/create";
 import OrderDetailPage from "@/features/my-orders/order-detail";
+import ReviewsPage from "@/pages/my-store/ReviewsPage";
 
 
 const router = createBrowserRouter([
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: "my-store/settings",
         element: <StoreSettingsPage />,
+      },
+      {
+        path: "my-store/reviews",
+        element: <ReviewsPage />,
       },
       {
         path: "my-store/create",

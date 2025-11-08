@@ -127,6 +127,7 @@ model Order {
   updatedAt       DateTime  @updatedAt
 
   orderItems OrderItem[]
+  review     Review?
 
   @@index([storeId, orderDate])
 }
@@ -160,6 +161,9 @@ model Review {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
 }
 
 // (ใหม่) โมเดลสำหรับตะกร้าสินค้า

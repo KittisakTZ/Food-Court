@@ -5,7 +5,7 @@ import * as Toast from "@radix-ui/react-toast";
 
 type ToastContextType = {
   // เปลี่ยนชื่อฟังก์ชันให้สื่อความหมายมากขึ้น
-  showToast: (message: string, type: 'success' | 'error') => void;
+  showToast: (message: string, type: 'success' | 'error' | 'warning') => void;
 };
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -14,7 +14,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 interface ToastState {
   open: boolean;
   message: string;
-  type: 'success' | 'error';
+  type: 'success' | 'error' | 'warning';
 }
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
@@ -25,7 +25,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // (2) แก้ไขฟังก์ชัน showToast
-  const showToast = (message: string, type: 'success' | 'error') => {
+  const showToast = (message: string, type: 'success' | 'error' | 'warning') => {
     setToast({ open: true, message, type });
   };
   
@@ -40,6 +40,18 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [toast.open]);
 
+  const toastStyles = {
+    success: "bg-green-100 border-green-400 text-green-700",
+    error: "bg-red-100 border-red-400 text-red-700",
+    warning: "bg-yellow-100 border-yellow-400 text-yellow-700",
+  };
+
+  const toastTitle = {
+      success: "Success!",
+      error: "Error!",
+      warning: "Warning!",
+  }
+
 
   return (
     <ToastContext.Provider value={{ showToast }}>
@@ -50,12 +62,12 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
           onOpenChange={(open) => setToast({ ...toast, open })}
           // (3) แก้ไข className ให้ใช้ toast.type
           className={`fixed top-[70px] right-4 max-w-lg w-auto px-4 py-3 rounded-lg shadow-lg border transition-all duration-300 transform data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:fade-in-80 data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] ${
-            toast.type === 'success' ? "bg-green-100 border-green-400 text-green-700" : "bg-red-100 border-red-400 text-red-700"
+            toastStyles[toast.type]
           }`}
         >
           <div className="flex items-center">
             {/* (4) แก้ไขข้อความให้ใช้ toast.type */}
-            <strong className="font-bold text-lg">{toast.type === 'success' ? "Success!" : "Error!"}</strong>
+            <strong className="font-bold text-lg">{toastTitle[toast.type]}</strong>
             <span className="ml-2 text-sm">{toast.message}</span>
           </div>
         </Toast.Root>

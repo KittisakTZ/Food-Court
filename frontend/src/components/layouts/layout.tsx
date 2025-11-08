@@ -15,6 +15,7 @@ import { MdDashboard, MdStorefront } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { useQueryClient } from "@tanstack/react-query";
+import { FiStar } from "react-icons/fi";
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -83,6 +84,7 @@ const MainLayout = () => {
         return [
           { title: "คิวออเดอร์", url: "/", icon: FaShoppingBag },
           { title: "จัดการเมนู", url: "/my-store/menus", icon: FaUtensils },
+          { title: "รีวิว", url: "/my-store/reviews", icon: FiStar },
           { title: "ตั้งค่าร้าน", url: "/my-store/settings", icon: IoIosSettings },
         ];
       case 'BUYER':
