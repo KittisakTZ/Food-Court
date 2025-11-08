@@ -180,17 +180,6 @@ async function main() {
         skipDuplicates: true,
       })
     }
-
-    // 🔹 รีวิวจำลองจาก buyer
-    await prisma.review.create({
-      data: {
-        rating: 5,
-        comment: `อาหารจากร้าน ${s.storeName} อร่อยมาก!`,
-        isVisible: true,
-        storeId: store.id,
-        userId: buyer.id,
-      },
-    })
   }
 
   // =================================================================
@@ -274,7 +263,7 @@ async function main() {
   yesterday.setDate(yesterday.getDate() - 1);
   yesterday.setHours(0, 0, 0, 0);
 
-  await prisma.order.create({
+  const completedOrder = await prisma.order.create({
     data: {
       buyerId: buyer.id,
       storeId: khaoManKaiStore.id,
@@ -345,6 +334,19 @@ async function main() {
           subtotal: 50,
         },
       },
+    }
+  });
+
+  // --- 5. CREATE SAMPLE REVIEW FOR COMPLETED ORDER ---
+  console.log('📝 Seeding sample review...');
+  await prisma.review.create({
+    data: {
+      rating: 5,
+      comment: 'อร่อยมากครับ! สั่งเมื่อวาน ได้รับของเร็วมาก',
+      isVisible: true,
+      storeId: completedOrder.storeId,
+      userId: completedOrder.buyerId,
+      orderId: completedOrder.id,
     }
   });
 

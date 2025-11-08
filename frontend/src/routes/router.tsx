@@ -60,7 +60,11 @@ const router = createBrowserRouter([
       {
         path: "my-orders/:orderId",
         element: <OrderDetailPage/>,
-      }
+      },
+      {
+        path: "my-store/orders/:orderId", // Path ใหม่สำหรับ Seller
+        element: <OrderDetailPage/>,       // ใช้ Component เดิมได้เลย
+      },
     ],
   },
   {

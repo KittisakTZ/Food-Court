@@ -12,4 +12,7 @@ export interface Review {
         id: string;
         username: string;
     };
+    order?: {
+        id: string;
+    };
 }

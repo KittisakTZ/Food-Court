@@ -162,8 +162,8 @@ model Review {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 
-  orderId String @unique
-  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String? @unique
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 }
 
 // (ใหม่) โมเดลสำหรับตะกร้าสินค้า

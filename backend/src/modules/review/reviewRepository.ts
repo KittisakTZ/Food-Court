@@ -24,6 +24,7 @@ export const reviewRepository = {
                     storeId: storeId,
                     userId: userId,
                     isVisible: true,
+                    orderId: orderId,
                 },
             });
 
@@ -64,7 +65,10 @@ export const reviewRepository = {
             skip: skip,
             take: pageSize,
             orderBy: { createdAt: 'desc' },
-            include: { user: { select: { id: true, username: true } } }
+            include: { 
+                user: { select: { id: true, username: true } },
+                order: { select: { id: true } }
+            }
         });
     },
 

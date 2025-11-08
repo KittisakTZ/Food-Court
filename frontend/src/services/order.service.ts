@@ -15,6 +15,11 @@ interface CreateOrderPayload {
     scheduledPickupTime?: string;
 }
 
+type GetOrderByIdParams = {
+    orderId: string;
+    isStoreContext: boolean; // พารามิเตอร์ใหม่ที่เราจะใช้
+}
+
 export const createOrder = async (payload: CreateOrderPayload) => {
     // โค้ดส่วนนี้มักจะถูกต้องอยู่แล้ว เพราะมันแค่ส่ง payload ไปตรงๆ
     const { data: response } = await mainApi.post<APIResponseType<Order>>(
@@ -110,9 +115,15 @@ export const uploadPaymentSlip = async ({ orderId, slipFile }: { orderId: string
 };
 
 // ✨ (เพิ่ม) ฟังก์ชันสำหรับดึงข้อมูลออร์เดอร์เดียว
-export const getOrderById = async (orderId: string) => {
-    const { data: response } = await mainApi.get<APIResponseType<Order>>(
-        `/v1/orders/${orderId}`
-    );
+export const getOrderById = async ({ orderId, isStoreContext }: GetOrderByIdParams) => {
+    
+    // ✨ 3. สร้าง URL ของ API แบบไดนามิกตาม isStoreContext
+    const endpoint = isStoreContext
+        ? `/v1/stores/my-store/orders/${orderId}` // Endpoint สำหรับ Seller
+        : `/v1/orders/${orderId}`;                 // Endpoint สำหรับ Buyer (ของเดิม)
+
+    // ✨ 4. ใช้ endpoint ที่เลือกในการยิง API
+    const { data: response } = await mainApi.get<APIResponseType<Order>>(endpoint);
+
     return response.responseObject;
 };

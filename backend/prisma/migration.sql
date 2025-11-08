@@ -196,3 +196,8 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+
+-- Add relation between Review and Order
+ALTER TABLE "Review" ADD COLUMN "orderId" TEXT;
+CREATE UNIQUE INDEX "Review_orderId_key" ON "Review"("orderId") WHERE "orderId" IS NOT NULL;
+ALTER TABLE "Review" ADD CONSTRAINT "Review_orderId_storeId_fkey" FOREIGN KEY ("orderId", "storeId") REFERENCES "Order"("id", "storeId") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -1,8 +1,9 @@
 // @/features/my-store/reviews/index.tsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMyStore } from "@/hooks/useStores";
 import { useGetReviewsForStore } from "@/hooks/useReviews";
-import { FiStar, FiMessageSquare, FiUser, FiCalendar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiStar, FiMessageSquare, FiUser, FiCalendar, FiChevronLeft, FiChevronRight, FiExternalLink } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
@@ -63,9 +64,21 @@ const StoreReviewsPage = () => {
                                     <span>{review.comment}</span>
                                 </p>
                             )}
-                            <div className="text-right text-sm text-gray-600 mt-3 flex items-center justify-end gap-2">
-                                <FiUser className="w-4 h-4" />
-                                <span>โดย: {review.user?.username || 'ไม่ระบุชื่อ'}</span>
+                            <div className="flex justify-between items-center mt-4">
+                                {review.order?.id ? (
+                                    <Link to={`/my-store/orders/${review.order.id}`}>
+                                        <Button variant="link" size="sm" className="text-orange-600">
+                                            <FiExternalLink className="mr-2 h-4 w-4" />
+                                            ดูออร์เดอร์
+                                        </Button>
+                                    </Link>
+                                ) : (
+                                    <div></div> // Placeholder to keep alignment
+                                )}
+                                <div className="text-right text-sm text-gray-600 flex items-center justify-end gap-2">
+                                    <FiUser className="w-4 h-4" />
+                                    <span>โดย: {review.user?.username || 'ไม่ระบุชื่อ'}</span>
+                                </div>
                             </div>
                         </div>
                     ))}

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
 import { toastService } from '@/services/toast.service';
 import { useClearCart } from "./useCart";
+import { useLocation } from "react-router-dom";
 
 // ===== HOOK สำหรับ BUYER (โค้ดเดิม) =====
 type UseOrdersProps = {
@@ -85,13 +86,13 @@ export const useMoveOrderPosition = () => {
 export const useCreateOrder = () => {
     // ดึง mutate function สำหรับล้างตะกร้ามาใช้
     const { mutate: clearCart } = useClearCart();
-    
+
     return useMutation({
         mutationFn: createOrder,
         onSuccess: () => {
             // **เมื่อสร้าง Order สำเร็จ, ให้เรียกใช้ mutation เพื่อล้างตะกร้า**
             clearCart();
-            
+
             // (Optional) อาจจะไม่ต้อง invalidate 'my-orders' ที่นี่
             // เพราะเราจะ navigate ไปหน้านั้น ซึ่งมันจะ refetch เองอยู่แล้ว
         },
@@ -121,14 +122,20 @@ export const useUploadSlip = () => {
 
 // ✨ (เพิ่ม) Hook สำหรับดึงข้อมูลออร์เดอร์เดียว
 export const useOrder = (orderId?: string) => {
+    // ✨ 2. ใช้ useLocation เพื่อเข้าถึงข้อมูล path ปัจจุบัน
+    const location = useLocation();
+
+    // ✨ 3. ตรวจสอบว่า path ปัจจุบันเป็นของฝั่งร้านค้าหรือไม่
+    const isStoreContext = location.pathname.includes('/my-store/');
+
     return useQuery({
-        // Key จะมี orderId เพื่อให้ React Query แยก cache ของแต่ละออร์เดอร์ได้
-        queryKey: ['order', orderId], 
-        // เรียกใช้ service ใหม่ที่เราสร้าง
-        queryFn: () => getOrderById(orderId!), // a non-null assertion (!) is safe here because of the `enabled` option
-        // `enabled` เป็น option ที่สำคัญมาก:
-        // Hook นี้จะทำงาน (เรียก API) ก็ต่อเมื่อ `orderId` มีค่า (ไม่ใช่ undefined)
-        enabled: !!orderId, 
-        staleTime: 1000 * 60, // Cache for 1 minute
+        // ✨ 4. (แนะนำ) เพิ่ม context เข้าไปใน queryKey เพื่อป้องกันการ cache ชนกัน
+        queryKey: ['order', orderId, { isStore: isStoreContext }],
+
+        // ✨ 5. เรียกใช้ service โดยส่งพารามิเตอร์เป็น object ที่มีทั้ง orderId และ context
+        queryFn: () => getOrderById({ orderId: orderId!, isStoreContext }),
+
+        enabled: !!orderId,
+        staleTime: 1000 * 60,
     });
 };
