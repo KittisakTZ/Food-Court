@@ -9,6 +9,7 @@ export interface Order {
     totalAmount: number;
     position: number;
     isReviewed: boolean;
+    review?: Review | null;
     createdAt: string;
     updatedAt: string;
     store: Omit<Store, 'owner'>;
@@ -28,4 +29,11 @@ export interface Order {
     paidAt: string | null;
     confirmedAt: string | null;
     completedAt: string | null;
+}
+
+export interface Review {
+    id: string;
+    rating: number;
+    comment: string | null;
+    createdAt: string;
 }

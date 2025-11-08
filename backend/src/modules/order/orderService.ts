@@ -342,6 +342,7 @@ export const orderService = {
                 store: true,
                 buyer: { select: { username: true } },
                 orderItems: { include: { menu: true } },
+                review: true, // ✨ <--- เพิ่มบรรทัดนี้เข้าไป
             }
         });
 

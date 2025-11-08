@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation  } from "react-router-dom";
 import { useOrder } from "@/hooks/useOrders";
 import { Order } from "@/types/response/order.response";
 import { ProgressBar, Step } from "react-step-progress-bar";
@@ -109,6 +109,8 @@ const OrderDetailPage = () => {
     const { orderId } = useParams<{ orderId: string }>();
     const { data: order, isLoading, isError } = useOrder(orderId);
     const [isReviewing, setIsReviewing] = useState(false);
+    const location = useLocation();
+    const isSellerView = location.pathname.includes('/my-store/');
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen"><p>Loading order details...</p></div>;
@@ -120,19 +122,49 @@ const OrderDetailPage = () => {
     const statusConfig = getStatusConfig(order.status);
     const isPaid = !!order.paidAt;
 
+    const DisplayReview = ({ review }: { review: Order['review'] }) => {
+        if (!review) return null;
+
+        return (
+            <div className="mt-6 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">{isSellerView ? "รีวิวจากลูกค้า" : "รีวิวของคุณ"}</h3>
+                <div className="flex items-center gap-2">
+                    {[...Array(5)].map((_, i) => (
+                        <FiStar key={i} className={`w-6 h-6 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                    ))}
+                    <span className="font-semibold text-lg text-gray-700">({review.rating}/5)</span>
+                </div>
+                {review.comment && (
+                    <p className="text-gray-700 mt-4 bg-gray-50 p-4 rounded-lg italic">
+                        "{review.comment}"
+                    </p>
+                )}
+            </div>
+        );
+    };
+
     const ReviewSection = () => {
+        // เงื่อนไขแรก: ยังแสดงผลรีวิวได้เฉพาะออร์เดอร์ที่เสร็จสิ้นแล้ว
         if (order.status !== 'COMPLETED') {
-            return null; // Do not show review section if order is not completed
+            return null;
         }
 
-        if (order.isReviewed) {
+        // เงื่อนไขที่สอง: ถ้ามีข้อมูลรีวิว (order.review) ให้แสดง Component DisplayReview
+        if (order.review) {
+            return <DisplayReview review={order.review} />;
+        }
+
+        // เงื่อนไขที่สาม: ถ้ายังไม่มีรีวิว
+        // ถ้าเป็นฝั่งร้านค้า (Seller) -> แสดงข้อความว่าลูกค้ารอรีวิว
+        if (isSellerView) {
             return (
-                <div className="mt-6 bg-green-50 border border-green-200 text-green-800 p-4 rounded-2xl text-center">
-                    <p className="font-semibold">คุณได้รีวิวออร์เดอร์นี้แล้ว</p>
+                <div className="mt-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-2xl text-center">
+                    <p className="font-semibold">ลูกค้ายังไม่ได้รีวิวออร์เดอร์นี้</p>
                 </div>
             );
         }
 
+        // ถ้าเป็นฝั่งผู้ซื้อ (Buyer) -> แสดงฟอร์มหรือปุ่มสำหรับเขียนรีวิว (เหมือนเดิม)
         if (isReviewing) {
             return (
                 <div className="mt-6">
