@@ -19,23 +19,24 @@ import { FiStar } from "react-icons/fi";
 
 const MainLayout = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, clearAuth, isLoading, setIsLoading } = useAuthStore();
+  const { isAuthenticated, user, clearAuth, _hasHydrated } = useAuthStore();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const handleRehydration = () => {
-      setIsLoading(false);
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'auth-storage') {
+        useAuthStore.persist.rehydrate();
+      }
     };
 
-    const unsubscribe = useAuthStore.persist.onFinishHydration(handleRehydration);
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
-      unsubscribe();
+      window.removeEventListener('storage', handleStorageChange);
     };
-  }, [setIsLoading]);
+  }, []);
 
-  // Enhanced Loading Screen
-  if (isLoading) {
+  if (!_hasHydrated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100">
         <div className="text-center">

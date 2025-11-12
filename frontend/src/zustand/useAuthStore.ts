@@ -11,6 +11,8 @@ interface AuthState {
     clearAuth: () => void; // ไม่มี logic ล้าง cache ที่นี่แล้ว
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
+    _hasHydrated: boolean;
+    setHasHydrated: (hydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -19,6 +21,13 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             isAuthenticated: false,
             isLoading: true,
+            _hasHydrated: false,
+
+            setHasHydrated: (hydrated) => {
+                set({
+                    _hasHydrated: hydrated,
+                });
+            },
 
             setUser: (user) => set({ user: user, isAuthenticated: true, isLoading: false }),
 
@@ -32,6 +41,9 @@ export const useAuthStore = create<AuthState>()(
         {
             name: 'auth-storage',
             storage: createJSONStorage(() => localStorage),
+            onRehydrateStorage: () => (state) => {
+                state?.setHasHydrated(true);
+            },
         }
     )
 );
