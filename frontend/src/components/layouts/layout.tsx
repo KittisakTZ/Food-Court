@@ -5,7 +5,7 @@ import NavbarMain from "./navbars/navbar.main";
 import { SidebarComponent, DataSideBar } from "./sidebars/sidebar";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { useEffect } from "react";
-import { getLogout } from "@/services/auth.service";
+import { getMe, getLogout } from "@/services/auth.service";
 import { Cart } from "./cart/Cart";
 import { FaUtensils } from "react-icons/fa";
 import { SidebarProvider, SidebarInset } from "../ui/sidebar";
@@ -14,62 +14,75 @@ import { FaUserShield, FaShoppingBag } from "react-icons/fa";
 import { MdDashboard, MdStorefront } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 import { IoFastFoodOutline } from "react-icons/io5";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FiStar } from "react-icons/fi";
 
 const MainLayout = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, clearAuth, _hasHydrated } = useAuthStore();
+  const { isAuthenticated, user, clearAuth, setUser, _hasHydrated } = useAuthStore();
   const queryClient = useQueryClient();
 
+  // --- 🛡️ ส่วน Gatekeeper ที่เพิ่มเข้ามา 🛡️ ---
+  // 1. ใช้ useQuery เพื่อ "ทวนสอบ" session กับ backend ทันทีที่ component โหลด
+  const {
+    data: userData,
+    isError,
+    isLoading: isVerifyingSession, // เปลี่ยนชื่อเป็น isVerifyingSession เพื่อให้สื่อความหมาย
+    isSuccess,
+  } = useQuery({
+    queryKey: ['me'], // queryKey สำหรับการดึงข้อมูลผู้ใช้
+    queryFn: getMe,   // ฟังก์ชัน API ที่จะเรียก
+    enabled: _hasHydrated, // จะเริ่มเรียก API ก็ต่อเมื่อ zustand โหลดข้อมูลจาก localStorage เสร็จแล้ว
+    retry: false, // สำคัญมาก: ถ้า session ไม่ถูกต้อง (ได้ 401) ไม่ต้องพยายามเรียกซ้ำ
+    refetchOnWindowFocus: false, // ป้องกันการเรียกซ้ำเมื่อผู้ใช้สลับหน้าจอ
+  });
+
+  // 2. ใช้ useEffect เพื่อจัดการผลลัพธ์จากการทวนสอบ
   useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'auth-storage') {
-        useAuthStore.persist.rehydrate();
-      }
-    };
+    if (!_hasHydrated) return; // รอให้ rehydration เสร็จก่อน
 
-    window.addEventListener('storage', handleStorageChange);
+    if (isError) {
+      // ถ้า Backend ตอบกลับมาว่า Error (เช่น 401 Unauthorized)
+      // หมายความว่า session ปลอม หรือหมดอายุ
+      console.log("Session verification failed. Logging out.");
+      clearAuth(); // ล้าง state ปลอมใน zustand
+      queryClient.clear(); // ล้าง cache ทั้งหมดของ react-query
+      navigate('/login', { replace: true }); // ส่งกลับไปหน้า login
+    } else if (isSuccess && userData?.responseObject) {
+      // ถ้า Backend ยืนยันว่า session ถูกต้อง
+      // อัปเดตข้อมูล user ใน zustand ให้เป็นข้อมูลล่าสุดจาก server เสมอ
+      // ป้องกันกรณีข้อมูลใน localStorage เก่าหรือไม่ตรง
+      setUser(userData.responseObject);
+    }
+  }, [isError, isSuccess, userData, _hasHydrated, navigate, clearAuth, queryClient, setUser]);
 
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
 
-  if (!_hasHydrated) {
+  // 3. แสดงหน้า Loading แบบเต็มจอขณะกำลัง "ทวนสอบ" session
+  // นี่คือส่วนที่ "Block" ไม่ให้ผู้ใช้เห็น UI หลักจนกว่าจะตรวจสอบเสร็จ
+  if (!_hasHydrated || isVerifyingSession) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100">
+      // ... แสดง Component Loading แบบเต็มหน้าจอ ...
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="text-center">
-          <div className="relative mb-8">
-            {/* Outer Ring */}
-            <div className="animate-spin rounded-full h-28 w-28 border-8 border-orange-200 border-t-orange-500 mx-auto"></div>
-            {/* Inner Icon */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <IoFastFoodOutline className="w-12 h-12 text-orange-500 animate-pulse" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">กำลังโหลด...</h2>
-          <p className="text-gray-600">กรุณารอสักครู่</p>
-
-          {/* Loading Dots */}
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-700">กำลังตรวจสอบสิทธิ์การเข้าใช้...</h2>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  // 4. ถ้าตรวจสอบแล้วไม่ผ่าน หรือ state ไม่ถูกต้อง ก็ให้ redirect
+  if (!isAuthenticated || !user) {
+    // หลังจาก logic ข้างบนทำงาน ถ้า isAuthenticated ยังเป็น false ก็คือไม่ผ่านจริงๆ
     return <Navigate to="/login" replace />;
   }
 
-  const handleLogout = () => {
-        clearAuth();
-        queryClient.clear();
-    };
+  // --- ✅ ถ้าผ่านทุกด่านมาได้ ถึงจะแสดงผลหน้าหลัก ✅ ---
+
+  const handleLogout = async () => {
+    clearAuth();
+    queryClient.clear();
+  };
 
   const generateSidebarItems = () => {
     if (!user) return [];
