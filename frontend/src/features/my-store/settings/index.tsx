@@ -1,4 +1,3 @@
-// @/features/my-store/settings/index.tsx
 import {
     useMyStore,
     useUpdateMyStore,
@@ -6,13 +5,15 @@ import {
 } from "@/hooks/useStores";
 import { useForm, SubmitHandler } from "react-hook-form";
 // *** เพิ่ม useState สำหรับการจัดการ Feedback ***
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
+import { getStoreImageUrl } from "@/utils/imageUtils";
 
 type StoreSettingsInputs = {
     name: string;
     description: string;
     location: string;
     promptPayId: string;
+    image: FileList;
 };
 
 // *** (UI/UX) สร้าง Component ไอคอน Spinner สำหรับใช้ซ้ำ ***
@@ -45,6 +46,7 @@ const StoreSettingsFeature = () => {
         register,
         handleSubmit,
         setValue,
+        watch,
         formState: { errors },
     } = useForm<StoreSettingsInputs>();
 
@@ -53,6 +55,9 @@ const StoreSettingsFeature = () => {
         type: "success" | "error";
         message: string;
     } | null>(null);
+
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const imageFile = watch("image");
 
     // *** (UX) ปรับแก้ useUpdateMyStore และ useToggleMyStoreStatus
     // ให้รับ onSuccess/onError ที่นี่ หรือจะส่งไปใน mutate() ก็ได้
@@ -70,15 +75,33 @@ const StoreSettingsFeature = () => {
         }
     }, [myStore, setValue]);
 
+    useEffect(() => {
+        if (imageFile && imageFile.length > 0) {
+            const file = imageFile[0];
+            const previewUrl = URL.createObjectURL(file);
+            setImagePreview(previewUrl);
+
+            // Cleanup function to revoke the object URL
+            return () => {
+                URL.revokeObjectURL(previewUrl);
+            };
+        } else {
+            setImagePreview(null);
+        }
+    }, [imageFile]);
+
     // *** (UX) ปรับปรุง onSubmit ให้มีการตั้งค่า Feedback ***
     const onSubmit: SubmitHandler<StoreSettingsInputs> = (data) => {
         setFeedback(null); // เคลียร์ Feedback เก่าก่อน
-        updateStore(data, {
+        const { image, ...storeData } = data;
+        const imageFile = image && image.length > 0 ? image[0] : undefined;
+        updateStore({ ...storeData, image: imageFile }, {
             onSuccess: () => {
                 setFeedback({
                     type: "success",
                     message: "Store information updated successfully!",
                 });
+                refetch();
                 // ไม่จำเป็นต้อง refetch() ถ้า hook ของคุณใช้ invalidateQueries
                 // แต่ถ้าต้องการข้อมูลล่าสุดทันที ก็ใส่ refetch() ได้
             },
@@ -238,6 +261,33 @@ const StoreSettingsFeature = () => {
                         Store Information
                     </h2>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        <div>
+                            <label
+                                htmlFor="image"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Store Image
+                            </label>
+                            <div className="mt-2 flex items-center gap-6">
+                                <img
+                                    src={imagePreview ?? getStoreImageUrl(myStore.image)}
+                                    alt="Store preview"
+                                    className="h-24 w-24 rounded-lg object-cover"
+                                />
+                                <input
+                                    id="image"
+                                    type="file"
+                                    {...register("image")}
+                                    className="block w-full text-sm text-gray-500
+                               file:mr-4 file:py-2 file:px-4
+                               file:rounded-md file:border-0
+                               file:text-sm file:font-semibold
+                               file:bg-blue-50 file:text-blue-700
+                               hover:file:bg-blue-100"
+                                    disabled={isPending}
+                                />
+                            </div>
+                        </div>
                         <div>
                             {/* (UI) ปรับ Label และ Input */}
                             <label

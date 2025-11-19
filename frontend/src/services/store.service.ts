@@ -56,18 +56,38 @@ export const getMyStore = async () => {
 
 // (ใหม่) Type สำหรับ Payload การอัปเดตข้อมูลร้าน
 // เราจะอนุญาตให้อัปเดตแค่บาง field เท่านั้น
-interface UpdateStorePayload {
+export interface UpdateStorePayload {
     name?: string;
     description?: string;
     location?: string;
-    promptPayId?: string; // ✨
+    promptPayId?: string;
+    image?: File;
 }
 
 // (ใหม่) ฟังก์ชันสำหรับ Seller อัปเดตข้อมูลร้านของตัวเอง
 export const updateMyStore = async (payload: UpdateStorePayload) => {
+    const formData = new FormData();
+
+    // วนลูปเพื่อ append ข้อมูล text ทั้งหมดลงใน formData
+    Object.entries(payload).forEach(([key, value]) => {
+        if (key !== 'image' && value !== undefined && value !== null) {
+            formData.append(key, String(value));
+        }
+    });
+
+    // เพิ่มไฟล์รูปภาพถ้ามี
+    if (payload.image) {
+        formData.append('image', payload.image);
+    }
+
     const { data: response } = await mainApi.patch<APIResponseType<Store>>(
-        `/v1/stores/my-store`, // <-- ตรวจสอบ URL
-        payload
+        `/v1/stores/my-store`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }
     );
     return response.responseObject;
 };
