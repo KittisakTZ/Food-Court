@@ -1,17 +1,22 @@
 // @/features/my-store/menus/index.tsx
 import { useMyStore } from "@/hooks/useStores";
-import { useMenuCategories, useCreateCategory } from "@/hooks/useMenuCategories";
+import { useMenuCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/useMenuCategories";
 import { useMenus, useDeleteMenu } from "@/hooks/useMenus";
 import { useState } from "react";
 import { Menu } from "@/types/response/menu.response";
 import { MenuForm } from "../components/MenuForm";
-import { FiPlus, FiEdit2, FiTrash2, FiSearch } from "react-icons/fi";
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiSave, FiX } from "react-icons/fi";
 import { MdRestaurant, MdCategory, MdClose } from "react-icons/md";
 
 const CategoryManager = ({ storeId }: { storeId: string }) => {
   const { data: categories, isLoading } = useMenuCategories(storeId);
-  const { mutate: createCat, isPending } = useCreateCategory();
+  const { mutate: createCat, isPending: isCreating } = useCreateCategory();
+  const { mutate: updateCat, isPending: isUpdating } = useUpdateCategory();
+  const { mutate: deleteCat, isPending: isDeleting } = useDeleteCategory();
+
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingCategoryName, setEditingCategoryName] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleCreate = () => {
@@ -20,6 +25,30 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
       setNewCategoryName("");
     }
   };
+
+  const handleDelete = (categoryId: string, categoryName: string) => {
+    if (window.confirm(`คุณแน่ใจว่าต้องการลบหมวดหมู่ "${categoryName}" ใช่หรือไม่?`)) {
+      deleteCat({ storeId, categoryId });
+    }
+  };
+
+  const handleEdit = (category: { id: string; name: string }) => {
+    setEditingCategoryId(category.id);
+    setEditingCategoryName(category.name);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCategoryId(null);
+    setEditingCategoryName("");
+  };
+
+  const handleUpdate = () => {
+    if (editingCategoryId && editingCategoryName.trim()) {
+      updateCat({ storeId, categoryId: editingCategoryId, name: editingCategoryName });
+      handleCancelEdit();
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -54,16 +83,16 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
             placeholder="เพิ่มหมวดหมู่ใหม่..."
             className="flex-grow px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all text-sm"
           />
-          <button 
-            onClick={handleCreate} 
-            disabled={isPending || !newCategoryName.trim()}
+          <button
+            onClick={handleCreate}
+            disabled={isCreating || !newCategoryName.trim()}
             className="px-5 py-2.5 bg-orange-500 text-white font-medium rounded-xl hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow"
           >
             <FiPlus className="w-4 h-4" />
-            {isPending ? 'กำลังเพิ่ม...' : 'เพิ่ม'}
+            {isCreating ? 'กำลังเพิ่ม...' : 'เพิ่ม'}
           </button>
         </div>
-        
+
         <div className={`space-y-2 transition-all duration-300 ${isExpanded ? 'max-h-96' : 'max-h-48'} overflow-y-auto`}>
           {categories?.length === 0 ? (
             <div className="text-center py-8">
@@ -72,15 +101,41 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
             </div>
           ) : (
             categories?.map(cat => (
-              <div 
-                key={cat.id} 
-                className="group p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all flex items-center gap-3 border border-orange-100 cursor-pointer"
+              <div
+                key={cat.id}
+                className="group p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all flex items-center gap-3 border border-orange-100"
               >
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="font-medium text-gray-800 text-sm flex-grow">{cat.name}</span>
-                <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                  แตะเพื่อเลือก
-                </span>
+                {editingCategoryId === cat.id ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editingCategoryName}
+                      onChange={(e) => setEditingCategoryName(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleUpdate()}
+                      className="flex-grow px-3 py-1 border border-orange-300 rounded-md focus:ring-1 focus:ring-orange-500 outline-none text-sm"
+                      autoFocus
+                    />
+                    <button onClick={handleUpdate} disabled={isUpdating} className="p-2 text-green-600 hover:text-green-700 disabled:text-gray-400">
+                      <FiSave className="w-4 h-4" />
+                    </button>
+                    <button onClick={handleCancelEdit} className="p-2 text-gray-500 hover:text-gray-700">
+                      <FiX className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="font-medium text-gray-800 text-sm flex-grow">{cat.name}</span>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => handleEdit(cat)} className="p-2 text-blue-500 hover:text-blue-700">
+                        <FiEdit2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDelete(cat.id, cat.name)} disabled={isDeleting} className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-400">
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))
           )}

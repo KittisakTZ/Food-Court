@@ -12,6 +12,7 @@ type StoreFormInputs = {
     name: string;
     description: string;
     location: string;
+    promptPayId: string;
     image: FileList; // react-hook-form จะให้ค่าเป็น FileList
 };
 
@@ -24,6 +25,7 @@ const createStore = async (payload: StoreFormInputs) => {
     formData.append('name', payload.name);
     formData.append('description', payload.description);
     formData.append('location', payload.location);
+    formData.append('promptPayId', payload.promptPayId);
 
     // 3. ตรวจสอบและเพิ่มไฟล์รูปภาพ (ถ้ามี)
     // Backend คาดหวัง field ที่ชื่อว่า 'image'
@@ -144,6 +146,11 @@ const CreateStoreFeature = () => {
                     <div>
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700">ที่ตั้ง</label>
                         <input id="location" {...register("location")} className="mt-1 block w-full p-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500" />
+                    </div>
+                    <div>
+                        <label htmlFor="promptPayId" className="block text-sm font-medium text-gray-700">PromptPay ID</label>
+                        <input id="promptPayId" {...register("promptPayId", { required: "กรุณากรอก PromptPay ID" })} className="mt-1 block w-full p-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500" />
+                        {errors.promptPayId && <p className="text-red-500 text-sm mt-1">{errors.promptPayId.message}</p>}
                     </div>
 
                     {/* Submit Button */}

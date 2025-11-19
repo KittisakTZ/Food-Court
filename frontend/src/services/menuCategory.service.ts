@@ -20,4 +20,14 @@ export const createCategory = async ({ storeId, name }: { storeId: string, name:
     return response.responseObject;
 };
 
+export const updateCategory = async ({ storeId, categoryId, name }: { storeId: string, categoryId: string, name: string }) => {
+    const { data: response } = await mainApi.patch<APIResponseType<MenuCategory>>(`/v1/stores/${storeId}/categories/${categoryId}`, { name });
+    return response.responseObject;
+}
+
+export const deleteCategory = async ({ storeId, categoryId }: { storeId: string, categoryId: string }) => {
+    const { data: response } = await mainApi.delete<APIResponseType<null>>(`/v1/stores/${storeId}/categories/${categoryId}`);
+    return response;
+}
+
 // เพิ่ม service สำหรับ update และ delete ตามต้องการ...

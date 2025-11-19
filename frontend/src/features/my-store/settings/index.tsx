@@ -12,6 +12,7 @@ type StoreSettingsInputs = {
     name: string;
     description: string;
     location: string;
+    promptPayId: string;
 };
 
 // *** (UI/UX) สร้าง Component ไอคอน Spinner สำหรับใช้ซ้ำ ***
@@ -65,6 +66,7 @@ const StoreSettingsFeature = () => {
             setValue("name", myStore.name);
             setValue("description", myStore.description || "");
             setValue("location", myStore.location || "");
+            setValue("promptPayId", myStore.promptPayId || "");
         }
     }, [myStore, setValue]);
 
@@ -292,6 +294,28 @@ const StoreSettingsFeature = () => {
                            disabled:bg-gray-50"
                                 disabled={isPending}
                             />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="promptPayId"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                PromptPay ID
+                            </label>
+                            <input
+                                id="promptPayId"
+                                {...register("promptPayId", { required: "PromptPay ID is required" })}
+                                className="block w-full p-2.5 border border-gray-300 rounded-md shadow-sm 
+                           focus:ring-blue-500 focus:border-blue-500
+                           disabled:bg-gray-50"
+                                disabled={isPending}
+                            />
+                            {errors.promptPayId && (
+                                <p className="text-red-600 text-sm mt-1">
+                                    {errors.promptPayId.message}
+                                </p>
+                            )}
                         </div>
 
                         {/* *** (UI/UX) ปรับปรุงปุ่ม Submit *** */}
