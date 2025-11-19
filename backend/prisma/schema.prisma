@@ -107,6 +107,7 @@ model Order {
   store       Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   status      OrderStatus @default(PENDING)
   totalAmount Float       @default(0)
+  description String?
 
   // --- ✨ Fields ใหม่ที่เกี่ยวข้องกับการจ่ายเงิน ---
   paymentMethod    PaymentMethod? // ประเภทการชำระเงิน

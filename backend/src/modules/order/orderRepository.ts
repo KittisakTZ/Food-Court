@@ -12,7 +12,8 @@ type OrderCreationData = {
     scheduledPickup?: Date | null;
     queueNumber: number;
     orderDate: Date;
-    paymentMethod: PaymentMethod; // <--- เพิ่มฟิลด์นี้เข้ามา
+    paymentMethod: PaymentMethod;
+    description?: string; // Add this line
     items: Array<{
         menuId: string;
         quantity: number;
@@ -34,7 +35,8 @@ export const orderRepository = {
                     scheduledPickup: data.scheduledPickup,
                     queueNumber: data.queueNumber,
                     orderDate: data.orderDate,
-                    paymentMethod: data.paymentMethod, // <--- เพิ่มฟิลด์นี้ตอนสร้างข้อมูล
+                    paymentMethod: data.paymentMethod,
+                    description: data.description, // Add this line
                 },
             });
 

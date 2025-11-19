@@ -20,6 +20,7 @@ export interface Order {
     scheduledPickup?: string | null;
     queueNumber: number;
     orderDate: string;
+    description: string | null;
 
     // --- ✨ เพิ่ม Fields ใหม่ทั้งหมด ---
     paymentMethod: 'PROMPTPAY' | 'CASH_ON_PICKUP' | null;

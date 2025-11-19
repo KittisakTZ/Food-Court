@@ -19,6 +19,7 @@ export const CreateOrderSchema = z.object({
         paymentMethod: z.nativeEnum(PaymentMethod, {
             errorMap: () => ({ message: "Invalid payment method specified" }),
         }),
+        description: z.string().optional(),
         
         scheduledPickupTime: z.string()
             .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format. Please use HH:mm (24-hour).")

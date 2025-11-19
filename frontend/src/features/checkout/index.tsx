@@ -27,6 +27,7 @@ const CheckoutFeature = () => {
   const [pickupHour, setPickupHour] = useState("");
   const [pickupMinute, setPickupMinute] = useState("10");
   const [paymentMethod, setPaymentMethod] = useState<'PROMPTPAY' | 'CASH_ON_PICKUP'>('PROMPTPAY');
+  const [description, setDescription] = useState(""); // Add this line
   const { mutate: placeOrder, isPending: isSubmitting } = useCreateOrder();
 
   // Get current date and time
@@ -93,6 +94,7 @@ const CheckoutFeature = () => {
       items: cart.items.map(item => ({ menuId: item.menu.id, quantity: item.quantity })),
       scheduledPickupTime: pickupOption === 'scheduled' ? `${pickupHour}:${pickupMinute}` : undefined,
       paymentMethod: paymentMethod, // <-- เช็คว่าบรรทัดนี้ถูกเพิ่มเข้าไปใน Object payload แล้ว
+      description: description, // Add this line
     };
 
     placeOrder(payload, {
@@ -416,44 +418,66 @@ const CheckoutFeature = () => {
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Payment Method Options */}
-            <div className="bg-white rounded-3xl shadow-xl border-2 border-purple-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <div className="bg-gradient-to-r from-purple-100 to-indigo-100 p-6 border-b-2 border-purple-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
-                    <FiDollarSign className="w-6 h-6 text-white" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    เลือกวิธีชำระเงิน 💳
-                  </h2>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* PromptPay Option */}
-                  <label className={`relative cursor-pointer group transition-all ${paymentMethod === "PROMPTPAY" ? "scale-105" : ""}`}>
-                    <input type="radio" name="paymentMethod" value="PROMPTPAY" checked={paymentMethod === "PROMPTPAY"} onChange={() => setPaymentMethod("PROMPTPAY")} className="peer sr-only" />
-                    <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-purple-500 peer-checked:bg-gradient-to-br peer-checked:from-purple-50 peer-checked:to-indigo-50 hover:border-purple-300 hover:shadow-lg group-hover:scale-105">
-                      <p className="font-bold text-gray-800 text-lg">QR PromptPay</p>
-                      <p className="text-sm text-gray-600 mt-1">ชำระเงินผ่าน QR Code หลังจากร้านค้ายืนยันออร์เดอร์</p>
-                      {paymentMethod === "PROMPTPAY" && (<div className="mt-4 flex items-center gap-2 text-purple-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
-                    </div>
-                  </label>
-                  {/* Cash on Pickup Option */}
-                  <label className={`relative cursor-pointer group transition-all ${paymentMethod === "CASH_ON_PICKUP" ? "scale-105" : ""}`}>
-                    <input type="radio" name="paymentMethod" value="CASH_ON_PICKUP" checked={paymentMethod === "CASH_ON_PICKUP"} onChange={() => setPaymentMethod("CASH_ON_PICKUP")} className="peer sr-only" />
-                    <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-green-500 peer-checked:bg-gradient-to-br peer-checked:from-green-50 peer-checked:to-emerald-50 hover:border-green-300 hover:shadow-lg group-hover:scale-105">
-                      <p className="font-bold text-gray-800 text-lg">จ่ายเงินสดหน้าร้าน</p>
-                      <p className="text-sm text-gray-600 mt-1">ชำระเงินสดเมื่อมารับอาหารที่ร้าน</p>
-                      {paymentMethod === "CASH_ON_PICKUP" && (<div className="mt-4 flex items-center gap-2 text-green-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+                        </div>
+                        {/* Payment Method Options */}
+                        <div className="bg-white rounded-3xl shadow-xl border-2 border-purple-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                          <div className="bg-gradient-to-r from-purple-100 to-indigo-100 p-6 border-b-2 border-purple-200">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
+                                <FiDollarSign className="w-6 h-6 text-white" />
+                              </div>
+                              <h2 className="text-2xl font-bold text-gray-800">
+                                เลือกวิธีชำระเงิน 💳
+                              </h2>
+                            </div>
+                          </div>
+                          <div className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* PromptPay Option */}
+                              <label className={`relative cursor-pointer group transition-all ${paymentMethod === "PROMPTPAY" ? "scale-105" : ""}`}>
+                                <input type="radio" name="paymentMethod" value="PROMPTPAY" checked={paymentMethod === "PROMPTPAY"} onChange={() => setPaymentMethod("PROMPTPAY")} className="peer sr-only" />
+                                <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-purple-500 peer-checked:bg-gradient-to-br peer-checked:from-purple-50 peer-checked:to-indigo-50 hover:border-purple-300 hover:shadow-lg group-hover:scale-105">
+                                  <p className="font-bold text-gray-800 text-lg">QR PromptPay</p>
+                                  <p className="text-sm text-gray-600 mt-1">ชำระเงินผ่าน QR Code หลังจากร้านค้ายืนยันออร์เดอร์</p>
+                                  {paymentMethod === "PROMPTPAY" && (<div className="mt-4 flex items-center gap-2 text-purple-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
+                                </div>
+                              </label>
+                              {/* Cash on Pickup Option */}
+                              <label className={`relative cursor-pointer group transition-all ${paymentMethod === "CASH_ON_PICKUP" ? "scale-105" : ""}`}>
+                                <input type="radio" name="paymentMethod" value="CASH_ON_PICKUP" checked={paymentMethod === "CASH_ON_PICKUP"} onChange={() => setPaymentMethod("CASH_ON_PICKUP")} className="peer sr-only" />
+                                <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-green-500 peer-checked:bg-gradient-to-br peer-checked:from-green-50 peer-checked:to-emerald-50 hover:border-green-300 hover:shadow-lg group-hover:scale-105">
+                                  <p className="font-bold text-gray-800 text-lg">จ่ายเงินสดหน้าร้าน</p>
+                                  <p className="text-sm text-gray-600 mt-1">ชำระเงินสดเมื่อมารับอาหารที่ร้าน</p>
+                                  {paymentMethod === "CASH_ON_PICKUP" && (<div className="mt-4 flex items-center gap-2 text-green-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+            
+                        {/* Description / Additional Notes */}
+                        <div className="bg-white rounded-3xl shadow-xl border-2 border-orange-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                          <div className="bg-gradient-to-r from-orange-100 to-yellow-100 p-6 border-b-2 border-orange-200">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md">
+                                <BiDish className="w-6 h-6 text-white" />
+                              </div>
+                              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                คำขอเพิ่มเติม (ถ้ามี)
+                              </h2>
+                            </div>
+                          </div>
+                          <div className="p-6">
+                            <textarea
+                              className="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all resize-y"
+                              rows={4}
+                              placeholder="เช่น ไม่ใส่ผัก, เผ็ดน้อย, หวานน้อย, หรือข้อความถึงร้านค้า..."
+                              value={description}
+                              onChange={(e) => setDescription(e.target.value)}
+                            ></textarea>
+                          </div>
+                        </div>
+                      </div>
 
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">

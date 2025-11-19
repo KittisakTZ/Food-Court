@@ -14,6 +14,7 @@ type CreateOrderPayload = {
     items: Array<{ menuId: string; quantity: number }>;
     paymentMethod: PaymentMethod; // ✨ เพิ่ม type
     scheduledPickupTime?: string;
+    description?: string; // Add this line
 };
 
 // Type สำหรับข้อมูล user ที่ได้จาก Token
@@ -99,6 +100,7 @@ export const orderService = {
                 buyerId: user.id,
                 storeId: payload.storeId,
                 paymentMethod: payload.paymentMethod, // <-- เพิ่มตรงนี้
+                description: payload.description, // Add this line
                 position: maxPosition + 1,
                 queueNumber: nextQueueNumber,
                 orderDate: orderDate,

@@ -13,6 +13,7 @@ interface CreateOrderPayload {
     }[];
     paymentMethod: 'PROMPTPAY' | 'CASH_ON_PICKUP'; // <-- ต้องมีบรรทัดนี้
     scheduledPickupTime?: string;
+    description?: string; // Add this line
 }
 
 type GetOrderByIdParams = {
