@@ -2,6 +2,7 @@
 
 import { useStore } from "@/hooks/useStores";
 import { useMenus } from "@/hooks/useMenus";
+import { useMenuCategories } from "@/hooks/useMenuCategories";
 import { useState } from "react";
 import { useAddItemToCart } from "@/hooks/useCart";
 import { FiStar, FiClock, FiMapPin, FiShoppingCart, FiChevronLeft, FiChevronRight, FiHeart, FiInfo } from "react-icons/fi";
@@ -18,6 +19,8 @@ interface StoreDetailFeatureProps {
 const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
   const [page, setPage] = useState(1);
   const [addingItemId, setAddingItemId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+
   const { mutate: addItem, isPending: isAdding } = useAddItemToCart();
   const {
     data: store,
@@ -28,7 +31,13 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
     data: menus,
     isLoading: isLoadingMenus,
     isError: isErrorMenus,
-  } = useMenus({ storeId, page });
+  } = useMenus({ storeId, page, categoryId: selectedCategoryId });
+  const { data: categories } = useMenuCategories(storeId);
+
+  const handleCategorySelect = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setPage(1);
+  };
 
   const handleAddItem = (menuId: string) => {
     setAddingItemId(menuId);
@@ -262,6 +271,27 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-3">เกิดข้อผิดพลาด</h3>
               <p className="text-gray-600">เกิดข้อผิดพลาดในการโหลดเมนู</p>
+            </div>
+          )}
+
+          {/* Category Filters */}
+          {categories && categories.length > 0 && (
+            <div className="mb-8 flex items-center justify-center flex-wrap gap-4 animate-fade-in-up">
+              <button
+                onClick={() => handleCategorySelect("")}
+                className={`px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-xl transform hover:-translate-y-1 ${selectedCategoryId === "" ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' : 'bg-white text-gray-700'}`}
+              >
+                All Categories
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategorySelect(category.id)}
+                  className={`px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-xl transform hover:-translate-y-1 ${selectedCategoryId === category.id ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' : 'bg-white text-gray-700'}`}
+                >
+                  {category.name}
+                </button>
+              ))}
             </div>
           )}
 

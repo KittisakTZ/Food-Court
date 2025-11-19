@@ -24,9 +24,9 @@ export const menuService = {
         return new ServiceResponse(ResponseStatus.Success, "Menu created successfully.", null, StatusCodes.CREATED);
     },
 
-    findByStoreId: async (storeId: string, page: number, pageSize: number, searchText?: string) => {
-        const menus = await menuRepository.findByStoreId(storeId, page, pageSize, searchText);
-        const totalCount = await menuRepository.countByStoreId(storeId, searchText);
+    findByStoreId: async (storeId: string, page: number, pageSize: number, searchText?: string, categoryId?: string) => {
+        const menus = await menuRepository.findByStoreId(storeId, page, pageSize, searchText, categoryId);
+        const totalCount = await menuRepository.countByStoreId(storeId, searchText, categoryId);
 
         return new ServiceResponse(
             ResponseStatus.Success,

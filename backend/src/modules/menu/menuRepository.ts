@@ -15,7 +15,7 @@ export const menuRepository = {
     },
 
     // ค้นหาเมนูทั้งหมดของร้านค้า
-    findByStoreId: async (storeId: string, page: number, pageSize: number, searchText?: string) => {
+    findByStoreId: async (storeId: string, page: number, pageSize: number, searchText?: string, categoryId?: string) => {
         const skip = (page - 1) * pageSize;
 
         // สร้างเงื่อนไขการค้นหา
@@ -26,6 +26,9 @@ export const menuRepository = {
                     contains: searchText,
                     mode: 'insensitive',
                 }
+            }),
+            ...(categoryId && {
+                categoryId: categoryId,
             })
         };
 
@@ -39,7 +42,7 @@ export const menuRepository = {
     },
 
     // (ใหม่) นับจำนวนเมนูทั้งหมดในร้านค้า (สำหรับ Pagination)
-    countByStoreId: async (storeId: string, searchText?: string) => {
+    countByStoreId: async (storeId: string, searchText?: string, categoryId?: string) => {
         // สร้างเงื่อนไขการค้นหา (ต้องเหมือนกับ findByStoreId)
         const whereClause: Prisma.MenuWhereInput = {
             storeId: storeId,
@@ -48,6 +51,9 @@ export const menuRepository = {
                     contains: searchText,
                     mode: 'insensitive',
                 }
+            }),
+            ...(categoryId && {
+                categoryId: categoryId,
             })
         };
 

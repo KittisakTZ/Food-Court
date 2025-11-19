@@ -35,6 +35,7 @@ type GetMenusParams = {
     page?: number;
     pageSize?: number;
     searchText?: string;
+    categoryId?: string;
 }
 
 // (ใหม่) ฟังก์ชันดึงข้อมูลเมนูทั้งหมดของร้าน (มี Pagination)

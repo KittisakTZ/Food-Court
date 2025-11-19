@@ -12,12 +12,13 @@ type UseMenusProps = {
     page?: number;
     pageSize?: number;
     searchText?: string;
+    categoryId?: string;
 };
 
-export const useMenus = ({ storeId, page = 1, pageSize = 12, searchText = "" }: UseMenusProps) => {
+export const useMenus = ({ storeId, page = 1, pageSize = 12, searchText = "", categoryId = "" }: UseMenusProps) => {
     return useQuery({
-        queryKey: ['menus', storeId, { page, pageSize, searchText }],
-        queryFn: () => getMenusByStore({ storeId, page, pageSize, searchText }),
+        queryKey: ['menus', storeId, { page, pageSize, searchText, categoryId }],
+        queryFn: () => getMenusByStore({ storeId, page, pageSize, searchText, categoryId }),
         enabled: !!storeId, // จะเริ่มดึงข้อมูลก็ต่อเมื่อ storeId มีค่า
     });
 };

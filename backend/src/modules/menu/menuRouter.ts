@@ -28,9 +28,10 @@ export const menuRouter = (() => {
             const pageSize = parseInt(req.query.pageSize as string);
             // searchText เป็น optional และเป็น string อยู่แล้ว
             const searchText = req.query.searchText as string | undefined;
+            const categoryId = req.query.categoryId as string | undefined;
 
             // ส่งค่าที่แปลงแล้วและมี Type ถูกต้องเข้าไปใน Service
-            const serviceResponse = await menuService.findByStoreId(storeId, page, pageSize, searchText);
+            const serviceResponse = await menuService.findByStoreId(storeId, page, pageSize, searchText, categoryId);
             handleServiceResponse(serviceResponse, res);
         }
     );
