@@ -246,6 +246,17 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                     </div>
                 </div>
 
+                {order.description && (
+                    <div className="p-4 bg-neutral-50 border-t-2 border-dashed border-gray-300">
+                        <h4 className="font-bold text-gray-700 mb-2">
+                            หมายเหตุจากลูกค้า:
+                        </h4>
+                        <p className="text-sm text-gray-600 italic">
+                            "{order.description}"
+                        </p>
+                    </div>
+                )}
+
                 {/* --- [TOTAL] - เปลี่ยนเป็นขอบประ (เหมือนใบเสร็จ) --- */}
                 <div className="bg-neutral-50 px-4 py-3 border-t-2 border-dashed border-gray-300">
                     <div className="flex items-center justify-between">
