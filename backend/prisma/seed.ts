@@ -12,23 +12,23 @@ const storesData = [
     email: 'seller.waffle@foodcourt.com',
     promptPayId: '0942874935',
     description: 'วาฟเฟิลฮ่องกงร้อนๆ กรอบนอกนุ่มใน ไส้แน่นทุกชิ้น',
-    image: '/uploads/stores/วัฟเฟิ่ล.jpg',
+    image: 'http://localhost:5080/uploads/stores/วัฟเฟิ่ล.jpg',
     categories: [
       {
         name: 'วาฟเฟิลไส้หวาน',
         menus: [
-          { name: 'ผลไม้รวม', price: 10, image: '/uploads/menus/วัฟเฟิล/ผลไม้รวม.png' },
-          { name: 'เผือก', price: 10, image: '/uploads/menus/วัฟเฟิล/เผือก.png' },
-          { name: 'ครีม', price: 10, image: '/uploads/menus/วัฟเฟิล/ครีม.png' },
-          { name: 'เนย น้ำตาล', price: 10, image: '/uploads/menus/วัฟเฟิล/เนยน้ำตาล.png' },
-          { name: 'ลูกเกด', price: 10, image: '/uploads/menus/วัฟเฟิล/ลูกเกด.png' },
-          { name: 'สังขยา', price: 10, image: '/uploads/menus/วัฟเฟิล/สังขยา.png' },
-          { name: 'ช็อกโกแลต', price: 10, image: '/uploads/menus/วัฟเฟิล/ช็อกโกแลต.png' },
-          { name: 'ฝอยทอง', price: 10, image: '/uploads/menus/วัฟเฟิล/ฝอยทอง.png' },
-          { name: 'ชีส', price: 10, image: '/uploads/menus/วัฟเฟิล/ชีส.png' },
-          { name: 'อัลมอนด์', price: 10, image: '/uploads/menus/วัฟเฟิล/อัลมอนด์.png' },
-          { name: 'ข้าวโพด', price: 10, image: '/uploads/menus/วัฟเฟิล/ข้าวโพด.png' },
-          { name: 'สตรอว์เบอร์รี่', price: 10, image: '/uploads/menus/วัฟเฟิล/สตรอว์เบอร์รี่.png' }
+          { name: 'ผลไม้รวม', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/ผลไม้รวม.png' },
+          { name: 'เผือก', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/เผือก.png' },
+          { name: 'ครีม', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/ครีม.png' },
+          { name: 'เนย น้ำตาล', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/เนยน้ำตาล.png' },
+          { name: 'ลูกเกด', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/ลูกเกด.png' },
+          { name: 'สังขยา', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/สังขยา.png' },
+          { name: 'ช็อกโกแลต', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/ช็อกโกแลต.png' },
+          { name: 'ฝอยทอง', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/ฝอยทอง.png' },
+          { name: 'ชีส', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/ชีส.png' },
+          { name: 'อัลมอนด์', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/อัลมอนด์.png' },
+          { name: 'ข้าวโพด', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/ข้าวโพด.png' },
+          { name: 'สตรอว์เบอร์รี่', price: 10, image: 'http://localhost:5080/uploads/menus/วัฟเฟิล/สตรอว์เบอร์รี่.png' }
         ],
       },
     ],
@@ -40,26 +40,26 @@ const storesData = [
     email: 'seller.giant@foodcourt.com',
     promptPayId: '0852535588',
     description: 'ลูกชิ้นระเบิด กรอบสะใจ น้ำจิ้มรสเด็ด',
-    image: '/uploads/stores/ลูกชิ้นระเบิด.jpg',
+    image: 'http://localhost:5080/uploads/stores/ลูกชิ้นระเบิด.jpg',
     categories: [
       {
         name: 'ลูกชิ้นทอด',
         menus: [
-          { name: 'ลูกชิ้นปลา (S)', price: 35, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
-          { name: 'ลูกชิ้นปลา (M)', price: 45, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
-          { name: 'ลูกชิ้นปลา (L)', price: 55, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
-          { name: 'ลูกชิ้นปลา (XL)', price: 65, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
-          { name: 'ลูกชิ้นกุ้ง (S)', price: 35, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นกุ้งระเบิด.png' },
-          { name: 'ลูกชิ้นกุ้ง (M)', price: 45, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นกุ้งระเบิด.png' },
-          { name: 'ลูกชิ้นไก่ (S)', price: 35, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นไก่คอกเทล.png' },
-          { name: 'ลูกชิ้นไก่ (M)', price: 45, image: '/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นไก่คอกเทล.png' },
+          { name: 'ลูกชิ้นปลา (S)', price: 35, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
+          { name: 'ลูกชิ้นปลา (M)', price: 45, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
+          { name: 'ลูกชิ้นปลา (L)', price: 55, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
+          { name: 'ลูกชิ้นปลา (XL)', price: 65, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นปลาระเบิด.png' },
+          { name: 'ลูกชิ้นกุ้ง (S)', price: 35, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นกุ้งระเบิด.png' },
+          { name: 'ลูกชิ้นกุ้ง (M)', price: 45, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นกุ้งระเบิด.png' },
+          { name: 'ลูกชิ้นไก่ (S)', price: 35, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นไก่คอกเทล.png' },
+          { name: 'ลูกชิ้นไก่ (M)', price: 45, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ลูกชิ้นไก่คอกเทล.png' },
         ],
       },
       {
         name: 'น้ำจิ้ม (สั่งเพิ่ม)',
         menus: [
-          { name: 'น้ำจิ้มต้นตำรับ (ถ้วย)', price: 5, image: '/uploads/menus/ลูกชิ้นระเบิด/ซอสมะขาม.jpg' },
-          { name: 'น้ำจิ้มซี้ดซ้าด (ถ้วย)', price: 5, image: '/uploads/menus/ลูกชิ้นระเบิด/น้ำจิ้มสุดแซ่บ.jpg' },
+          { name: 'น้ำจิ้มต้นตำรับ (ถ้วย)', price: 5, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/ซอสมะขาม.jpg' },
+          { name: 'น้ำจิ้มซี้ดซ้าด (ถ้วย)', price: 5, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นระเบิด/น้ำจิ้มสุดแซ่บ.jpg' },
         ]
       }
     ],
@@ -71,45 +71,45 @@ const storesData = [
     email: 'seller.nammore@foodcourt.com',
     promptPayId: '0639271202',
     description: 'รวมเครื่องดื่มทุกชนิด สดชื่นทุกเวลา',
-    image: '/uploads/stores/ร้านน้ำมอ.jpg',
+    image: 'http://localhost:5080/uploads/stores/ร้านน้ำมอ.jpg',
     categories: [
       {
         name: 'น้ำชง',
         menus: [
-          { name: 'นมเย็น', price: 25, image: '/uploads/menus/ร้านน้ำ/นมเย็น.jpg' },
-          { name: 'โกโก้เย็น', price: 25, image: '/uploads/menus/ร้านน้ำ/โกโก้เย็น.jpg' },
-          { name: 'ชามะนาว', price: 25, image: '/uploads/menus/ร้านน้ำ/ชามะนาว.jpg' },
-          { name: 'ชานมเย็น', price: 25, image: '/uploads/menus/ร้านน้ำ/ชานมเย็น.jpg' },
-          { name: 'ชาเขียวนม', price: 25, image: '/uploads/menus/ร้านน้ำ/ชาเขียวนม.png' },
-          { name: 'โอเลี้ยง', price: 20, image: '/uploads/menus/ร้านน้ำ/โอเลี้ยง.jpg' },
-          { name: 'กาแฟโบราณ', price: 20, image: '/uploads/menus/ร้านน้ำ/กาแฟโบราณ.jpg' },
-          { name: 'น้ำแดงมะนาวโซดา', price: 30, image: '/uploads/menus/ร้านน้ำ/น้ำแดงมะนาวโซดา.jpg' },
-          { name: 'น้ำผึ้งมะนาว', price: 30, image: '/uploads/menus/ร้านน้ำ/น้ำผึ้งมะนาว.jpg' },
-          { name: 'นมสดคาราเมล', price: 30, image: '/uploads/menus/ร้านน้ำ/นมสดคาราเมล.jpg' },
+          { name: 'นมเย็น', price: 25, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/นมเย็น.jpg' },
+          { name: 'โกโก้เย็น', price: 25, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/โกโก้เย็น.jpg' },
+          { name: 'ชามะนาว', price: 25, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/ชามะนาว.jpg' },
+          { name: 'ชานมเย็น', price: 25, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/ชานมเย็น.jpg' },
+          { name: 'ชาเขียวนม', price: 25, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/ชาเขียวนม.png' },
+          { name: 'โอเลี้ยง', price: 20, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/โอเลี้ยง.jpg' },
+          { name: 'กาแฟโบราณ', price: 20, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/กาแฟโบราณ.jpg' },
+          { name: 'น้ำแดงมะนาวโซดา', price: 30, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/น้ำแดงมะนาวโซดา.jpg' },
+          { name: 'น้ำผึ้งมะนาว', price: 30, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/น้ำผึ้งมะนาว.jpg' },
+          { name: 'นมสดคาราเมล', price: 30, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/นมสดคาราเมล.jpg' },
         ]
       },
       {
         name: 'น้ำอัดลม',
         menus: [
-          { name: 'โค้ก (แก้ว)', price: 15, image: '/uploads/menus/ร้านน้ำ/โค้ก (แก้ว).jpg' },
-          { name: 'เป๊ปซี่ (แก้ว)', price: 15, image: '/uploads/menus/ร้านน้ำ/เป๊ปซี่ (แก้ว).jpg' },
-          { name: 'แฟนต้า น้ำแดง (แก้ว)', price: 15, image: '/uploads/menus/ร้านน้ำ/แฟนต้า น้ำแดง (แก้ว).jpg' },
-          { name: 'แฟนต้า น้ำส้ม (แก้ว)', price: 15, image: '/uploads/menus/ร้านน้ำ/แฟนต้า น้ำส้ม (แก้ว).jpg' },
-          { name: 'สไปรท์ (แก้ว)', price: 15, image: '/uploads/menus/ร้านน้ำ/สไปรท์ (แก้ว).jpg' },
+          { name: 'โค้ก (แก้ว)', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/โค้ก (แก้ว).jpg' },
+          { name: 'เป๊ปซี่ (แก้ว)', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/เป๊ปซี่ (แก้ว).jpg' },
+          { name: 'แฟนต้า น้ำแดง (แก้ว)', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/แฟนต้า น้ำแดง (แก้ว).jpg' },
+          { name: 'แฟนต้า น้ำส้ม (แก้ว)', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/แฟนต้า น้ำส้ม (แก้ว).jpg' },
+          { name: 'สไปรท์ (แก้ว)', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/สไปรท์ (แก้ว).jpg' },
         ]
       },
       {
         name: 'นม',
         menus: [
-          { name: 'นมจืด', price: 15, image: '/uploads/menus/ร้านน้ำ/นมวัวรสจืด.jpg' },
-          { name: 'นมช็อกโกแลต', price: 15, image: '/uploads/menus/ร้านน้ำ/นมช็อกโกแลต.jpg' },
-          { name: 'นมเปรี้ยว', price: 15, image: '/uploads/menus/ร้านน้ำ/นมเปรี้ยว.jpg' },
+          { name: 'นมจืด', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/นมวัวรสจืด.jpg' },
+          { name: 'นมช็อกโกแลต', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/นมช็อกโกแลต.jpg' },
+          { name: 'นมเปรี้ยว', price: 15, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/นมเปรี้ยว.jpg' },
         ]
       },
       {
         name: 'น้ำเปล่า',
         menus: [
-          { name: 'น้ำเปล่า (ขวด)', price: 10, image: '/uploads/menus/ร้านน้ำ/น้ำเปล่า (ขวด).jpg' },
+          { name: 'น้ำเปล่า (ขวด)', price: 10, image: 'http://localhost:5080/uploads/menus/ร้านน้ำ/น้ำเปล่า (ขวด).jpg' },
         ]
       }
     ]
@@ -121,20 +121,20 @@ const storesData = [
     email: 'seller.nicha@foodcourt.com',
     promptPayId: '0639271202',
     description: 'ข้าวมันไก่สูตรเด็ด ไก่นุ่ม ข้าวมันหอม น้ำจิ้มรสเลิศ',
-    image: '/uploads/stores/ข้าวมันไก่.jpg',
+    image: 'http://localhost:5080/uploads/stores/ข้าวมันไก่.jpg',
     categories: [
       {
         name: 'ข้าวมันไก่',
         menus: [
-          { name: 'ข้าวมันไก่ต้ม (ธรรมดา)', price: 40, image: '/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ต้ม.jpg' },
-          { name: 'ข้าวมันไก่ต้ม (พิเศษ)', price: 45, image: '/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ต้ม.jpg' },
-          { name: 'ข้าวมันไก่ทอด (ธรรมดา)', price: 40, image: '/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ทอด.jpg' },
-          { name: 'ข้าวมันไก่ทอด (พิเศษ)', price: 45, image: '/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ทอด.jpg' },
-          { name: 'ข้าวมันไก่ผสม (ต้ม+ทอด)', price: 50, image: '/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ผสม.jpg' },
-          { name: 'ข้าวมันไก่ต้ม (ไม่หนัง)', price: 40, image: '/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ต้ม ไม่หนัง.jpg' },
-          { name: 'ไก่ต้ม (กับ)', price: 60, image: '/uploads/menus/ณิชา ข้าวมันไก่/ไก่ต้ม (กับ).jpg' },
-          { name: 'ไก่ทอด (กับ)', price: 60, image: '/uploads/menus/ณิชา ข้าวมันไก่/ไก่ทอด (กับ).jpg' },
-          { name: 'ข้าวมันเปล่า', price: 10, image: '/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันเปล่า.jpg' },
+          { name: 'ข้าวมันไก่ต้ม (ธรรมดา)', price: 40, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ต้ม.jpg' },
+          { name: 'ข้าวมันไก่ต้ม (พิเศษ)', price: 45, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ต้ม.jpg' },
+          { name: 'ข้าวมันไก่ทอด (ธรรมดา)', price: 40, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ทอด.jpg' },
+          { name: 'ข้าวมันไก่ทอด (พิเศษ)', price: 45, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ทอด.jpg' },
+          { name: 'ข้าวมันไก่ผสม (ต้ม+ทอด)', price: 50, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ผสม.jpg' },
+          { name: 'ข้าวมันไก่ต้ม (ไม่หนัง)', price: 40, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันไก่ต้ม ไม่หนัง.jpg' },
+          { name: 'ไก่ต้ม (กับ)', price: 60, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ไก่ต้ม (กับ).jpg' },
+          { name: 'ไก่ทอด (กับ)', price: 60, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ไก่ทอด (กับ).jpg' },
+          { name: 'ข้าวมันเปล่า', price: 10, image: 'http://localhost:5080/uploads/menus/ณิชา ข้าวมันไก่/ข้าวมันเปล่า.jpg' },
         ],
       },
     ],
@@ -146,44 +146,44 @@ const storesData = [
     email: 'seller.pakstai@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อาหารใต้รสจัดจ้าน ถึงเครื่องแกงใต้แท้ๆ',
-    image: '/uploads/stores/ครัวปักใต้.jpg',
+    image: 'http://localhost:5080/uploads/stores/ครัวปักใต้.jpg',
     categories: [
       {
         name: 'แกง',
         menus: [
-          { name: 'แกงไตปลา', price: 60, image: '/uploads/menus/ครัวปักษ์ใต้/แกงไตปลา.jpg' },
-          { name: 'แกงส้มปลา', price: 70, image: '/uploads/menus/ครัวปักษ์ใต้/แกงส้มปลา.jpg' },
-          { name: 'แกงเหลืองหน่อไม้ดอง', price: 70, image: '/uploads/menus/ครัวปักษ์ใต้/แกงเหลืองหน่อไม้ดอง.jpg' },
-          { name: 'พะแนงหมู', price: 65, image: '/uploads/menus/ครัวปักษ์ใต้/พะแนงหมู.jpg' },
-          { name: 'เขียวหวานไก่', price: 60, image: '/uploads/menus/ครัวปักษ์ใต้/เขียวหวานไก่.jpg' },
+          { name: 'แกงไตปลา', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/แกงไตปลา.jpg' },
+          { name: 'แกงส้มปลา', price: 70, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/แกงส้มปลา.jpg' },
+          { name: 'แกงเหลืองหน่อไม้ดอง', price: 70, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/แกงเหลืองหน่อไม้ดอง.jpg' },
+          { name: 'พะแนงหมู', price: 65, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/พะแนงหมู.jpg' },
+          { name: 'เขียวหวานไก่', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/เขียวหวานไก่.jpg' },
         ]
       },
       {
         name: 'ผัด',
         menus: [
-          { name: 'คั่วกลิ้งหมูสับ', price: 65, image: '/uploads/menus/ครัวปักษ์ใต้/คั่วกลิ้งหมูสับ.jpg' },
-          { name: 'หมูผัดกะปิ', price: 65, image: '/uploads/menus/ครัวปักษ์ใต้/หมูผัดกะปิ.jpg' },
-          { name: 'ใบเหลียงผัดไข่', price: 60, image: '/uploads/menus/ครัวปักษ์ใต้/ใบเหลียงผัดไข่.webp' },
-          { name: 'ผัดสะตอกะปิกุ้ง', price: 80, image: '/uploads/menus/ครัวปักษ์ใต้/ผัดสะตอกะปิกุ้ง.jpg' },
-          { name: 'ไก่ผัดขมิ้น', price: 60, image: '/uploads/menus/ครัวปักษ์ใต้/ไก่ผัดขมิ้น.jpg' },
+          { name: 'คั่วกลิ้งหมูสับ', price: 65, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/คั่วกลิ้งหมูสับ.jpg' },
+          { name: 'หมูผัดกะปิ', price: 65, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/หมูผัดกะปิ.jpg' },
+          { name: 'ใบเหลียงผัดไข่', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ใบเหลียงผัดไข่.webp' },
+          { name: 'ผัดสะตอกะปิกุ้ง', price: 80, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ผัดสะตอกะปิกุ้ง.jpg' },
+          { name: 'ไก่ผัดขมิ้น', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ไก่ผัดขมิ้น.jpg' },
         ]
       },
       {
         name: 'ของทอด',
         menus: [
-          { name: 'หมูทอด', price: 50, image: '/uploads/menus/ครัวปักษ์ใต้/หมูทอด.jpg' },
-          { name: 'ไก่ทอดหาดใหญ่', price: 50, image: '/uploads/menus/ครัวปักษ์ใต้/ไก่ทอดหาดใหญ่.jpg' },
-          { name: 'ปลาทอดขมิ้น', price: 70, image: '/uploads/menus/ครัวปักษ์ใต้/ปลาทอดขมิ้น.jpg' },
-          { name: 'ไข่เจียว', price: 40, image: '/uploads/menus/ครัวปักษ์ใต้/ไข่เจียว.jpg' },
+          { name: 'หมูทอด', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/หมูทอด.jpg' },
+          { name: 'ไก่ทอดหาดใหญ่', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ไก่ทอดหาดใหญ่.jpg' },
+          { name: 'ปลาทอดขมิ้น', price: 70, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ปลาทอดขมิ้น.jpg' },
+          { name: 'ไข่เจียว', price: 40, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ไข่เจียว.jpg' },
         ]
       },
       {
         name: 'เครื่องเคียงและอื่นๆ',
         menus: [
-          { name: 'ไข่พะโล้', price: 50, image: '/uploads/menus/ครัวปักษ์ใต้/ไข่พะโล้.jpg' },
-          { name: 'น้ำพริกกะปิ + ผักสด', price: 45, image: '/uploads/menus/ครัวปักษ์ใต้/น้ำพริกกะปิ.jpg' },
-          { name: 'ขนมจีนน้ำยาปักษ์ใต้', price: 50, image: '/uploads/menus/ครัวปักษ์ใต้/ขนมจีนน้ำยาปักษ์ใต้.jpg' },
-          { name: 'ข้าวสวย', price: 10, image: '/uploads/menus/ครัวปักษ์ใต้/ข้าวสวย.jpg' },
+          { name: 'ไข่พะโล้', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ไข่พะโล้.jpg' },
+          { name: 'น้ำพริกกะปิ + ผักสด', price: 45, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/น้ำพริกกะปิ.jpg' },
+          { name: 'ขนมจีนน้ำยาปักษ์ใต้', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ขนมจีนน้ำยาปักษ์ใต้.jpg' },
+          { name: 'ข้าวสวย', price: 10, image: 'http://localhost:5080/uploads/menus/ครัวปักษ์ใต้/ข้าวสวย.jpg' },
         ]
       }
     ]
@@ -195,37 +195,37 @@ const storesData = [
     email: 'seller.deksomburn@foodcourt.com',
     promptPayId: '0639271202',
     description: 'ก๋วยเตี๋ยวรสเด็ด น้ำซุปกลมกล่อม',
-    image: '/uploads/stores/เด็กสมบูณร์.jpg',
+    image: 'http://localhost:5080/uploads/stores/เด็กสมบูณร์.jpg',
     categories: [
       {
         name: 'ก๋วยเตี๋ยวต้มยำ',
         menus: [
-          { name: 'เล็กต้มยำหมู', price: 50, image: '/uploads/menus/เด็กสมบูรณ์/เล็กต้มยำหมู.jpg' },
-          { name: 'ใหญ่ต้มยำหมู', price: 50, image: '/uploads/menus/เด็กสมบูรณ์/ใหญ่ต้มยำหมู.jpg' },
-          { name: 'หมี่ต้มยำหมู', price: 50, image: '/uploads/menus/เด็กสมบูรณ์/หมี่ต้มยำหมู.jpg' },
-          { name: 'วุ้นเส้นต้มยำรวมมิตร', price: 60, image: '/uploads/menus/เด็กสมบูรณ์/วุ้นเส้นต้มยำรวมมิตร.jpg' },
+          { name: 'เล็กต้มยำหมู', price: 50, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/เล็กต้มยำหมู.jpg' },
+          { name: 'ใหญ่ต้มยำหมู', price: 50, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/ใหญ่ต้มยำหมู.jpg' },
+          { name: 'หมี่ต้มยำหมู', price: 50, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/หมี่ต้มยำหมู.jpg' },
+          { name: 'วุ้นเส้นต้มยำรวมมิตร', price: 60, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/วุ้นเส้นต้มยำรวมมิตร.jpg' },
         ]
       },
       {
         name: 'ก๋วยเตี๋ยวน้ำใส',
         menus: [
-          { name: 'เล็กน้ำใสลูกชิ้นปลา', price: 45, image: '/uploads/menus/เด็กสมบูรณ์/เล็กน้ำใสลูกชิ้นปลา.jpg' },
-          { name: 'ใหญ่น้ำใสหมู', price: 45, image: '/uploads/menus/เด็กสมบูรณ์/ใหญ่น้ำใสหมู.jpg' },
-          { name: 'หมี่น้ำใสไก่', price: 45, image: '/uploads/menus/เด็กสมบูรณ์/หมี่น้ำใสไก่.jpg' },
+          { name: 'เล็กน้ำใสลูกชิ้นปลา', price: 45, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/เล็กน้ำใสลูกชิ้นปลา.jpg' },
+          { name: 'ใหญ่น้ำใสหมู', price: 45, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/ใหญ่น้ำใสหมู.jpg' },
+          { name: 'หมี่น้ำใสไก่', price: 45, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/หมี่น้ำใสไก่.jpg' },
         ]
       },
       {
         name: 'ก๋วยเตี๋ยวแห้ง',
         menus: [
-          { name: 'บะหมี่แห้งหมูแดง', price: 50, image: '/uploads/menus/เด็กสมบูรณ์/บะหมี่แห้งหมูแดง.jpg' },
-          { name: 'เล็กแห้งต้มยำ', price: 50, image: '/uploads/menus/เด็กสมบูรณ์/เล็กแห้งต้มยำ.jpg' },
+          { name: 'บะหมี่แห้งหมูแดง', price: 50, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/บะหมี่แห้งหมูแดง.jpg' },
+          { name: 'เล็กแห้งต้มยำ', price: 50, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/เล็กแห้งต้มยำ.jpg' },
         ]
       },
       {
         name: 'เย็นตาโฟ',
         menus: [
-          { name: 'เย็นตาโฟ', price: 55, image: '/uploads/menus/เด็กสมบูรณ์/เย็นตาโฟ.jpg' },
-          { name: 'เย็นตาโฟต้มยำ', price: 60, image: '/uploads/menus/เด็กสมบูรณ์/เย็นตาโฟต้มยำ.jpg' },
+          { name: 'เย็นตาโฟ', price: 55, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/เย็นตาโฟ.jpg' },
+          { name: 'เย็นตาโฟต้มยำ', price: 60, image: 'http://localhost:5080/uploads/menus/เด็กสมบูรณ์/เย็นตาโฟต้มยำ.jpg' },
         ]
       },
     ]
@@ -237,47 +237,47 @@ const storesData = [
     email: 'seller.prarama@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อาหารตามสั่งจานด่วน สดใหม่ทุกจาน (ระบุได้ เช่น ไม่ใส่ผัก, เผ็ดน้อย)',
-    image: '/uploads/stores/ครัวพระราม.jpg',
+    image: 'http://localhost:5080/uploads/stores/ครัวพระราม.jpg',
     categories: [
       {
         name: 'เมนูผัด',
         menus: [
-          { name: 'กะเพราหมูสับ', price: 50, image: '/uploads/menus/ครัวพระราม/กะเพราหมูสับ.jpg' },
-          { name: 'คะน้าหมูกรอบ', price: 60, image: '/uploads/menus/ครัวพระราม/คะน้าหมูกรอบ.jpg' },
-          { name: 'ผัดพริกแกงไก่', price: 55, image: '/uploads/menus/ครัวพระราม/ผัดพริกแกงไก่.jpeg' },
-          { name: 'หมูทอดกระเทียม', price: 55, image: '/uploads/menus/ครัวพระราม/หมูทอดกระเทียม.jpg' },
-          { name: 'ผัดผักรวมมิตร', price: 50, image: '/uploads/menus/ครัวพระราม/ผัดผักรวมมิตร.jpg' },
+          { name: 'กะเพราหมูสับ', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/กะเพราหมูสับ.jpg' },
+          { name: 'คะน้าหมูกรอบ', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/คะน้าหมูกรอบ.jpg' },
+          { name: 'ผัดพริกแกงไก่', price: 55, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ผัดพริกแกงไก่.jpeg' },
+          { name: 'หมูทอดกระเทียม', price: 55, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/หมูทอดกระเทียม.jpg' },
+          { name: 'ผัดผักรวมมิตร', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ผัดผักรวมมิตร.jpg' },
         ]
       },
       {
         name: 'เมนูต้ม',
         menus: [
-          { name: 'ต้มยำกุ้ง', price: 80, image: '/uploads/menus/ครัวพระราม/ต้มยำกุ้ง.jpg' },
-          { name: 'ต้มข่าไก่', price: 70, image: '/uploads/menus/ครัวพระราม/ต้มข่าไก่.jpeg' },
-          { name: 'แกงจืดเต้าหู้หมูสับ', price: 60, image: '/uploads/menus/ครัวพระราม/แกงจืดเต้าหู้หมูสับ.jpg' },
+          { name: 'ต้มยำกุ้ง', price: 80, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ต้มยำกุ้ง.jpg' },
+          { name: 'ต้มข่าไก่', price: 70, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ต้มข่าไก่.jpeg' },
+          { name: 'แกงจืดเต้าหู้หมูสับ', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/แกงจืดเต้าหู้หมูสับ.jpg' },
         ]
       },
       {
         name: 'เมนูเส้น',
         menus: [
-          { name: 'มาม่าผัดขี้เมาทะเล', price: 65, image: '/uploads/menus/ครัวพระราม/มาม่าผัดขี้เมาทะเล.jpg' },
-          { name: 'สุกี้แห้ง', price: 60, image: '/uploads/menus/ครัวพระราม/สุกี้แห้ง.jpg' },
-          { name: 'ราดหน้าหมูหมัก', price: 55, image: '/uploads/menus/ครัวพระราม/ราดหน้าหมูหมัก.jpg' },
+          { name: 'มาม่าผัดขี้เมาทะเล', price: 65, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/มาม่าผัดขี้เมาทะเล.jpg' },
+          { name: 'สุกี้แห้ง', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/สุกี้แห้ง.jpg' },
+          { name: 'ราดหน้าหมูหมัก', price: 55, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ราดหน้าหมูหมัก.jpg' },
         ]
       },
       {
         name: 'เมนูไข่',
         menus: [
-          { name: 'ข้าวไข่เจียวหมูสับ', price: 45, image: '/uploads/menus/ครัวพระราม/ข้าวไข่เจียวหมูสับ.jpg' },
-          { name: 'ไข่ดาว', price: 10, image: '/uploads/menus/ครัวพระราม/ไข่ดาว.jpg' },
+          { name: 'ข้าวไข่เจียวหมูสับ', price: 45, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ข้าวไข่เจียวหมูสับ.jpg' },
+          { name: 'ไข่ดาว', price: 10, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ไข่ดาว.jpg' },
         ]
       },
       {
         name: 'เมนูข้าวผัด',
         menus: [
-          { name: 'ข้าวผัดหมู', price: 50, image: '/uploads/menus/ครัวพระราม/ข้าวผัดหมู.jpg' },
-          { name: 'ข้าวผัดกุ้ง', price: 60, image: '/uploads/menus/ครัวพระราม/ข้าวผัดกุ้ง.jpg' },
-          { name: 'ข้าวผัดอเมริกัน', price: 70, image: '/uploads/menus/ครัวพระราม/ข้าวผัดอเมริกัน.jpg' },
+          { name: 'ข้าวผัดหมู', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ข้าวผัดหมู.jpg' },
+          { name: 'ข้าวผัดกุ้ง', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ข้าวผัดกุ้ง.jpg' },
+          { name: 'ข้าวผัดอเมริกัน', price: 70, image: 'http://localhost:5080/uploads/menus/ครัวพระราม/ข้าวผัดอเมริกัน.jpg' },
         ]
       },
     ]
@@ -289,30 +289,30 @@ const storesData = [
     email: 'seller.inter@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อาหารนานาชาติและฟิวชั่น อร่อยหลากหลายสไตล์',
-    image: '/uploads/stores/ครัวอินเตอร์.jpg',
+    image: 'http://localhost:5080/uploads/stores/ครัวอินเตอร์.jpg',
     categories: [
       {
         name: 'สปาเก็ตตี้',
         menus: [
-          { name: 'สปาเก็ตตี้คาโบนาร่า', price: 89, image: '/uploads/menus/ครัวอินเตอร์/สปาเก็ตตี้คาโบนาร่า.jpg' },
-          { name: 'สปาเก็ตตี้ซอสหมู', price: 79, image: '/uploads/menus/ครัวอินเตอร์/สปาเก็ตตี้ซอสหมู.jpg' },
-          { name: 'สปาเก็ตตี้ขี้เมาทะเล', price: 99, image: '/uploads/menus/ครัวอินเตอร์/สปาเก็ตตี้ขี้เมาทะเล.jpg' },
+          { name: 'สปาเก็ตตี้คาโบนาร่า', price: 89, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/สปาเก็ตตี้คาโบนาร่า.jpg' },
+          { name: 'สปาเก็ตตี้ซอสหมู', price: 79, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/สปาเก็ตตี้ซอสหมู.jpg' },
+          { name: 'สปาเก็ตตี้ขี้เมาทะเล', price: 99, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/สปาเก็ตตี้ขี้เมาทะเล.jpg' },
         ]
       },
       {
         name: 'สเต็ก',
         menus: [
-          { name: 'สเต็กหมูพริกไทยดำ', price: 129, image: '/uploads/menus/ครัวอินเตอร์/สเต็กหมูพริกไทยดำ.jpg' },
-          { name: 'สเต็กไก่สไปซี่', price: 119, image: '/uploads/menus/ครัวอินเตอร์/สเต็กไก่สไปซี่.jpg' },
-          { name: 'ฟิชแอนด์ชิปส์', price: 109, image: '/uploads/menus/ครัวอินเตอร์/ฟิชแอนด์ชิปส์.jpg' },
+          { name: 'สเต็กหมูพริกไทยดำ', price: 129, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/สเต็กหมูพริกไทยดำ.jpg' },
+          { name: 'สเต็กไก่สไปซี่', price: 119, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/สเต็กไก่สไปซี่.jpg' },
+          { name: 'ฟิชแอนด์ชิปส์', price: 109, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/ฟิชแอนด์ชิปส์.jpg' },
         ]
       },
       {
         name: 'ของทานเล่น',
         menus: [
-          { name: 'ผักโขมอบชีส', price: 79, image: '/uploads/menus/ครัวอินเตอร์/ผักโขมอบชีส.jpg' },
-          { name: 'เฟรนช์ฟรายส์', price: 49, image: '/uploads/menus/ครัวอินเตอร์/เฟรนช์ฟรายส์.jpg' },
-          { name: 'นักเก็ตไก่', price: 59, image: '/uploads/menus/ครัวอินเตอร์/นักเก็ตไก่.jpg' },
+          { name: 'ผักโขมอบชีส', price: 79, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/ผักโขมอบชีส.jpg' },
+          { name: 'เฟรนช์ฟรายส์', price: 49, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/เฟรนช์ฟรายส์.jpg' },
+          { name: 'นักเก็ตไก่', price: 59, image: 'http://localhost:5080/uploads/menus/ครัวอินเตอร์/นักเก็ตไก่.jpg' },
         ]
       },
     ]
@@ -324,35 +324,35 @@ const storesData = [
     email: 'seller.chopud@foodcourt.com',
     promptPayId: '0639271202',
     description: 'มื้อเช้าและมื้อดึก อุ่นร้อนคล่องคอ',
-    image: '/uploads/stores/ครัวช่อพุช.jpg',
+    image: 'http://localhost:5080/uploads/stores/ครัวช่อพุช.jpg',
     categories: [
       {
         name: 'ต้มเล้ง',
         menus: [
-          { name: 'เล้งแซ่บ (ชาม)', price: 80, image: '/uploads/menus/ครัวช่อพุช/เล้งแซ่บ (ชาม).jpg' },
-          { name: 'เล้งแซ่บ (หม้อไฟ)', price: 150, image: '/uploads/menus/ครัวช่อพุช/เล้งแซ่บ (หม้อไฟ).jpg' },
+          { name: 'เล้งแซ่บ (ชาม)', price: 80, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/เล้งแซ่บ (ชาม).jpg' },
+          { name: 'เล้งแซ่บ (หม้อไฟ)', price: 150, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/เล้งแซ่บ (หม้อไฟ).jpg' },
         ]
       },
       {
         name: 'ข้าวต้ม/โจ๊ก',
         menus: [
-          { name: 'ข้าวต้มปลา', price: 60, image: '/uploads/menus/ครัวช่อพุช/ข้าวต้มปลา.jpg' },
-          { name: 'โจ๊กหมูใส่ไข่', price: 50, image: '/uploads/menus/ครัวช่อพุช/โจ๊กหมูใส่ไข่.jpg' },
-          { name: 'โจ๊กเปล่า', price: 20, image: '/uploads/menus/ครัวช่อพุช/โจ๊กเปล่า.jpg' },
+          { name: 'ข้าวต้มปลา', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/ข้าวต้มปลา.jpg' },
+          { name: 'โจ๊กหมูใส่ไข่', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/โจ๊กหมูใส่ไข่.jpg' },
+          { name: 'โจ๊กเปล่า', price: 20, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/โจ๊กเปล่า.jpg' },
         ]
       },
       {
         name: 'ต้มเลือดหมู',
         menus: [
-          { name: 'ต้มเลือดหมู', price: 60, image: '/uploads/menus/ครัวช่อพุช/ต้มเลือดหมู.jpg' },
-          { name: 'เกาเหลาเลือดหมู', price: 60, image: '/uploads/menus/ครัวช่อพุช/เกาเหลาเลือดหมู.jpg' },
+          { name: 'ต้มเลือดหมู', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/ต้มเลือดหมู.jpg' },
+          { name: 'เกาเหลาเลือดหมู', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/เกาเหลาเลือดหมู.jpg' },
         ]
       },
       {
         name: 'เกี๊ยว',
         menus: [
-          { name: 'เกี๊ยวน้ำหมู', price: 50, image: '/uploads/menus/ครัวช่อพุช/เกี๊ยวน้ำหมู.jpg' },
-          { name: 'เกี๊ยวกุ้ง', price: 60, image: '/uploads/menus/ครัวช่อพุช/เกี๊ยวกุ้ง.jpg' },
+          { name: 'เกี๊ยวน้ำหมู', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/เกี๊ยวน้ำหมู.jpg' },
+          { name: 'เกี๊ยวกุ้ง', price: 60, image: 'http://localhost:5080/uploads/menus/ครัวช่อพุช/เกี๊ยวกุ้ง.jpg' },
         ]
       }
     ]
@@ -364,24 +364,24 @@ const storesData = [
     email: 'seller.hason@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อาหารมุสลิม ข้าวหมกหอมเครื่องเทศ ซุปเนื้อรสเด็ด',
-    image: '/uploads/stores/ครัวฮาซัน.jpg',
+    image: 'http://localhost:5080/uploads/stores/ครัวฮาซัน.jpg',
     categories: [
       {
         name: 'ข้าวหมก',
         menus: [
-          { name: 'ข้าวหมกไก่ต้ม', price: 50, image: '/uploads/menus/ครัวฮาซัน/ข้าวหมกไก่ต้ม.jpg' },
-          { name: 'ข้าวหมกไก่ทอด', price: 55, image: '/uploads/menus/ครัวฮาซัน/ข้าวหมกไก่ทอด.jpg' },
-          { name: 'ข้าวหมกเนื้อ', price: 70, image: '/uploads/menus/ครัวฮาซัน/ข้าวหมกเนื้อ.jpg' },
-          { name: 'พิเศษไก่', price: 65, image: '/uploads/menus/ครัวฮาซัน/พิเศษไก่.jpg' },
-          { name: 'พิเศษเนื้อ', price: 80, image: '/uploads/menus/ครัวฮาซัน/พิเศษเนื้อ.jpg' },
+          { name: 'ข้าวหมกไก่ต้ม', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/ข้าวหมกไก่ต้ม.jpg' },
+          { name: 'ข้าวหมกไก่ทอด', price: 55, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/ข้าวหมกไก่ทอด.jpg' },
+          { name: 'ข้าวหมกเนื้อ', price: 70, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/ข้าวหมกเนื้อ.jpg' },
+          { name: 'พิเศษไก่', price: 65, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/พิเศษไก่.jpg' },
+          { name: 'พิเศษเนื้อ', price: 80, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/พิเศษเนื้อ.jpg' },
         ]
       },
       {
         name: 'เมนูพิเศษ',
         menus: [
-          { name: 'ซุปเนื้อ', price: 80, image: '/uploads/menus/ครัวฮาซัน/ซุปเนื้อ.jpg' },
-          { name: 'กะเพราเนื้อราดข้าว', price: 75, image: '/uploads/menus/ครัวฮาซัน/กะเพราเนื้อราดข้าว.jpg' },
-          { name: 'สลัดแขก', price: 50, image: '/uploads/menus/ครัวฮาซัน/สลัดแขก.jpg' },
+          { name: 'ซุปเนื้อ', price: 80, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/ซุปเนื้อ.jpg' },
+          { name: 'กะเพราเนื้อราดข้าว', price: 75, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/กะเพราเนื้อราดข้าว.jpg' },
+          { name: 'สลัดแขก', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวฮาซัน/สลัดแขก.jpg' },
         ]
       }
     ]
@@ -393,36 +393,36 @@ const storesData = [
     email: 'seller.coffeemore@foodcourt.com',
     promptPayId: '0639271202',
     description: 'กาแฟสด ชาพรีเมี่ยม และเครื่องดื่มหลากหลาย',
-    image: '/uploads/stores/กาแฟมอ.jpg',
+    image: 'http://localhost:5080/uploads/stores/กาแฟมอ.jpg',
     categories: [
       {
         name: 'กาแฟ',
         menus: [
-          { name: 'เอสเพรสโซ่ (ร้อน)', price: 40, image: '/uploads/menus/กาแฟมอ/เอสเพรสโซ่ (ร้อน).jpg' },
-          { name: 'อเมริกาโน่ (เย็น)', price: 50, image: '/uploads/menus/กาแฟมอ/อเมริกาโน่ (เย็น).jpg' },
-          { name: 'ลาเต้ (เย็น)', price: 55, image: '/uploads/menus/กาแฟมอ/ลาเต้ (เย็น).jpg' },
-          { name: 'คาปูชิโน่ (เย็น)', price: 55, image: '/uploads/menus/กาแฟมอ/คาปูชิโน่ (เย็น).jpg' },
-          { name: 'มอคค่า (เย็น)', price: 60, image: '/uploads/menus/กาแฟมอ/มอคค่า (เย็น).jpg' },
-          { name: 'อเมริกาโน่ (ปั่น)', price: 60, image: '/uploads/menus/กาแฟมอ/อเมริกาโน่ (ปั่น).jpg' },
-          { name: 'ลาเต้ (ปั่น)', price: 65, image: '/uploads/menus/กาแฟมอ/ลาเต้ (ปั่น).jpg' },
+          { name: 'เอสเพรสโซ่ (ร้อน)', price: 40, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/เอสเพรสโซ่ (ร้อน).jpg' },
+          { name: 'อเมริกาโน่ (เย็น)', price: 50, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/อเมริกาโน่ (เย็น).jpg' },
+          { name: 'ลาเต้ (เย็น)', price: 55, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/ลาเต้ (เย็น).jpg' },
+          { name: 'คาปูชิโน่ (เย็น)', price: 55, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/คาปูชิโน่ (เย็น).jpg' },
+          { name: 'มอคค่า (เย็น)', price: 60, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/มอคค่า (เย็น).jpg' },
+          { name: 'อเมริกาโน่ (ปั่น)', price: 60, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/อเมริกาโน่ (ปั่น).jpg' },
+          { name: 'ลาเต้ (ปั่น)', price: 65, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/ลาเต้ (ปั่น).jpg' },
         ]
       },
       {
         name: 'ชา',
         menus: [
-          { name: 'ชาไทย (เย็น)', price: 45, image: '/uploads/menus/กาแฟมอ/ชาไทย (เย็น).jpg' },
-          { name: 'ชาเขียวมัทฉะ (เย็น)', price: 55, image: '/uploads/menus/กาแฟมอ/ชาเขียวมัทฉะ (เย็น).jpg' },
-          { name: 'ชาพีช (เย็น)', price: 50, image: '/uploads/menus/กาแฟมอ/ชาพีช (เย็น).jpg' },
-          { name: 'ชาไทย (ปั่น)', price: 55, image: '/uploads/menus/กาแฟมอ/ชาไทย (ปั่น).jpg' },
-          { name: 'ชาเขียวมัทฉะ (ปั่น)', price: 65, image: '/uploads/menus/กาแฟมอ/ชาเขียวมัทฉะ (ปั่น).jpg' },
+          { name: 'ชาไทย (เย็น)', price: 45, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/ชาไทย (เย็น).jpg' },
+          { name: 'ชาเขียวมัทฉะ (เย็น)', price: 55, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/ชาเขียวมัทฉะ (เย็น).jpg' },
+          { name: 'ชาพีช (เย็น)', price: 50, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/ชาพีช (เย็น).jpg' },
+          { name: 'ชาไทย (ปั่น)', price: 55, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/ชาไทย (ปั่น).jpg' },
+          { name: 'ชาเขียวมัทฉะ (ปั่น)', price: 65, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/ชาเขียวมัทฉะ (ปั่น).jpg' },
         ]
       },
       {
         name: 'อื่นๆ',
         menus: [
-          { name: 'โกโก้ (เย็น/ปั่น)', price: 55, image: '/uploads/menus/กาแฟมอ/โกโก้ (เย็น/ปั่น).jpg' },
-          { name: 'นมสดคาราเมล (เย็น/ปั่น)', price: 55, image: '/uploads/menus/กาแฟมอ/นมสดคาราเมล (เย็น/ปั่น).jpg' },
-          { name: 'อิตาเลี่ยนโซดา', price: 45, image: '/uploads/menus/กาแฟมอ/อิตาเลี่ยนโซดา.jpg' },
+          { name: 'โกโก้ (เย็น/ปั่น)', price: 55, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/โกโก้ (เย็น/ปั่น).jpg' },
+          { name: 'นมสดคาราเมล (เย็น/ปั่น)', price: 55, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/นมสดคาราเมล (เย็น/ปั่น).jpg' },
+          { name: 'อิตาเลี่ยนโซดา', price: 45, image: 'http://localhost:5080/uploads/menus/กาแฟมอ/อิตาเลี่ยนโซดา.jpg' },
         ]
       }
     ]
@@ -434,15 +434,15 @@ const storesData = [
     email: 'seller.kaijiao@foodcourt.com',
     promptPayId: '0639271202',
     description: 'ไข่เจียวร้อนๆ เลือกเครื่องได้ตามใจชอบ',
-    image: '/uploads/stores/ไข่เจียวทรงเครื่อง.jpg',
+    image: 'http://localhost:5080/uploads/stores/ไข่เจียวทรงเครื่อง.jpg',
     categories: [
       {
         name: 'ไข่เจียวราดข้าว',
         menus: [
-          { name: 'ไข่เจียวเปล่า (2ฟอง)', price: 35, image: '/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวเปล่า (2ฟอง).jpg' },
-          { name: 'ไข่เจียวหมูสับ', price: 40, image: '/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวหมูสับ.jpg' },
-          { name: 'ไข่เจียวแหนม', price: 40, image: '/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวแหนม.jpg' },
-          { name: 'ไข่เจียวปูอัด', price: 40, image: '/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวปูอัด.jpg' },
+          { name: 'ไข่เจียวเปล่า (2ฟอง)', price: 35, image: 'http://localhost:5080/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวเปล่า (2ฟอง).jpg' },
+          { name: 'ไข่เจียวหมูสับ', price: 40, image: 'http://localhost:5080/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวหมูสับ.jpg' },
+          { name: 'ไข่เจียวแหนม', price: 40, image: 'http://localhost:5080/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวแหนม.jpg' },
+          { name: 'ไข่เจียวปูอัด', price: 40, image: 'http://localhost:5080/uploads/menus/ไข่เจียวทรงเครื่อง/ไข่เจียวปูอัด.jpg' },
         ]
       }
     ]
@@ -509,7 +509,7 @@ async function main() {
         name: storeData.storeName,
         description: storeData.description,
         location: 'โรงอาหารกลาง DPU',
-        image: storeData.image || '/uploads/stores/default_store.png',
+        image: storeData.image || 'http://localhost:5080/uploads/stores/default_store.png',
         promptPayId: storeData.promptPayId,
         isApproved: true,
         isOpen: true,
@@ -536,7 +536,7 @@ async function main() {
       const menusToCreate = categoryData.menus.map(menu => ({
         name: menu.name,
         price: menu.price,
-        image: menu.image || '/uploads/menus/default_menu.png',
+        image: menu.image || 'http://localhost:5080/uploads/menus/default_menu.png',
         storeId: store.id,
         categoryId: category.id,
       }))
@@ -594,7 +594,7 @@ async function main() {
       orderDate: today,
       confirmedAt: new Date(Date.now() - 10 * 60 * 1000),
       paymentQrCode: `https://promptpay.io/${nichaStore.promptPayId}/45.00.png`,
-      paymentSlip: '/uploads/sample_slip.png',
+      paymentSlip: 'http://localhost:5080/uploads/sample_slip.png',
       orderItems: {
         create: {
           storeId: nichaStore.id,
