@@ -447,6 +447,437 @@ const storesData = [
       }
     ]
   },
+  // 13. ครัวคุณทีป (KRUAW KHUNTEEP)'
+  {
+    storeName: 'ครัวคุณทีป (KRUAW KHUNTEEP)',
+    username: 'seller_khunteep',
+    email: 'seller_khunteep@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'ข้าวขาหมู ข้าวหมูแดง ข้าวหมูกรอบ',
+    categories: [
+        {
+            name: 'ข้าวขาหมู',
+            menus: [
+                { name: 'ข้าวขาหมูเปล่า', price: 45  , image: 'http://localhost:5080/uploads/menus/ครัวคุณทีป/ข้าวขาหมูเปล่า.jpg'},
+                { name: 'ข้าวขาหมูเปล่า (เพิ่มไข่)', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวคุณทีป/ข้าวขาหมูเปล่า (เพิ่มไข่).jpg'},
+            ]
+        },
+        {
+            name: 'ข้าวหมูแดง',
+            menus: [
+                { name: 'ข้าวหมูแดงเปล่า', price: 45 , image: 'http://localhost:5080/uploads/menus/ครัวคุณทีป/ข้าวหมูแดงเปล่า.jpg'},
+                { name: 'ข้าวหมูแดง(เพิ่มไข่)', price: 50, image: 'http://localhost:5080/uploads/menus/ครัวคุณทีป/ข้าวหมูแดง(เพิ่มไข่).jpg'},
+            ]
+        },
+        {
+            name: 'ข้าวหมูกรอบ',
+            menus: [
+                { name: 'ข้าวหมูกรอบเปล่า', price: 45, image: 'http://localhost:5080/uploads/menus/ครัวคุณทีป/ข้าวหมูกรอบเปล่า.jpg'},
+                { name: 'ข้าวหมูกรอบ(เพิ่มไข่)', price: 50 , image: 'http://localhost:5080/uploads/menus/ครัวคุณทีป/ข้าวหมูกรอบ(เพิ่มไข่).jpg'},
+            ]
+        },
+    ]
+  },
+   
+  // 14. ครัวคุณทีป (KRUAW KHUNTEEP)'
+  {
+    storeName: 'ครัวรสเด็ด (KRUA ROSDED)',
+    username: 'seller_khuarosded',
+    email: 'seller_khuarosdep@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'กับข้าว อาหารรสเด็ด',
+    categories: [
+        {
+            name: 'กับข้าว',
+            menus: [
+                { name: 'กะเพราไข่ดาว', price: 40 , image: 'http://localhost:5080/uploads/menus/ครัวรสเด็ด/กะเพราไข่ดาว.jpg'},
+                { name: 'กะเพราหมู', price: 45 , image: 'http://localhost:5080/uploads/menus/ครัวรสเด็ด/กะเพราหมู.jpg'},
+                { name: 'กะเพราไก่', price: 40 , image: 'http://localhost:5080/uploads/menus/ครัวรสเด็ด/กะเพราไก่.jpg'},
+                { name: 'ปลาสามรส', price: 40 , image: 'http://localhost:5080/uploads/menus/ครัวรสเด็ด/ปลาสามรส.jpg'},
+                { name: 'แกงเขียวหวาน', price: 45, image: 'http://localhost:5080/uploads/menus/ครัวรสเด็ด/แกงเขียวหวาน.jpg'},
+                { name: 'กระหล่ำปลีผัดน้ำปลา', price: 25, image: 'http://localhost:5080/uploads/menus/ครัวรสเด็ด/กระหล่ำปลีผัดน้ำปลา.jpg'},
+                { name: 'ห่อหมกปลากราย', price: 20, image: 'http://localhost:5080/uploads/menus/ครัวรสเด็ด/ห่อหมกปลากราย.jpg'},
+            ]
+        },
+        
+    ]
+  },
+  // 15. ก๋วยเตี๋ยวเรือนไทย (KUAI TIAO REUAN THAI)
+  {
+    storeName: 'ก๋วยเตี๋ยวเรือนไทย (KUAI TIAO REUAN THAI)',
+    username: 'seller_kuaitiaoreuanthai',
+    email: 'seller_kuaitiaoreuanthaip@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'ก๋วยเตี๋ยวไก่ เรือนไทย',
+    categories: [
+        {
+            name: 'ก๋วยเตี๋ยวไก่',
+            menus: [
+                { name: 'เส็นเล็ก', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นเล็ก.jpg'},
+                { name: 'เส็นเล็ก(พิเศษ)', price: 50 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นเล็ก(พิเศษ).jpg'},
+                { name: 'เส็นใหญ่', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นใหญ่.jpg'},
+                { name: 'เส็นใหญ่(พิเศษ)', price: 50 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นใหญ่(พิเศษ).jpg'},
+                { name: 'เส้นมาม่า', price: 45 ,  image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นมาม่า.jpg'},
+                { name: 'เส้นมาม่า(พิเศษ)', price: 50, image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นมาม่า(พิเศษ).jpg'},
+                { name: 'บะหมี่เหลือง', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/บะหมี่เหลือง.jpg'},
+                { name: 'บะหมี่เหลือง(พิเศษ)', price: 50, image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/บะหมี่เหลือง(พิเศษ).jpg'},
+                { name: 'หมี่ขาว', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/หมี่ขาว.jpg'},
+                { name: 'หมี่ขาว(พิเศษ)', price: 50, image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/หมี่ขาว(พิเศษ).jpg'},
+            ]
+        },
+        
+    ]
+  },
+  // 16. อาหารตามสั่ง (AHAN TAM SANG)
+  {
+    storeName: 'อาหารตามสั่ง (AHAN TAM SANG)',
+    username: 'seller_ahantamsang',
+    email: 'seller_ahantamsang@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'อาหารตามสั่ง',
+    categories: [
+        {
+            name: 'เมนูผัด',
+            menus: [
+                { name: 'ผัดกะเพรา', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดกะเพรา.jpg'},
+                { name: 'ผัดกะเพรา(พิเศษ)', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดกะเพรา(พิเศษ).jpg'},
+                { name: 'ผัดคะน้าหมูกรอบ', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดคะน้าหมูกรอบ.jpg'},
+                { name: 'ผัดผักรวม', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดผักรวม.jpg'},
+                { name: 'ผัดพริกแกง', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดพริกแกง.jpg'},
+                { name: 'ผัดหน่อไม้', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดหน่อไม้.jpg'},
+                { name: 'ผัดมาม่า', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดมาม่า.jpg'},
+                { name: 'ผัดซีอิ้ว', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดซีอิ้ว.jpg'},
+                { name: 'ผัดพริกเผา', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดพริกเผา.jpg'},
+                { name: 'ผัดผงกระหรี่', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดผงกระหรี่.jpg'},
+                { name: 'ผัดผักบุ้งไฟแดง', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ผัดผักบุ้งไฟแดง.jpg'},
+            ]
+        },
+         {
+            name: 'ไข่เจียว',
+            menus: [
+                { name: 'ไข่เจียวหมู', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ไข่เจียวหมู.jpg'},
+                { name: 'ไข่เจียวไก่', price: 40 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ไข่เจียวไก่.jpg'},
+                { name: 'ไข่เจียวกุ้ง', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ไข่เจียวกุ้ง.jpg'},
+                { name: 'ไข่เจียวหมึก', price: 45, image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ไข่เจียวหมึก.jpg'},
+            ]
+        },
+         {
+            name: 'ข้าวผัด',
+            menus: [
+                { name: 'ข้าวผัดแหนม', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวผัดแหนม.jpg'},
+                { name: 'ข้าวผัดไก่', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวผัดไก่.jpg'},
+                { name: 'ข้าวผัดหมู', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวผัดหมู.jpg'},
+                { name: 'ข้าวผัดกุ้ง', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวผัดกุ้ง.jpg'},
+            ]
+        },
+         {
+            name: 'เมนูต้ม',
+            menus: [
+                { name: 'ข้าวต้มหมู', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวต้มหมู.jpg'},
+                { name: 'ข้าวต้มไก่', price: 40 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวต้มไก่.jpg'},
+                { name: 'สุกี้น้ำหมู', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำหมู.jpg'},
+                { name: 'สุกี้น้ำหมู (แห้ง)', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำหมู (แห้ง).jpg'},
+                { name: 'สุกี้น้ำทะเล', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำทะเล.jpg'},
+                { name: 'สุกี้น้ำทะเล (แห้ง)', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำทะเล (แห้ง).jpg'},
+                { name: 'ต้มยำน้ำข้น', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ต้มยำน้ำข้น.jpg'},
+                { name: 'ต้มยำน้ำใส', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ต้มยำน้ำใส.jpg'},
+            ]
+        },
+    ]
+  },
+  // 17. ขนมจีน น้ำยาปู (Knom Chine Nam Yap Poo)
+  {
+    storeName: 'ขนมจีน น้ำยาปู (Knom Chine Nam Yap Poo)',
+    username: 'seller_knomchine',
+    email: 'seller_knomchine@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'อาหารตามสั่ง',
+    categories: [
+        {
+            name: 'น้ำยาขนมจีน',
+            menus: [
+                { name: 'น้ำยาปู', price: 50 ,image : 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำยาปู.jpg'},
+                { name: 'น้ำยากะทิ', price: 40 ,image : 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำยากะทิ.jpg'},
+                { name: 'น้ำยาพริกหวาน', price: 40 ,image : 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำยาพริกหวาน.jpg'},
+                { name: 'น้ำเงี้ยว', price: 4 ,image : 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำเงี้ยว.jpg'},
+                { name: 'น้ำยาแกงไตปลา', price: 40, image: 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำยาแกงไตปลา.jpg'},
+                { name: 'น้ำยาป่า', price: 40, image: 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำยาป่า.jpg'},
+                { name: 'น้ำยาแกงเขียวหวานไก่', price: 40, image: 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำยาแกงเขียวหวานไก่.jpg'},
+                { name: 'น้ำยาแกงเขียวหวานเนื้อ', price: 50, image: 'http://localhost:5080/uploads/menus/ขนมจีน/น้ำยาแกงเขียวหวานเนื้อ.jpg'},
+            ]
+        },
+         {
+            name: 'เมนูอื่นๆ',
+            menus: [
+                { name: 'ข้าวซอยไก่', price: 45 , image: 'http://localhost:5080/uploads/menus/ขนมจีน/ข้าวซอยไก่.jpg'},
+                { name: 'ข้าวคลุกกะปิ', price: 50, image: 'http://localhost:5080/uploads/menus/ขนมจีน/ข้าวคลุกกะปิ.jpg'},
+                { name: 'ข้าวคลุกน้ำพริก(กล่อง)', price: 40, image: 'http://localhost:5080/uploads/menus/ขนมจีน/ข้าวคลุกน้ำพริก(กล่อง).jpg'},
+            ]
+        },
+    ]
+  },
+  // 18. ลูกชิ้น เรือ 3 รำ (LOOK CHIEN REU SAM RAM
+  {
+    storeName: 'ลูกชิ้น เรือ 3 รำ (LOOK CHIEN REU SAM RAM)',
+    username: 'seller_lukchien',
+    email: 'seller_lukchien@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'อร่อยมาก ต้องลอง!',
+    categories: [
+        {
+            name: 'ลูกชิ้น',
+            menus: [
+                { name: 'ไก่', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/ไก่.jpg'},
+                { name: 'ปลา', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/ปลา.jpg'},
+                { name: 'เนื้อ', price: 10 , image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/เนื้อ.jpg'},
+                { name: 'หมู', price: 10 , image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/หมู.jpg'},
+                { name: 'ไส้กรอก', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/ไส้กรอก.jpg'},
+            ]
+        },
+    ]
+  },
+  // 19. ชานเสน ฟรายแอนด์ดริ้งส์ (CHANSEN FRIES AND DRINKS)
+  {
+    storeName: 'ชานเสน ฟรายแอนด์ดริ้งส์ (CHANSEN FRIES AND DRINKS)',
+    username: 'seller_chansen',
+    email: 'seller_chansene@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'สแน็คและเครื่องดื่ม',
+    categories: [
+        {
+            name: 'สแน็ค',
+            menus: [
+                { name: 'เฟรนฟราย', price: 30 , image: 'http://localhost:5080/uploads/menus/ชานเสน/เฟรนฟราย.jpg'},
+                { name: 'นัคเกต', price: 20 , image: 'http://localhost:5080/uploads/menus/ชานเสน/นัคเกต.jpg'},
+            ]
+        },
+    ]
+  },
+   // 20. DEUM DAM
+  {
+    storeName: 'DEUM DAM & HERB AND HEALTHY',
+    username: 'seller_deumdam',
+    email: 'seller_deumdam@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'อร่อยมาก ต้องลอง!',
+    categories: [
+        {
+            name: 'เครื่องดื่ม',
+            menus: [
+                { name: 'น้ำอัญชันมะนาว', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำอัญชันมะนาว.jpg'},
+                { name: 'น้ำผึ้งมะนาว', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำผึ้งมะนาว.jpg'},
+                { name: 'น้ำตาลสด', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำตาลสด.jpg'},
+                { name: 'น้ำมะตูม', price: 25, image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำมะตูม.jpg'},
+                { name: 'น้ำส้ม', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำส้ม.jpg'},
+                { name: 'น้ำเลมอน', price: 25, image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำเลมอน.jpg'},
+                { name: 'อเมริกาโน', price: 35, image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/อเมริกาโน.jpg'},
+                { name: 'ชามะลิ', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/ชามะลิ.jpg'},
+                { name: 'น้ำพั้นซ์', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำพั้นซ์.jpg'},
+                { name: 'น้ำใบเตย', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำใบเตย.jpg'},
+            ]
+        },
+        {
+            name: 'ท็อปปิ้ง',
+            menus: [
+                { name: 'ไข่มุก', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/ไข่มุก.jpg'},
+                { name: 'วุ้น', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/วุ้น.jpg'},
+                { name: 'น้ำผึ้ง', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/น้ำผึ้ง.jpg'},
+                { name: 'ลอดช่อง', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/ลอดช่อง.jpg'},
+                { name: 'ลูกตาล', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/ลูกตาล.jpg'},
+            ]
+        },
+    ]
+  },
+   // 21. ชาบูเสียบไม้ (SHABU SEIAB MAI)
+  {
+    storeName: 'ชาบูเสียบไม้ (SHABU SEIAB MAI)',
+    username: 'seller_shabu',
+    email: 'seller_shabu@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'น้ำจิ้มรสเด็ด เริ่มต้นไม้ละ 10 บาท',
+    categories: [
+        {
+            name: 'ชาบูเสียบไม้',
+            menus: [
+                { name: 'หมู', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/หมู.jpg'},
+                { name: 'กุ้ง', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/กุ้ง.jpg'},
+                { name: 'ปลาดอรี่', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปลาดอรี่.jpg'},
+                { name: 'สันคอหมูสไลซ์', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/สันคอหมูสไลซ์.jpg'},
+                { name: 'หมูสามชั้นสไลซ์', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/หมูสามชั้นสไลซ์.jpg'},
+                { name: 'ปลาหมึก', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปลาหมึก.jpg'},
+                { name: 'เนื้อ', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เนื้อ.jpg'},
+                { name: 'ลูกชิ้นลาวา', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ลูกชิ้นลาวา.jpg'},
+                { name: 'ปูอัด', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปูอัด.jpg'},
+                { name: 'ไส้กรอก', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ไส้กรอก.jpg'},
+            ]
+        },
+        {
+            name: 'ผักและเห็ด',
+            menus: [
+                { name: 'เห็ดเข็มทอง', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เห็ดเข็มทอง.jpg'},
+                { name: 'ข้าวโพดอ่อน', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ข้าวโพดอ่อน.jpg'},
+                { name: 'ฟักทอง', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ฟักทอง.jpg'},
+                { name: 'แครอท', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/แครอท.jpg'},
+                { name: 'ผักกาดขาว', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ผักกาดขาว.jpg'},
+                { name: 'ผักบุ้ง', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ผักบุ้ง.jpg'},
+                { name: 'เห็ดออรินจิ', price: 35 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เห็ดออรินจิ.jpg'},
+            ]
+        },
+        {
+            name: 'น้ำซุป',
+            menus: [
+                { name: 'น้ำดำ', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/น้ำดำ.jpg'},
+                { name: 'ปกติ', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปกติ.jpg'},
+                { name: 'หม่าล่า', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/หม่าล่า.jpg'},
+            ]
+        },
+        {
+            name: 'น้ำจิ้ม',
+            menus: [
+                { name: 'ซีฟู้ด', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ซีฟู้ด.jpg'},
+                { name: 'น้ำจิ้มหม่าล่า ', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/น้ำจิ้มหม่าล่า.jpg'},
+                { name: 'น้ำจิ้มสุกี้', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/น้ำจิ้มสุกี้.jpg'},
+            ]
+        },
+    ]
+  },
+   // 22. ผล ละ ไม้ (Phol La Mai)
+  {
+    storeName: 'ผล ละ ไม้ (Phol La Mai)',
+    username: 'seller_phollamai',
+    email: 'seller_phollamai@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'สดใหม่จากธรรมชาติ',
+    categories: [
+        {
+            name: 'ผลไม้',
+            menus: [
+                { name: 'สตอเบอร์รี่', price: 30, image: 'http://localhost:5080/uploads/menus/ผลไม้/สตอเบอร์รี่.jpg'},
+                { name: 'มะม่วง', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/มะม่วง.jpg'},
+                { name: 'อาโวคาโด', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/อาโวคาโด.jpg'},
+                { name: 'กีวี', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/กีวี.jpg'},
+                { name: 'ส้มโอ', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/ส้มโอ.jpg'},
+                { name: 'ส้ม', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/ส้ม.jpg'},
+                { name: 'ฝรั่งแช่บ๊วย', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/ฝรั่งแช่บ๊วย.jpg'},
+                { name: 'แตงโม', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/แตงโม.jpg'},
+                { name: 'มะละกอ', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/มะละกอ.jpg'},
+                { name: 'สับปะรด', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/สับปะรด.jpg'},
+                { name: 'ฝรั่ง', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/ฝรั่ง.jpg'},
+            ]
+        },
+        {
+            name: 'เมนูยำ',
+            menus: [
+                { name: 'ยำมะม่วงปลากรอบ (ไม่ใส่ปลาร้า)', price: 40 , image: 'http://localhost:5080/uploads/menus/เมนูยำ/ยำมะม่วงปลากรอบ (ไม่ใส่ปลาร้า).jpg'},
+                { name: 'ยำมะม่วงปลากรอบ(ปลาร้า)', price: 40 , image: 'http://localhost:5080/uploads/menus/เมนูยำ/ยำมะม่วงปลากรอบ(ปลาร้า).jpg'},
+                { name: 'ยำผลไม้รวม', price: 40 , image: 'http://localhost:5080/uploads/menus/เมนูยำ/ยำผลไม้รวม.jpg'},
+            ]
+        },
+    ]
+  },
+    //23. ซูซิ ปั้นคำ (Pun Khum Sushi)
+  {
+    storeName: 'ซูซิ ปั้นคำ (Pun Khum Sushi)',
+    username: 'seller_punkhumsushi',
+    email: 'seller_punkhumsushi@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'ปั้นคำ ปั้นใหม่ทุกคำ',
+    categories: [
+        {
+            name: 'ซูซิ',
+            menus: [
+                { name: 'แซลมอน', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/แซลมอน.jpg'},
+                { name: 'ไข่กุ้ง', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่กุ้ง.jpg'},
+                { name: 'กุ้งหวาน', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/กุ้งหวาน.jpg'},
+                { name: 'ไข่ปลาแซลมอน', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่ปลาแซลมอน.jpg'},
+                { name: 'ปลาหมึก', price: 20 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ปลาหมึก.jpg'},
+                { name: 'ไข่หวาน', price: 10 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่หวาน.jpg'},
+                { name: 'ปูอัด', price: 10, image: 'http://localhost:5080/uploads/menus/ซูซิ/ปูอัด.jpg'},
+                { name: 'ทูน่า', price: 20, image: 'http://localhost:5080/uploads/menus/ซูซิ/ทูน่า.jpg'},
+                { name: 'สาหร่าย', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/สาหร่าย.jpg'},
+                { name: 'ปลาไหล', price: 20, image: 'http://localhost:5080/uploads/menus/ซูซิ/ปลาไหล.jpg'},
+                { name: 'หอยลาย', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/หอยลาย.jpg'},
+            ]
+        },
+    ]
+  },
+   //24. ไอ สโนว์ (I Snow)
+  {
+    storeName: 'ไอ สโนว์ (I Snow)',
+    username: 'seller_isnow',
+    email: 'seller_isnow@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'ไอ สโนว์ ไอศกรีม',
+    categories: [
+        {
+            name: 'ไอศกรีม',
+            menus: [
+                { name: 'ซ็อกโกแลต', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/ซ็อกโกแลต.jpg'},
+                { name: 'วานิลา', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอศกรีม/วานิลา.jpg'},
+                { name: 'มะนาว', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอศกรีม/มะนาว.jpg'},
+                { name: 'กระทิ', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/กระทิ.jpg'},
+                { name: 'มะม่วง', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/มะม่วง.jpg'},
+                { name: 'สตรอว์เบอร์รี่', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอศกรีม/สตรอว์เบอร์รี่.jpg'},
+                { name: 'ชาไทย', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/ชาไทย.jpg'},
+            ]
+        },
+         {
+            name: 'ของหวาน',
+            menus: [
+                { name: 'เฉาก๊วยนมสด', price: 30, image: 'http://localhost:5080/uploads/menus/ของหวาน/เฉาก๊วยนมสด.jpg'},
+                { name: 'ลอดช่อง', price: 30, image: 'http://localhost:5080/uploads/menus/ของหวาน/ลอดช่อง.jpg'},
+                { name: 'ลูกเดือยเปียกทรงเครื่อง', price: 30, image: 'http://localhost:5080/uploads/menus/ของหวาน/ลูกเดือยเปียกทรงเครื่อง.jpg'},
+            ]
+        },
+    ]
+  },
+  //25. โนบิชา (Nobicha)'
+  {
+    storeName: 'โนบิชา (Nobicha)',
+    username: 'seller_nobicha',
+    email: 'seller_nobicha@foodcourt.com',
+    promptPayId: '0639271202',
+    description: 'โนบิชา ชา',
+    categories: [
+        {
+            name: 'โซดา',
+            menus: [
+                { name: 'น้ำแดงโซดา', price: 19, image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/น้ำแดงโซดา.jpg'},
+                { name: 'มะนาวโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/มะนาวโซดา.jpg'},
+                { name: 'เมล่อนโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/เมล่อนโซดา.jpg'},
+                { name: 'แอปเปิ้ลโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/แอปเปิ้ลโซดา.jpg'},
+                { name: 'น้าแดงมะนาวโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/น้าแดงมะนาวโซดา.jpg'},
+                { name: 'สตรอว์เบอร์รี่โซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/สตรอว์เบอร์รี่โซดา.jpg'},
+                { name: 'ลิ้นจี่โซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/ลิ้นจี่โซดา.jpg'},
+            ]
+        },
+        {
+            name: 'พรี่เมี่ยม',
+            menus: [
+                { name: 'มัทฉะลาเต้', price: 55, image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/มัทฉะลาเต้.jpg'},
+                { name: 'นมสดน้ําผึ้ง', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดน้ําผึ้ง.jpg'},
+                { name: 'นมสดคาราเมล', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดคาราเมล.jpg'},
+                { name: 'นมสดโกโก้', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดโกโก้.jpg'},
+                { name: 'ชาเขียวน้ำผึ้ง', price: 34 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/ชาเขียวน้ำผึ้ง.jpg'},
+                { name: 'ชาเขียวมะลิ', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/ชาเขียวมะลิ.jpg'},
+                { name: 'นมสดไข่มุกบราวน์ชูการ์', price: 34 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดไข่มุกบราวน์ชูการ์.jpg'},
+            ]
+        },
+        {
+            name: 'เมนูอื่นๆ',
+            menus: [
+                { name: 'นมชมพู', price: 24, image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/นมชมพู.jpg'},
+                { name: 'โอวัลติน', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/โอวัลติน.jpg'},
+                { name: 'โกโก้', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/โกโก้.jpg'},
+                { name: 'เนสกาแฟ', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/เนสกาแฟ.jpg'},
+                { name: 'มอคค่า', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/มอคค่า.jpg'},
+                { name: 'ลาเต้', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/ลาเต้.jpg'},
+                { name: 'น้ำผึ้งมะนาว', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/น้ำผึ้งมะนาว.jpg'},
+            ]
+        },
+    ]
+  },
+
 ]
 
 
