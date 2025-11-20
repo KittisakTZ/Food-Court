@@ -33,9 +33,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# upload images
-public/uploads/
-uploads
-/uploads/
-
 /prisma/migrations
