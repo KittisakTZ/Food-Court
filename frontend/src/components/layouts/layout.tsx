@@ -119,19 +119,6 @@ const MainLayout = () => {
         items: generateSidebarItems(),
       },
     ],
-    sidebarFooter: {
-      profile: {
-        name: user?.username ?? "ผู้ใช้",
-        avatar: "/images/avatar2.png",
-      },
-      items: [
-        {
-          icon: <IoIosLogOut className="text-orange-500" />,
-          name: "ออกจากระบบ",
-          onClick: handleLogout,
-        },
-      ],
-    },
   };
 
   return (

@@ -219,11 +219,11 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
                                     {/* --- [รูปอาหาร] เพิ่มเงาและวงแหวน --- */}
                                     <img
-                                        src={item.menu.image || 'https://via.placeholder.com/150'}
+                                        src={item.menu.image || ''}
                                         alt={item.menu.name}
                                         className="w-20 h-20 rounded-lg object-cover flex-shrink-0 shadow-md ring-2 ring-orange-100"
                                         onError={(e) => {
-                                            e.currentTarget.src = 'https://via.placeholder.com/150';
+                                            e.currentTarget.src = '';
                                         }}
                                     />
 

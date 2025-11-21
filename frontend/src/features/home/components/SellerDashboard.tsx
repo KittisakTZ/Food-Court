@@ -22,7 +22,8 @@ import {
   FiSearch,
   FiRefreshCw,
   FiX,
-  FiCheck, // Import FiCheck
+  FiCheck,
+  FiUser, // Import FiCheck
 } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { Order } from "@/types/response/order.response";
@@ -390,7 +391,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             onClick={() => handleStatusChange("AWAITING_PAYMENT")}
             className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
           >
-            <FiDollarSign className="w-6 h-6 mx-auto mb-2" />
+            <FiUser className="w-6 h-6 mx-auto mb-2" />
             <p className="text-2xl font-bold">
               {statsFromCurrentPage.awaitingPayment}
             </p>
