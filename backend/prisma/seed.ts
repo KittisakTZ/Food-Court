@@ -513,10 +513,10 @@ const storesData = [
         {
             name: 'ก๋วยเตี๋ยวไก่',
             menus: [
-                { name: 'เส็นเล็ก', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นเล็ก.jpg'},
-                { name: 'เส็นเล็ก(พิเศษ)', price: 50 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นเล็ก(พิเศษ).jpg'},
-                { name: 'เส็นใหญ่', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นใหญ่.jpg'},
-                { name: 'เส็นใหญ่(พิเศษ)', price: 50 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส็นใหญ่(พิเศษ).jpg'},
+                { name: 'เส็นเล็ก', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นเล็ก.jpg'},
+                { name: 'เส็นเล็ก(พิเศษ)', price: 50 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นเล็ก(พิเศษ).jpg'},
+                { name: 'เส็นใหญ่', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นใหญ่.jpg'},
+                { name: 'เส็นใหญ่(พิเศษ)', price: 50 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นใหญ่(พิเศษ).jpg'},
                 { name: 'เส้นมาม่า', price: 45 ,  image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นมาม่า.jpg'},
                 { name: 'เส้นมาม่า(พิเศษ)', price: 50, image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/เส้นมาม่า(พิเศษ).jpg'},
                 { name: 'บะหมี่เหลือง', price: 45 , image: 'http://localhost:5080/uploads/menus/ก๋วยเตี๋ยวเรือนไทย/บะหมี่เหลือง.jpg'},
@@ -576,9 +576,9 @@ const storesData = [
                 { name: 'ข้าวต้มหมู', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวต้มหมู.jpg'},
                 { name: 'ข้าวต้มไก่', price: 40 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ข้าวต้มไก่.jpg'},
                 { name: 'สุกี้น้ำหมู', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำหมู.jpg'},
-                { name: 'สุกี้น้ำหมู (แห้ง)', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำหมู (แห้ง).jpg'},
+                { name: 'สุกี้น้ำหมู (แห้ง)', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำหมู(แห้ง).jpg'},
                 { name: 'สุกี้น้ำทะเล', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำทะเล.jpg'},
-                { name: 'สุกี้น้ำทะเล (แห้ง)', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำทะเล (แห้ง).jpg'},
+                { name: 'สุกี้น้ำทะเล (แห้ง)', price: 45 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/สุกี้น้ำทะเล(แห้ง).jpg'},
                 { name: 'ต้มยำน้ำข้น', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ต้มยำน้ำข้น.jpg'},
                 { name: 'ต้มยำน้ำใส', price: 50 , image: 'http://localhost:5080/uploads/menus/อาหารตามสั่ง/ต้มยำน้ำใส.jpg'},
             ]
@@ -627,11 +627,10 @@ const storesData = [
         {
             name: 'ลูกชิ้น',
             menus: [
-                { name: 'ไก่', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/ไก่.jpg'},
-                { name: 'ปลา', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/ปลา.jpg'},
-                { name: 'เนื้อ', price: 10 , image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/เนื้อ.jpg'},
-                { name: 'หมู', price: 10 , image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/หมู.jpg'},
-                { name: 'ไส้กรอก', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้น/ไส้กรอก.jpg'},
+                { name: 'ปลา', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นเรือ3ลำ/ปลา.jpg'},
+                { name: 'เนื้อ', price: 10 , image: 'http://localhost:5080/uploads/menus/ลูกชิ้นเรือ3ลำ/เนื้อ.jpg'},
+                { name: 'หมู', price: 10 , image: 'http://localhost:5080/uploads/menus/ลูกชิ้นเรือ3ลำ/หมู.jpg'},
+                { name: 'ไส้กรอก', price: 10, image: 'http://localhost:5080/uploads/menus/ลูกชิ้นเรือ3ลำ/ไส้กรอกแดง.jpg'},
             ]
         },
     ]
@@ -664,26 +663,25 @@ const storesData = [
         {
             name: 'เครื่องดื่ม',
             menus: [
-                { name: 'น้ำอัญชันมะนาว', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำอัญชันมะนาว.jpg'},
-                { name: 'น้ำผึ้งมะนาว', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำผึ้งมะนาว.jpg'},
-                { name: 'น้ำตาลสด', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำตาลสด.jpg'},
-                { name: 'น้ำมะตูม', price: 25, image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำมะตูม.jpg'},
-                { name: 'น้ำส้ม', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำส้ม.jpg'},
-                { name: 'น้ำเลมอน', price: 25, image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำเลมอน.jpg'},
-                { name: 'อเมริกาโน', price: 35, image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/อเมริกาโน.jpg'},
-                { name: 'ชามะลิ', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/ชามะลิ.jpg'},
-                { name: 'น้ำพั้นซ์', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำพั้นซ์.jpg'},
-                { name: 'น้ำใบเตย', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/เครื่องดื่ม/น้ำใบเตย.jpg'},
+                { name: 'น้ำอัญชันมะนาว', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำอัญชันมะนาว.jpg'},
+                { name: 'น้ำผึ้งมะนาว', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำผึ้งมะนาว.jpg'},
+                { name: 'น้ำตาลสด', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำตาลสด.jpg'},
+                { name: 'น้ำมะตูม', price: 25, image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำมะตูม.jpg'},
+                { name: 'น้ำส้ม', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำส้ม.jpg'},
+                { name: 'น้ำเลมอน', price: 25, image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำเลมอน.jpg'},
+                { name: 'อเมริกาโน', price: 35, image: 'http://localhost:5080/uploads/menus/DEUMDAM/อเมริกาโน.jpg'},
+                { name: 'ชามะลิ', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/ชามะลิ.jpg'},
+                { name: 'น้ำพั้นซ์', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำพั้นซ์.jpg'},
+                { name: 'น้ำใบเตย', price: 25 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำใบเตย.jpg'},
             ]
         },
         {
             name: 'ท็อปปิ้ง',
             menus: [
-                { name: 'ไข่มุก', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/ไข่มุก.jpg'},
-                { name: 'วุ้น', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/วุ้น.jpg'},
-                { name: 'น้ำผึ้ง', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/น้ำผึ้ง.jpg'},
-                { name: 'ลอดช่อง', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/ลอดช่อง.jpg'},
-                { name: 'ลูกตาล', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUM DAM/ท็อปปิ้ง/ลูกตาล.jpg'},
+                { name: 'ไข่มุก', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/ไข่มุก.jpg'},
+                { name: 'น้ำผึ้ง', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/น้ำผึ้ง.jpg'},
+                { name: 'ลอดช่อง', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/ลอดช่อง.jpg'},
+                { name: 'ลูกตาล', price: 10 , image: 'http://localhost:5080/uploads/menus/DEUMDAM/ลูกตาล.jpg'},
             ]
         },
     ]
@@ -699,28 +697,26 @@ const storesData = [
         {
             name: 'ชาบูเสียบไม้',
             menus: [
-                { name: 'หมู', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/หมู.jpg'},
-                { name: 'กุ้ง', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/กุ้ง.jpg'},
-                { name: 'ปลาดอรี่', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปลาดอรี่.jpg'},
-                { name: 'สันคอหมูสไลซ์', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/สันคอหมูสไลซ์.jpg'},
-                { name: 'หมูสามชั้นสไลซ์', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/หมูสามชั้นสไลซ์.jpg'},
-                { name: 'ปลาหมึก', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปลาหมึก.jpg'},
+                { name: 'หมู', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/หมู.png'},
+                { name: 'กุ้ง', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/กุ้ง.png'},
+                { name: 'ปลาดอรี่', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปลาดอลลี่.png'},
+                { name: 'สันคอหมูสไลซ์', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/สันคอหมูสไลซ์.png'},
+                { name: 'หมูสามชั้นสไลซ์', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/หมูสามชั้นสไลด์.png'},
+                { name: 'ปลาหมึก', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปลาหมึก.png'},
                 { name: 'เนื้อ', price: 20 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เนื้อ.jpg'},
-                { name: 'ลูกชิ้นลาวา', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ลูกชิ้นลาวา.jpg'},
-                { name: 'ปูอัด', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปูอัด.jpg'},
-                { name: 'ไส้กรอก', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ไส้กรอก.jpg'},
+                { name: 'ลูกชิ้นลาวา', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ลูกชิ้นลาวา.png'},
+                { name: 'ปูอัด', price: 10 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ปูอัด.png'},
             ]
         },
         {
             name: 'ผักและเห็ด',
             menus: [
-                { name: 'เห็ดเข็มทอง', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เห็ดเข็มทอง.jpg'},
-                { name: 'ข้าวโพดอ่อน', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ข้าวโพดอ่อน.jpg'},
+                { name: 'เห็ดเข็มทอง', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เห็ดเข็มทอง.png'},
+                { name: 'ข้าวโพดอ่อน', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ข้าวโพดอ่อน.png'},
                 { name: 'ฟักทอง', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ฟักทอง.jpg'},
-                { name: 'แครอท', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/แครอท.jpg'},
-                { name: 'ผักกาดขาว', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ผักกาดขาว.jpg'},
-                { name: 'ผักบุ้ง', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ผักบุ้ง.jpg'},
-                { name: 'เห็ดออรินจิ', price: 35 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เห็ดออรินจิ.jpg'},
+                { name: 'แครอท', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/แครอท.png'},
+                { name: 'ผักกาดขาว', price: 25 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ผักกาดขาว.png'},
+                { name: 'เห็ดออรินจิ', price: 35 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/เห็ดออรินจิ.png'},
             ]
         },
         {
@@ -735,7 +731,6 @@ const storesData = [
             name: 'น้ำจิ้ม',
             menus: [
                 { name: 'ซีฟู้ด', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/ซีฟู้ด.jpg'},
-                { name: 'น้ำจิ้มหม่าล่า ', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/น้ำจิ้มหม่าล่า.jpg'},
                 { name: 'น้ำจิ้มสุกี้', price: 0 , image: 'http://localhost:5080/uploads/menus/ชาบูเสียบไม้/น้ำจิ้มสุกี้.jpg'},
             ]
         },
@@ -760,7 +755,7 @@ const storesData = [
                 { name: 'ส้ม', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/ส้ม.jpg'},
                 { name: 'ฝรั่งแช่บ๊วย', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/ฝรั่งแช่บ๊วย.jpg'},
                 { name: 'แตงโม', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/แตงโม.jpg'},
-                { name: 'มะละกอ', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/มะละกอ.jpg'},
+                { name: 'มะละกอ', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/มะละกอ.png'},
                 { name: 'สับปะรด', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/สับปะรด.jpg'},
                 { name: 'ฝรั่ง', price: 30 , image: 'http://localhost:5080/uploads/menus/ผลไม้/ฝรั่ง.jpg'},
             ]
@@ -768,7 +763,7 @@ const storesData = [
         {
             name: 'เมนูยำ',
             menus: [
-                { name: 'ยำมะม่วงปลากรอบ (ไม่ใส่ปลาร้า)', price: 40 , image: 'http://localhost:5080/uploads/menus/เมนูยำ/ยำมะม่วงปลากรอบ (ไม่ใส่ปลาร้า).jpg'},
+                { name: 'ยำมะม่วงปลากรอบ (ไม่ใส่ปลาร้า)', price: 40 , image: 'http://localhost:5080/uploads/menus/เมนูยำ/ยำมะม่วงปลากรอบ(ไม่ใส่ปลาร้า).jpg'},
                 { name: 'ยำมะม่วงปลากรอบ(ปลาร้า)', price: 40 , image: 'http://localhost:5080/uploads/menus/เมนูยำ/ยำมะม่วงปลากรอบ(ปลาร้า).jpg'},
                 { name: 'ยำผลไม้รวม', price: 40 , image: 'http://localhost:5080/uploads/menus/เมนูยำ/ยำผลไม้รวม.jpg'},
             ]
@@ -787,16 +782,16 @@ const storesData = [
             name: 'ซูซิ',
             menus: [
                 { name: 'แซลมอน', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/แซลมอน.jpg'},
-                { name: 'ไข่กุ้ง', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่กุ้ง.jpg'},
+                { name: 'ไข่กุ้ง', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่กุ้ง.png'},
                 { name: 'กุ้งหวาน', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/กุ้งหวาน.jpg'},
-                { name: 'ไข่ปลาแซลมอน', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่ปลาแซลมอน.jpg'},
-                { name: 'ปลาหมึก', price: 20 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ปลาหมึก.jpg'},
-                { name: 'ไข่หวาน', price: 10 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่หวาน.jpg'},
+                { name: 'ไข่ปลาแซลมอน', price: 15 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่ปลาแซลมอน.png'},
+                { name: 'ปลาหมึก', price: 20 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ปลาหมึก.png'},
+                { name: 'ไข่หวาน', price: 10 , image: 'http://localhost:5080/uploads/menus/ซูซิ/ไข่หวาน.png'},
                 { name: 'ปูอัด', price: 10, image: 'http://localhost:5080/uploads/menus/ซูซิ/ปูอัด.jpg'},
-                { name: 'ทูน่า', price: 20, image: 'http://localhost:5080/uploads/menus/ซูซิ/ทูน่า.jpg'},
-                { name: 'สาหร่าย', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/สาหร่าย.jpg'},
-                { name: 'ปลาไหล', price: 20, image: 'http://localhost:5080/uploads/menus/ซูซิ/ปลาไหล.jpg'},
-                { name: 'หอยลาย', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/หอยลาย.jpg'},
+                { name: 'ทูน่า', price: 20, image: 'http://localhost:5080/uploads/menus/ซูซิ/ทูน่า.png'},
+                { name: 'สาหร่าย', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/สาหร่าย.png'},
+                { name: 'ปลาไหล', price: 20, image: 'http://localhost:5080/uploads/menus/ซูซิ/ปลาไหล.png'},
+                { name: 'หอยลาย', price: 15, image: 'http://localhost:5080/uploads/menus/ซูซิ/หอยลาย.png'},
             ]
         },
     ]
@@ -807,26 +802,24 @@ const storesData = [
     username: 'seller_isnow',
     email: 'seller_isnow@foodcourt.com',
     promptPayId: '0639271202',
-    description: 'ไอ สโนว์ ไอศกรีม',
+    description: 'ไอ สโนว์ ไอสโนว์',
     categories: [
         {
-            name: 'ไอศกรีม',
+            name: 'ไอสโนว์',
             menus: [
-                { name: 'ซ็อกโกแลต', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/ซ็อกโกแลต.jpg'},
-                { name: 'วานิลา', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอศกรีม/วานิลา.jpg'},
-                { name: 'มะนาว', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอศกรีม/มะนาว.jpg'},
-                { name: 'กระทิ', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/กระทิ.jpg'},
-                { name: 'มะม่วง', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/มะม่วง.jpg'},
-                { name: 'สตรอว์เบอร์รี่', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอศกรีม/สตรอว์เบอร์รี่.jpg'},
-                { name: 'ชาไทย', price: 10, image: 'http://localhost:5080/uploads/menus/ไอศกรีม/ชาไทย.jpg'},
+                { name: 'ซ็อกโกแลต', price: 10, image: 'http://localhost:5080/uploads/menus/ไอสโนว์/ซ็อกโกแลต.png'},
+                { name: 'วานิลา', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอสโนว์/วานิลา.png'},
+                { name: 'มะนาว', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอสโนว์/มะนาว.png'},
+                { name: 'กระทิ', price: 10, image: 'http://localhost:5080/uploads/menus/ไอสโนว์/กระทิ.png'},
+                { name: 'มะม่วง', price: 10, image: 'http://localhost:5080/uploads/menus/ไอสโนว์/มะม่วง.png'},
+                { name: 'สตรอว์เบอร์รี่', price: 10 , image: 'http://localhost:5080/uploads/menus/ไอสโนว์/สตรอว์เบอร์รี่.png'},
+                { name: 'ชาไทย', price: 10, image: 'http://localhost:5080/uploads/menus/ไอสโนว์/ชาไทย.jpg'},
             ]
         },
          {
             name: 'ของหวาน',
             menus: [
                 { name: 'เฉาก๊วยนมสด', price: 30, image: 'http://localhost:5080/uploads/menus/ของหวาน/เฉาก๊วยนมสด.jpg'},
-                { name: 'ลอดช่อง', price: 30, image: 'http://localhost:5080/uploads/menus/ของหวาน/ลอดช่อง.jpg'},
-                { name: 'ลูกเดือยเปียกทรงเครื่อง', price: 30, image: 'http://localhost:5080/uploads/menus/ของหวาน/ลูกเดือยเปียกทรงเครื่อง.jpg'},
             ]
         },
     ]
@@ -842,37 +835,35 @@ const storesData = [
         {
             name: 'โซดา',
             menus: [
-                { name: 'น้ำแดงโซดา', price: 19, image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/น้ำแดงโซดา.jpg'},
-                { name: 'มะนาวโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/มะนาวโซดา.jpg'},
-                { name: 'เมล่อนโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/เมล่อนโซดา.jpg'},
-                { name: 'แอปเปิ้ลโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/แอปเปิ้ลโซดา.jpg'},
-                { name: 'น้าแดงมะนาวโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/น้าแดงมะนาวโซดา.jpg'},
-                { name: 'สตรอว์เบอร์รี่โซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/สตรอว์เบอร์รี่โซดา.jpg'},
-                { name: 'ลิ้นจี่โซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โซดา/ลิ้นจี่โซดา.jpg'},
+                { name: 'น้ำแดงโซดา', price: 19, image: 'http://localhost:5080/uploads/menus/โนบิชา/น้ำแดงโซดา.png'},
+                { name: 'เมล่อนโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมล่อนโซดา.jpg'},
+                { name: 'แอปเปิ้ลโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/แอปเปิ้ลโซดา.jpg'},
+                { name: 'น้าแดงมะนาวโซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/น้าแดงมะนาวโซดา.jpg'},
+                { name: 'สตรอว์เบอร์รี่โซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/สตรอว์เบอร์รี่โซดา.jpg'},
+                { name: 'ลิ้นจี่โซดา', price: 19 , image: 'http://localhost:5080/uploads/menus/โนบิชา/ลิ้นจี่โซดา.png'},
             ]
         },
         {
             name: 'พรี่เมี่ยม',
             menus: [
-                { name: 'มัทฉะลาเต้', price: 55, image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/มัทฉะลาเต้.jpg'},
-                { name: 'นมสดน้ําผึ้ง', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดน้ําผึ้ง.jpg'},
-                { name: 'นมสดคาราเมล', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดคาราเมล.jpg'},
-                { name: 'นมสดโกโก้', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดโกโก้.jpg'},
-                { name: 'ชาเขียวน้ำผึ้ง', price: 34 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/ชาเขียวน้ำผึ้ง.jpg'},
-                { name: 'ชาเขียวมะลิ', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/ชาเขียวมะลิ.jpg'},
-                { name: 'นมสดไข่มุกบราวน์ชูการ์', price: 34 , image: 'http://localhost:5080/uploads/menus/โนบิชา/พรี่เมี่ยม/นมสดไข่มุกบราวน์ชูการ์.jpg'},
+                { name: 'มัทฉะลาเต้', price: 55, image: 'http://localhost:5080/uploads/menus/โนบิชา/มัทฉะลาเต้.jpg'},
+                { name: 'นมสดโกโก้', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/นมสดโกโก้.jpg'},
+                { name: 'นมสดน้ำผึ้ง', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/นมสดน้ำผึ้ง.jpg'},
+                { name: 'นมสดคาราเมล', price: 39 , image: 'http://localhost:5080/uploads/menus/โนบิชา/นมสดคาราเมล.jpg'},
+                { name: 'ชาเขียวน้ำผึ้ง', price: 34 , image: 'http://localhost:5080/uploads/menus/โนบิชา/ชาเขียวน้ำผึ้ง.jpg'},
+                { name: 'นมสดไข่มุกบราวน์ชูการ์', price: 34 , image: 'http://localhost:5080/uploads/menus/โนบิชา/นมสดไข่มุกบราวน์ชูการ์.jpg'},
+                { name: 'ชาเขียวมะลิ', price: 34 , image: 'http://localhost:5080/uploads/menus/โนบิชา/ชาเขียวมะลิ.jpg'},
             ]
         },
         {
             name: 'เมนูอื่นๆ',
             menus: [
-                { name: 'นมชมพู', price: 24, image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/นมชมพู.jpg'},
-                { name: 'โอวัลติน', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/โอวัลติน.jpg'},
-                { name: 'โกโก้', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/โกโก้.jpg'},
-                { name: 'เนสกาแฟ', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/เนสกาแฟ.jpg'},
-                { name: 'มอคค่า', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/มอคค่า.jpg'},
-                { name: 'ลาเต้', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/ลาเต้.jpg'},
-                { name: 'น้ำผึ้งมะนาว', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เมนูอื่นๆ/น้ำผึ้งมะนาว.jpg'},
+                { name: 'นมชมพู', price: 24, image: 'http://localhost:5080/uploads/menus/โนบิชา/นมชมพู.jpg'},
+                { name: 'โอวัลติน', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โอวัลติน.jpg'},
+                { name: 'โกโก้', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/โกโก้.jpg'},
+                { name: 'เนสกาแฟ', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/เนสกาแฟ.jpg'},
+                { name: 'มอคค่า', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/มอคค่า.jpg'},
+                { name: 'น้ำผึ้งมะนาว', price: 24 , image: 'http://localhost:5080/uploads/menus/โนบิชา/น้ำผึ้งมะนาว.jpg'},
             ]
         },
     ]
