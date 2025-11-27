@@ -248,10 +248,6 @@ const SidebarMain = () => {
           );
         })}
       </div>
-
-      <div className=" fixed bottom-0 border-t-[1px] border-[#f6f7f9]">
-        <SidebarItemLogout />
-      </div>
     </section>
   );
 };

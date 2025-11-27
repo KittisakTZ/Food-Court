@@ -110,11 +110,6 @@ const NavbarMain = () => {
         </nav>
 
         <Flex className="text-gray-700 mr-4" align="center" gap="4">
-          {/* Notification Bell */}
-          <button className="relative p-2 hover:bg-orange-50 rounded-full transition-colors group">
-            <FiBell className="w-5 h-5 text-gray-600 group-hover:text-orange-600 transition-colors" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
 
           {/* Profile Dropdown */}
           <div className="relative">
@@ -156,29 +151,6 @@ const NavbarMain = () => {
                     </p>
                     <p className="text-xs text-gray-500">{user?.email || "ไม่มีอีเมล"}</p>
                   </div>
-
-                  <Link
-                    to="/profile"
-                    className="flex items-center gap-3 px-4 py-2 hover:bg-orange-50 transition-colors"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <span className="text-orange-600">👤</span>
-                    </div>
-                    <span className="text-sm text-gray-700">โปรไฟล์</span>
-                  </Link>
-
-                  <Link
-                    to="/settings"
-                    className="flex items-center gap-3 px-4 py-2 hover:bg-orange-50 transition-colors"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <span className="text-blue-600">⚙️</span>
-                    </div>
-                    <span className="text-sm text-gray-700">ตั้งค่า</span>
-                  </Link>
-
                   <div className="border-t border-gray-200 my-2"></div>
 
                   {/* Logout Button */}
