@@ -454,6 +454,7 @@ const storesData = [
     email: 'seller_khunteep@foodcourt.com',
     promptPayId: '0639271202',
     description: 'ข้าวขาหมู ข้าวหมูแดง ข้าวหมูกรอบ',
+    Image: 'http://localhost:5080/uploads/stores/ครัวคุณทีป.jpg',
     categories: [
         {
             name: 'ข้าวขาหมู',
@@ -486,6 +487,7 @@ const storesData = [
     email: 'seller_khuarosdep@foodcourt.com',
     promptPayId: '0639271202',
     description: 'กับข้าว อาหารรสเด็ด',
+    Image: 'http://localhost:5080/uploads/stores/ครัวรสเด็ด.jpg',
     categories: [
         {
             name: 'กับข้าว',
@@ -509,6 +511,7 @@ const storesData = [
     email: 'seller_kuaitiaoreuanthaip@foodcourt.com',
     promptPayId: '0639271202',
     description: 'ก๋วยเตี๋ยวไก่ เรือนไทย',
+    Image: 'http://localhost:5080/uploads/stores/ก๋วยเตี๋ยวเรือนไทย.jpg',
     categories: [
         {
             name: 'ก๋วยเตี๋ยวไก่',
@@ -535,6 +538,7 @@ const storesData = [
     email: 'seller_ahantamsang@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อาหารตามสั่ง',
+    image: 'http://localhost:5080/uploads/stores/อาหารตามสั่ง.jpg',
     categories: [
         {
             name: 'เมนูผัด',
@@ -592,6 +596,7 @@ const storesData = [
     email: 'seller_knomchine@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อาหารตามสั่ง',
+    image: 'http://localhost:5080/uploads/stores/ขนมจีน.jpg',
     categories: [
         {
             name: 'น้ำยาขนมจีน',
@@ -623,6 +628,7 @@ const storesData = [
     email: 'seller_lukchien@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อร่อยมาก ต้องลอง!',
+    image: 'http://localhost:5080/uploads/stores/ลูกชิ้นเรือ3ลำ.jpg',
     categories: [
         {
             name: 'ลูกชิ้น',
@@ -642,6 +648,7 @@ const storesData = [
     email: 'seller_chansene@foodcourt.com',
     promptPayId: '0639271202',
     description: 'สแน็คและเครื่องดื่ม',
+    image: 'http://localhost:5080/uploads/stores/ชานเสน.jpg',
     categories: [
         {
             name: 'สแน็ค',
@@ -659,6 +666,7 @@ const storesData = [
     email: 'seller_deumdam@foodcourt.com',
     promptPayId: '0639271202',
     description: 'อร่อยมาก ต้องลอง!',
+    image: 'http://localhost:5080/uploads/stores/DEUMDAM.jpg',
     categories: [
         {
             name: 'เครื่องดื่ม',
@@ -693,6 +701,7 @@ const storesData = [
     email: 'seller_shabu@foodcourt.com',
     promptPayId: '0639271202',
     description: 'น้ำจิ้มรสเด็ด เริ่มต้นไม้ละ 10 บาท',
+    image: 'http://localhost:5080/uploads/stores/ชาบูเสียบไม้.jpg',
     categories: [
         {
             name: 'ชาบูเสียบไม้',
@@ -743,6 +752,7 @@ const storesData = [
     email: 'seller_phollamai@foodcourt.com',
     promptPayId: '0639271202',
     description: 'สดใหม่จากธรรมชาติ',
+    image: 'http://localhost:5080/uploads/stores/ผลละไม้.jpg',
     categories: [
         {
             name: 'ผลไม้',
@@ -777,6 +787,7 @@ const storesData = [
     email: 'seller_punkhumsushi@foodcourt.com',
     promptPayId: '0639271202',
     description: 'ปั้นคำ ปั้นใหม่ทุกคำ',
+    image: 'http://localhost:5080/uploads/stores/ซูซิ.jpg',
     categories: [
         {
             name: 'ซูซิ',
@@ -803,6 +814,7 @@ const storesData = [
     email: 'seller_isnow@foodcourt.com',
     promptPayId: '0639271202',
     description: 'ไอ สโนว์ ไอสโนว์',
+    image: 'http://localhost:5080/uploads/stores/ไอสโนว์.jpg',
     categories: [
         {
             name: 'ไอสโนว์',
@@ -831,6 +843,7 @@ const storesData = [
     email: 'seller_nobicha@foodcourt.com',
     promptPayId: '0639271202',
     description: 'โนบิชา ชา',
+    image: 'http://localhost:5080/uploads/stores/โนบิชา.jpg',
     categories: [
         {
             name: 'โซดา',
