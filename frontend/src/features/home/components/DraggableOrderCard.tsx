@@ -1,5 +1,4 @@
 // @/features/home/components/DraggableOrderCard.tsx
-
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Order } from '@/types/response/order.response';
@@ -10,10 +9,22 @@ import { useMoveOrderPosition } from '@/hooks/useOrders';
 import { useState } from 'react';
 import { FiCheck, FiX, FiDollarSign, FiPackage, FiClock, FiUser } from "react-icons/fi";
 import { MdRestaurant } from "react-icons/md";
+import { ConfirmationDialog } from '@/components/customs/ConfirmationDialog';
 
 // Component สำหรับปุ่ม Action (ปรับปรุง Icon)
 const OrderActions = ({ order }: { order: Order }) => {
     const { mutate: updateStatus, isPending } = useUpdateOrderStatus();
+    const [dialogState, setDialogState] = useState<{
+        isOpen: boolean;
+        title: string;
+        description: string;
+        onConfirm: (() => void) | null;
+    }>({
+        isOpen: false,
+        title: '',
+        description: '',
+        onConfirm: null,
+    });
 
     const handleUpdate = (action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP") => {
         const actionMessages: Record<typeof action, string> = {
@@ -24,80 +35,100 @@ const OrderActions = ({ order }: { order: Order }) => {
             CUSTOMER_PICKED_UP: "ลูกค้ารับอาหารแล้ว"
         };
 
-        if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการ '${actionMessages[action]}'?`)) {
-            updateStatus({ orderId: order.id, action });
-        }
+        setDialogState({
+            isOpen: true,
+            title: "ยืนยันการดำเนินการ",
+            description: `คุณแน่ใจหรือไม่ว่าต้องการ '${actionMessages[action]}'?`,
+            onConfirm: () => updateStatus({ orderId: order.id, action }),
+        });
+    };
+
+    const closeDialog = () => {
+        setDialogState({ isOpen: false, title: '', description: '', onConfirm: null });
     };
 
     const commonButtonClass = "px-4 py-3 rounded-lg transition-all font-bold shadow-sm flex items-center justify-center gap-2 disabled:bg-gray-300";
 
-    switch (order.status) {
-        case 'PENDING':
-            return (
-                <div className="grid grid-cols-2 gap-3">
-                    <button
-                        onClick={() => handleUpdate('APPROVE')}
-                        disabled={isPending}
-                        className={`${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
-                    >
-                        <FiCheck className="w-5 h-5" />
-                        <span>อนุมัติ</span>
-                    </button>
-                    <button
-                        onClick={() => handleUpdate('REJECT')}
-                        disabled={isPending}
-                        className={`${commonButtonClass} bg-gray-400 text-white hover:bg-gray-500`}
-                    >
-                        <FiX className="w-5 h-5" />
-                        <span>ปฏิเสธ</span>
-                    </button>
-                </div>
-            );
-        // ✨ (ปรับปรุง) สถานะนี้ ร้านค้าไม่ต้องทำอะไร รอให้ลูกค้าจ่ายเงิน
-        case 'AWAITING_PAYMENT':
-            return (
-                <div className="text-center p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
-                    <p className="font-semibold">รอการชำระเงินจากลูกค้า</p>
-                </div>
-            );
+    return (
+        <>
+            <ConfirmationDialog
+                isOpen={dialogState.isOpen}
+                onClose={closeDialog}
+                onConfirm={dialogState.onConfirm!}
+                title={dialogState.title}
+                description={dialogState.description}
+            />
+            {(() => {
+                switch (order.status) {
+                    case 'PENDING':
+                        return (
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => handleUpdate('APPROVE')}
+                                    disabled={isPending}
+                                    className={`${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
+                                >
+                                    <FiCheck className="w-5 h-5" />
+                                    <span>อนุมัติ</span>
+                                </button>
+                                <button
+                                    onClick={() => handleUpdate('REJECT')}
+                                    disabled={isPending}
+                                    className={`${commonButtonClass} bg-gray-400 text-white hover:bg-gray-500`}
+                                >
+                                    <FiX className="w-5 h-5" />
+                                    <span>ปฏิเสธ</span>
+                                </button>
+                            </div>
+                        );
+                    // ✨ (ปรับปรุง) สถานะนี้ ร้านค้าไม่ต้องทำอะไร รอให้ลูกค้าจ่ายเงิน
+                    case 'AWAITING_PAYMENT':
+                        return (
+                            <div className="text-center p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
+                                <p className="font-semibold">รอการชำระเงินจากลูกค้า</p>
+                            </div>
+                        );
 
-        // ✨ (เพิ่ม) สถานะใหม่สำหรับตรวจสอบสลิป
-        case 'AWAITING_CONFIRMATION':
-            return (
-                <button
-                    onClick={() => handleUpdate('CONFIRM_PAYMENT')}
-                    disabled={isPending}
-                    className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
-                >
-                    <FiCheck className="w-5 h-5" />
-                    <span>ยืนยันการชำระเงิน</span>
-                </button>
-            );
-        case 'COOKING':
-            return (
-                <button
-                    onClick={() => handleUpdate('PREPARE_COMPLETE')}
-                    disabled={isPending}
-                    className={`w-full ${commonButtonClass} bg-orange-500 text-white hover:bg-orange-600`}
-                >
-                    <FiPackage className="w-5 h-5" />
-                    <span>อาหารพร้อม</span>
-                </button>
-            );
-        case 'READY_FOR_PICKUP':
-            return (
-                <button
-                    onClick={() => handleUpdate('CUSTOMER_PICKED_UP')}
-                    disabled={isPending}
-                    className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
-                >
-                    <FiCheck className="w-5 h-5" />
-                    <span>ลูกค้ารับแล้ว</span>
-                </button>
-            );
-        default:
-            return null;
-    }
+                    // ✨ (เพิ่ม) สถานะใหม่สำหรับตรวจสอบสลิป
+                    case 'AWAITING_CONFIRMATION':
+                        return (
+                            <button
+                                onClick={() => handleUpdate('CONFIRM_PAYMENT')}
+                                disabled={isPending}
+                                className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
+                            >
+                                <FiCheck className="w-5 h-5" />
+                                <span>ยืนยันการชำระเงิน</span>
+                            </button>
+                        );
+                    case 'COOKING':
+                        return (
+                            <button
+                                onClick={() => handleUpdate('PREPARE_COMPLETE')}
+                                disabled={isPending}
+                                className={`w-full ${commonButtonClass} bg-orange-500 text-white hover:bg-orange-600`}
+                            >
+                                <FiPackage className="w-5 h-5" />
+                                <span>อาหารพร้อม</span>
+                            </button>
+                        );
+                    case 'READY_FOR_PICKUP':
+                        return (
+                            <button
+                                onClick={() => handleUpdate('CUSTOMER_PICKED_UP')}
+                                disabled={isPending}
+                                className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
+                            >
+                                <FiCheck className="w-5 h-5" />
+                                <span>ลูกค้ารับแล้ว</span>
+                            </button>
+                        );
+                    default:
+                        return null;
+                }
+            })()}
+        </>
+    );
 }
 
 // Component หลัก

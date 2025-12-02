@@ -158,12 +158,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               )}
             </div>
 
-            {/* Favorite Button */}
-            <div className="absolute top-6 left-6 animate-slide-in-left">
-              <button className="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl hover:bg-red-500 hover:text-white transition-all hover:scale-110 group/heart">
-                <FiHeart className="w-6 h-6 group-hover/heart:fill-current" />
-              </button>
-            </div>
+            
             
             {/* Store Info Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-8 text-white">

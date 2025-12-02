@@ -73,13 +73,6 @@ const NavbarMain = () => {
                 <span>หน้าหลัก</span>
               </Link>
               <Link
-                to="/stores"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
-              >
-                <MdRestaurant className="w-5 h-5" />
-                <span>ร้านค้า</span>
-              </Link>
-              <Link
                 to="/my-orders"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
               >

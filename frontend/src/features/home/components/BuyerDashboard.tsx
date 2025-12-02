@@ -74,6 +74,12 @@ export const BuyerDashboard = () => {
         );
     }
 
+    const allStores = data?.data || [];
+    const totalStoresCount = data?.totalCount || 0;
+    const totalReviews = allStores.reduce((sum, store) => sum + store.reviewCount, 0);
+    const sumOfWeightedRatings = allStores.reduce((sum, store) => sum + (store.avgRating * store.reviewCount), 0);
+    const overallAvgRating = totalReviews > 0 ? (sumOfWeightedRatings / totalReviews).toFixed(1) : "0.0";
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50">
             <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
@@ -84,14 +90,14 @@ export const BuyerDashboard = () => {
                     <div className="absolute bottom-0 left-0 w-56 h-56 bg-white/10 rounded-full -ml-28 -mb-28 animate-pulse" style={{ animationDelay: '1s' }}></div>
                     <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-white/5 rounded-full animate-float"></div>
                     <div className="absolute top-1/4 left-1/3 w-24 h-24 bg-white/5 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
-                    
+
                     <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-8">
+                        <div className="flex items-center gap-4 mb-1">
                             <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl animate-bounce-slow">
                                 <IoFastFoodOutline className="w-12 h-12" />
                             </div>
                             <div>
-                                <div className="flex items-center gap-3 mb-3">
+                                <div className="flex items-center gap-3 mb-1">
                                     <h1 className="text-4xl md:text-6xl font-bold animate-slide-in-right">ยินดีต้อนรับ!</h1>
                                     <HiSparkles className="w-10 h-10 text-yellow-300 animate-spin-slow" />
                                 </div>
@@ -100,30 +106,13 @@ export const BuyerDashboard = () => {
                                 </p>
                             </div>
                         </div>
+
                         
-                        {/* Quick Stats with Hover Effects */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
-                            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-5 text-center transform hover:scale-110 hover:bg-white/30 transition-all cursor-pointer group shadow-lg">
-                                <MdStorefront className="w-10 h-10 mx-auto mb-3 group-hover:animate-bounce" />
-                                <p className="text-3xl font-bold mb-1">{data?.total || 0}</p>
-                                <p className="text-sm text-orange-100">ร้านค้าทั้งหมด</p>
-                            </div>
-                            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-5 text-center transform hover:scale-110 hover:bg-white/30 transition-all cursor-pointer group shadow-lg">
-                                <FiStar className="w-10 h-10 mx-auto mb-3 group-hover:animate-spin" />
-                                <p className="text-3xl font-bold mb-1">4.5+</p>
-                                <p className="text-sm text-orange-100">คะแนนเฉลี่ย</p>
-                            </div>
-                            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-5 text-center col-span-2 md:col-span-1 transform hover:scale-110 hover:bg-white/30 transition-all cursor-pointer group shadow-lg">
-                                <IoFastFoodOutline className="w-10 h-10 mx-auto mb-3 group-hover:rotate-12 transition-transform" />
-                                <p className="text-3xl font-bold mb-1">100+</p>
-                                <p className="text-sm text-orange-100">เมนูให้เลือก</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
                 {/* Search Section */}
-                <div className="mb-10">
+                <div className="mb-4">
                     <div className="bg-white rounded-3xl shadow-2xl border-2 border-orange-100 p-2 hover:shadow-3xl hover:border-orange-300 transition-all duration-300 transform hover:-translate-y-1">
                         <div className="relative flex items-center gap-2">
                             <div className="relative flex-grow">
@@ -147,7 +136,7 @@ export const BuyerDashboard = () => {
                                     </button>
                                 )}
                             </div>
-                            
+
                             {/* Search Button */}
                             <button
                                 onClick={handleSearch}
@@ -158,7 +147,7 @@ export const BuyerDashboard = () => {
                             </button>
                         </div>
                     </div>
-                    
+
                     {searchText && (
                         <div className="mt-5 flex items-center gap-3 animate-slide-down">
                             <p className="text-gray-700 font-medium">
@@ -182,7 +171,7 @@ export const BuyerDashboard = () => {
                         </div>
                         <h2 className="text-4xl font-bold text-gray-800 mb-4">ไม่พบร้านค้า 😔</h2>
                         <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg leading-relaxed">
-                            {searchText 
+                            {searchText
                                 ? `ไม่พบร้านค้าที่ตรงกับ "${searchText}" ลองค้นหาด้วยคำอื่นหรือดูร้านค้าทั้งหมด`
                                 : "ยังไม่มีร้านค้าในระบบ กรุณาลองใหม่ภายหลัง"
                             }
@@ -219,8 +208,8 @@ export const BuyerDashboard = () => {
                         {/* Stores Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
                             {data?.data.map((store, index) => (
-                                <Link 
-                                    to={`/stores/${store.id}`} 
+                                <Link
+                                    to={`/stores/${store.id}`}
                                     key={store.id}
                                     className="group block animate-fade-in-up"
                                     style={{ animationDelay: `${index * 0.1}s` }}
@@ -228,15 +217,15 @@ export const BuyerDashboard = () => {
                                     <div className="bg-white rounded-3xl shadow-xl hover:shadow-3xl transition-all duration-500 overflow-hidden border-2 border-gray-100 h-full flex flex-col transform hover:-translate-y-3 hover:border-orange-300">
                                         {/* Store Image */}
                                         <div className="relative overflow-hidden h-56">
-                                            <img 
-                                                src={store.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'} 
-                                                alt={store.name} 
+                                            <img
+                                                src={store.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'}
+                                                alt={store.name}
                                                 className="w-full h-full object-cover group-hover:scale-125 group-hover:rotate-2 transition-all duration-700"
                                                 onError={(e) => {
                                                     e.currentTarget.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
                                                 }}
                                             />
-                                            
+
                                             {/* Status Badge */}
                                             <div className="absolute top-4 right-4 animate-slide-in-right">
                                                 {store.isOpen ? (
@@ -253,16 +242,9 @@ export const BuyerDashboard = () => {
                                                 )}
                                             </div>
 
-                                            {/* Favorite Button */}
-                                            <div className="absolute top-4 left-4 animate-slide-in-left">
-                                                <button className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl hover:bg-red-500 hover:text-white transition-all hover:scale-110 group/heart">
-                                                    <FiHeart className="w-5 h-5 group-hover/heart:fill-current" />
-                                                </button>
-                                            </div>
-
                                             {/* Gradient Overlay */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                            
+
                                             {/* Quick View on Hover */}
                                             <div className="absolute bottom-4 left-4 right-4 transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                                                 <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 text-center shadow-2xl">
@@ -280,7 +262,7 @@ export const BuyerDashboard = () => {
                                             <h2 className="text-xl font-bold text-gray-800 mb-4 truncate group-hover:text-orange-600 transition-colors">
                                                 {store.name}
                                             </h2>
-                                            
+
                                             {/* Rating */}
                                             <div className="flex items-center gap-3 mb-4">
                                                 <div className="flex items-center gap-2 bg-gradient-to-r from-orange-100 to-yellow-100 px-4 py-2 rounded-full border-2 border-orange-200 shadow-md hover:shadow-lg transition-shadow">
@@ -342,11 +324,10 @@ export const BuyerDashboard = () => {
                                         <button
                                             key={pageNum}
                                             onClick={() => setPage(pageNum)}
-                                            className={`min-w-[56px] h-14 rounded-2xl font-bold transition-all transform ${
-                                                pageNum === page
+                                            className={`min-w-[56px] h-14 rounded-2xl font-bold transition-all transform ${pageNum === page
                                                     ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-2xl scale-125 border-2 border-orange-400 animate-pulse'
                                                     : 'bg-white border-2 border-orange-200 text-gray-700 hover:border-orange-400 hover:bg-orange-50 hover:scale-110'
-                                            }`}
+                                                }`}
                                         >
                                             {pageNum}
                                         </button>

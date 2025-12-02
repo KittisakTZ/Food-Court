@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAdminStores, useAdminApproveStore, useAdminRejectStore, useAdminStoreStats } from "@/hooks/useAdmin";
 import { Store } from "@/types/response/store.response";
 import { Search, ChevronLeft, ChevronRight, Store as StoreIcon, CheckCircle, Clock, XCircle, Filter } from "lucide-react";
+import { ConfirmationDialog } from "@/components/customs/ConfirmationDialog";
 
 type FilterStatus = 'all' | 'pending' | 'approved';
 
@@ -11,6 +12,17 @@ export const AdminDashboard = () => {
     const [searchText, setSearchText] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState<FilterStatus>('pending');
+    const [dialogState, setDialogState] = useState<{
+        isOpen: boolean;
+        title: string;
+        description: string;
+        onConfirm: (() => void) | null;
+    }>({
+        isOpen: false,
+        title: '',
+        description: '',
+        onConfirm: null,
+    });
 
     // Debounce search
     const handleSearchChange = (value: string) => {
@@ -51,15 +63,21 @@ export const AdminDashboard = () => {
     };
 
     const handleApprove = (storeId: string, storeName: string) => {
-        if (window.confirm(`Are you sure you want to approve the store "${storeName}"?`)) {
-            approveStore(storeId);
-        }
+        setDialogState({
+            isOpen: true,
+            title: "Confirm Approval",
+            description: `Are you sure you want to approve the store "${storeName}"?`,
+            onConfirm: () => approveStore(storeId),
+        });
     };
 
     const handleReject = (storeId: string, storeName: string) => {
-        if (window.confirm(`Are you sure you want to revoke approval for "${storeName}"? This will make the store unavailable to customers.`)) {
-            rejectStore(storeId);
-        }
+        setDialogState({
+            isOpen: true,
+            title: "Confirm Rejection",
+            description: `Are you sure you want to revoke approval for "${storeName}"? This will make the store unavailable to customers.`,
+            onConfirm: () => rejectStore(storeId),
+        });
     };
 
     if (isLoading) {
@@ -80,8 +98,19 @@ export const AdminDashboard = () => {
 
     const isPending = isApproving || isRejecting;
 
+    const closeDialog = () => {
+        setDialogState({ isOpen: false, title: '', description: '', onConfirm: null });
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <ConfirmationDialog
+                isOpen={dialogState.isOpen}
+                onClose={closeDialog}
+                onConfirm={dialogState.onConfirm!}
+                title={dialogState.title}
+                description={dialogState.description}
+            />
             <div className="container mx-auto p-4 md:p-8">
                 {/* Header */}
                 <div className="mb-8">

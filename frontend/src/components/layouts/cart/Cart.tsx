@@ -8,10 +8,12 @@ import { BiDish } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
+import { ConfirmationDialog } from "@/components/customs/ConfirmationDialog";
 
 export const Cart = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const cart = useCartStore(state => state.cart);
+    const [isConfirmOpen, setConfirmOpen] = useState(false);
 
     // คำนวณค่า totals ด้วย useMemo
     const { totalItems, totalPrice } = useMemo(() => {
@@ -38,15 +40,20 @@ export const Cart = () => {
     };
 
     const handleClearCart = () => {
-        if (window.confirm("คุณต้องการล้างตะกร้าสินค้าทั้งหมดใช่หรือไม่? 🗑️")) {
-            clearCart();
-        }
+        setConfirmOpen(true);
     };
 
     const isPending = isUpdating || isClearing;
 
     return (
         <>
+            <ConfirmationDialog
+                isOpen={isConfirmOpen}
+                onClose={() => setConfirmOpen(false)}
+                onConfirm={clearCart}
+                title="ยืนยันการล้างตะกร้า"
+                description="คุณต้องการล้างตะกร้าสินค้าทั้งหมดใช่หรือไม่? 🗑️"
+            />
             {/* Floating Cart Button */}
             <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
                 {!isExpanded ? (
