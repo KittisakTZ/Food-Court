@@ -4,6 +4,7 @@ import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, cr
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
 import { toastService } from '@/services/toast.service';
+import { dialogService } from '@/services/dialog.service';
 import { useClearCart } from "./useCart";
 import { useLocation } from "react-router-dom";
 
@@ -59,7 +60,7 @@ export const useUpdateOrderStatus = () => {
         onError: (error) => {
             // เราสามารถเข้าถึง message ของ error ที่ axios ส่งกลับมาได้
             const errorMessage = (error as any)?.response?.data?.message || error.message;
-            toastService.error(`Failed to update order status: ${errorMessage}`);
+            toastService.error(`ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: ${errorMessage}`);
         }
     });
 };
@@ -75,7 +76,10 @@ export const useMoveOrderPosition = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            alert(`Failed to move order: ${errorMessage}`);
+            dialogService.error(
+                'ไม่สามารถย้ายคำสั่งซื้อได้',
+                errorMessage
+            );
             // ถ้าล้มเหลว, ก็ควร invalidate เพื่อให้ UI กลับไปเป็นลำดับเดิมที่ถูกต้อง
             queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
         }
@@ -98,7 +102,7 @@ export const useCreateOrder = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`Failed to create order: ${errorMessage}`);
+            toastService.error(`ไม่สามารถสร้างคำสั่งซื้อได้: ${errorMessage}`);
         }
     });
 };
@@ -109,13 +113,13 @@ export const useUploadSlip = () => {
     return useMutation({
         mutationFn: uploadPaymentSlip,
         onSuccess: () => {
-            toastService.success("Slip uploaded successfully! Please wait for confirmation.");
+            toastService.success("อัปโหลดสลิปสำเร็จ! กรุณารอการยืนยัน");
             // Invalidate query 'my-orders' เพื่อให้สถานะอัปเดตเป็น AWAITING_CONFIRMATION
             queryClient.invalidateQueries({ queryKey: ['my-orders'] });
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`Failed to upload slip: ${errorMessage}`);
+            toastService.error(`ไม่สามารถอัปโหลดสลิปได้: ${errorMessage}`);
         }
     });
 };

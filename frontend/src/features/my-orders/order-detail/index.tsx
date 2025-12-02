@@ -113,10 +113,10 @@ const OrderDetailPage = () => {
     const isSellerView = location.pathname.includes('/my-store/');
 
     if (isLoading) {
-        return <div className="flex items-center justify-center min-h-screen"><p>Loading order details...</p></div>;
+        return <div className="flex items-center justify-center min-h-screen"><p>กำลังโหลดรายละเอียดคำสั่งซื้อ...</p></div>;
     }
     if (isError || !order) {
-        return <div className="flex items-center justify-center min-h-screen"><p>Error: Order not found.</p></div>;
+        return <div className="flex items-center justify-center min-h-screen"><p>เกิดข้อผิดพลาด: ไม่พบคำสั่งซื้อ</p></div>;
     }
 
     const statusConfig = getStatusConfig(order.status);

@@ -22,7 +22,7 @@ export const useCreateCategory = () => {
             queryClient.invalidateQueries({ queryKey: [CATEGORIES_QUERY_KEY, data.storeId] });
         },
         onError: (error) => {
-            toastService.error(`Failed to create category: ${error.message}`);
+            toastService.error(`ไม่สามารถสร้างหมวดหมู่ได้: ${error.message}`);
         }
     });
 };
@@ -36,7 +36,7 @@ export const useUpdateCategory = () => {
             queryClient.invalidateQueries({ queryKey: [CATEGORIES_QUERY_KEY, data.storeId] });
         },
         onError: (error) => {
-            toastService.error(`Failed to update category: ${error.message}`);
+            toastService.error(`ไม่สามารถอัปเดตหมวดหมู่ได้: ${error.message}`);
         }
     });
 };
@@ -50,12 +50,12 @@ export const useDeleteCategory = () => {
                 toastService.success('ลบหมวดหมู่สำเร็จ');
                 queryClient.invalidateQueries({ queryKey: [CATEGORIES_QUERY_KEY, variables.storeId] });
             } else {
-                toastService.error(data.message || 'Failed to delete category');
+                toastService.error(data.message || 'ไม่สามารถลบหมวดหมู่ได้');
             }
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`Failed to delete category: ${errorMessage}`);
+            toastService.error(`ไม่สามารถลบหมวดหมู่ได้: ${errorMessage}`);
         }
     });
 };

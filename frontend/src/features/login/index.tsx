@@ -43,7 +43,7 @@ export default function LoginFeature() {
       }
     } catch (error: unknown) {
       if (typeof error === "object" && error !== null) {
-        console.error("Error logging in:", error);
+        console.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ:", error);
         toastService.error(
           (error as { response?: { data?: { message: string } } }).response
             ?.data?.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ"

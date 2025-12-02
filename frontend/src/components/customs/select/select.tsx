@@ -41,7 +41,7 @@ const MasterSelectComponent: React.FC<MasterSelectComponentProps> = ({
                 }));
                 setOptions(options);
             } catch (error) {
-                setError((error as Error)?.message || 'An error occurred while fetching options.');
+                setError((error as Error)?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
             } finally {
                 setIsLoading(false);
             }
@@ -50,11 +50,11 @@ const MasterSelectComponent: React.FC<MasterSelectComponentProps> = ({
     }, [valueKey, labelKey, fetchDataFromGetAPI]);
 
     if (isLoading) {
-        return <p>Loading...</p>;
+        return <p>กำลังโหลด...</p>;
     }
 
     if (error) {
-        return <p className="text-red-500">Error: {error}</p>;
+        return <p className="text-red-500">เกิดข้อผิดพลาด: {error}</p>;
     }
 
     return (

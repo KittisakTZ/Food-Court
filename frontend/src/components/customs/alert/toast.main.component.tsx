@@ -47,9 +47,9 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toastTitle = {
-      success: "Success!",
-      error: "Error!",
-      warning: "Warning!",
+      success: "สำเร็จ!",
+      error: "เกิดข้อผิดพลาด!",
+      warning: "คำเตือน!",
   }
 
 

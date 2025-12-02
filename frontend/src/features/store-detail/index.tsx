@@ -117,19 +117,19 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50">
       <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
-        {/* Back Button */}
+        {/* Back Button - Compact */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2 mb-6 px-6 py-3 bg-white border-2 border-orange-200 rounded-2xl hover:border-orange-400 hover:bg-orange-50 transition-all shadow-md hover:shadow-xl font-semibold text-gray-700 group animate-fade-in"
+          className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white border border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-all shadow-sm hover:shadow-md font-semibold text-gray-700 text-sm group"
         >
-          <FiChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <FiChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           กลับหน้าหลัก
         </Link>
 
-        {/* Store Header Section */}
-        <div className="mb-10 animate-fade-in">
-          {/* Store Cover Image */}
-          <div className="relative overflow-hidden rounded-3xl shadow-2xl mb-6 h-72 md:h-96 group">
+        {/* Store Header Section - Compact */}
+        <div className="mb-6">
+          {/* Store Cover Image - Compact */}
+          <div className="relative overflow-hidden rounded-2xl shadow-lg mb-4 h-48 md:h-64 group">
             <img
               src={store.image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200"}
               alt={store.name}
@@ -142,38 +142,38 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
             
-            {/* Store Status Badge */}
-            <div className="absolute top-6 right-6 animate-slide-in-right">
+            {/* Store Status Badge - Compact */}
+            <div className="absolute top-3 right-3">
               {store.isOpen ? (
-                <div className="bg-green-500 text-white px-6 py-3 rounded-full text-sm font-bold flex items-center gap-3 shadow-2xl backdrop-blur-sm bg-opacity-95">
-                  <div className="w-3 h-3 bg-white rounded-full animate-ping"></div>
-                  <div className="w-3 h-3 bg-white rounded-full absolute"></div>
-                  เปิดอยู่ตอนนี้
+                <div className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                  <div className="w-1.5 h-1.5 bg-white rounded-full absolute"></div>
+                  เปิดอยู่
                 </div>
               ) : (
-                <div className="bg-red-500 text-white px-6 py-3 rounded-full text-sm font-bold flex items-center gap-3 shadow-2xl backdrop-blur-sm bg-opacity-95">
-                  <FiClock className="w-4 h-4" />
-                  ปิดแล้ว
+                <div className="bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                  <FiClock className="w-3 h-3" />
+                  ปิด
                 </div>
               )}
             </div>
 
             
             
-            {/* Store Info Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-2xl">
-                  <IoFastFoodOutline className="w-10 h-10" />
+            {/* Store Info Overlay - Compact */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg">
+                  <IoFastFoodOutline className="w-6 h-6" />
                 </div>
                 <div className="flex-grow">
-                  <h1 className="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">{store.name}</h1>
-                  <div className="flex flex-wrap items-center gap-4">
-                    {/* Rating */}
-                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30">
-                      <FiStar className="w-5 h-5 text-yellow-300 fill-yellow-300" />
-                      <span className="font-bold text-lg">{store.avgRating.toFixed(1)}</span>
-                      <span className="text-white/80">({store.reviewCount} รีวิว)</span>
+                  <h1 className="text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">{store.name}</h1>
+                  <div className="flex items-center gap-2">
+                    {/* Rating - Compact */}
+                    <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
+                      <FiStar className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
+                      <span className="font-bold text-sm">{store.avgRating.toFixed(1)}</span>
+                      <span className="text-white/80 text-xs">({store.reviewCount})</span>
                     </div>
                   </div>
                 </div>
@@ -181,64 +181,63 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
             </div>
           </div>
 
-          {/* Store Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {/* Description Card */}
-            <div className="md:col-span-2 bg-white rounded-3xl p-8 shadow-xl border-2 border-orange-100 hover:shadow-2xl transition-all hover:-translate-y-1">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md">
-                  <FiInfo className="w-6 h-6 text-white" />
+          {/* Store Info Cards - Compact */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Description Card - Compact */}
+            <div className="md:col-span-2 bg-white rounded-xl p-4 shadow-md border border-orange-100 hover:shadow-lg transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-lg flex items-center justify-center">
+                  <FiInfo className="w-4 h-4 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800">รายละเอียดร้าน</h3>
+                <h3 className="text-base font-bold text-gray-800">รายละเอียดร้าน</h3>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 {store.description || "ร้านอาหารคุณภาพดี บริการด้วยใจ อาหารอร่อย สดใหม่ทุกวัน"}
               </p>
             </div>
 
-            {/* Quick Info Card */}
-            <div className="bg-gradient-to-br from-orange-500 to-yellow-500 rounded-3xl p-8 shadow-xl text-white hover:shadow-2xl transition-all hover:-translate-y-1">
-              <div className="flex items-center gap-3 mb-6">
-                <HiSparkles className="w-8 h-8 animate-spin-slow" />
-                <h3 className="text-2xl font-bold">ข้อมูลเพิ่มเติม</h3>
+            {/* Quick Info Card - Compact */}
+            <div className="bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl p-4 shadow-md text-white">
+              <div className="flex items-center gap-2 mb-3">
+                <HiSparkles className="w-5 h-5" />
+                <h3 className="text-base font-bold">ข้อมูลเพิ่มเติม</h3>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-xl p-3">
-                  <BiDish className="w-6 h-6" />
-                  <span className="font-semibold">เมนูหลากหลาย</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-2">
+                  <BiDish className="w-4 h-4" />
+                  <span className="font-semibold text-sm">เมนูหลากหลาย</span>
                 </div>
-                <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-xl p-3">
-                  <FiMapPin className="w-6 h-6" />
-                  <span className="font-semibold">จัดส่งฟรี</span>
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-2">
+                  <FiMapPin className="w-4 h-4" />
+                  <span className="font-semibold text-sm">จัดส่งฟรี</span>
                 </div>
-                <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-xl p-3">
-                  <FiClock className="w-6 h-6" />
-                  <span className="font-semibold">จัดส่งรวดเร็ว</span>
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-2">
+                  <FiClock className="w-4 h-4" />
+                  <span className="font-semibold text-sm">จัดส่งรวดเร็ว</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Menu Section */}
-        <div className="animate-fade-in-up">
-          {/* Section Header */}
-          <div className="flex items-center justify-between mb-8 bg-white rounded-2xl p-6 shadow-xl border-2 border-orange-100">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-md">
-                <BiDish className="w-7 h-7 text-white" />
+        {/* Menu Section - Compact */}
+        <div>
+          {/* Section Header - Compact */}
+          <div className="flex items-center justify-between mb-5 bg-white rounded-xl p-4 shadow-md border border-orange-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-lg flex items-center justify-center">
+                <BiDish className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-800">
                   เมนูอาหาร
-                  <HiSparkles className="w-7 h-7 text-orange-500" />
                 </h2>
-                <p className="text-gray-500 text-sm mt-1">เลือกเมนูที่คุณชื่นชอบ</p>
+                <p className="text-gray-500 text-xs">เลือกเมนูที่คุณชื่นชอบ</p>
               </div>
             </div>
             {menus?.total && (
-              <div className="bg-gradient-to-r from-orange-100 to-yellow-100 px-6 py-3 rounded-full border-2 border-orange-200 shadow-md">
-                <p className="font-bold text-orange-600 text-lg">
+              <div className="bg-gradient-to-r from-orange-100 to-yellow-100 px-4 py-2 rounded-full border border-orange-200">
+                <p className="font-bold text-orange-600 text-sm">
                   {menus.total} เมนู
                 </p>
               </div>
@@ -269,20 +268,20 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
             </div>
           )}
 
-          {/* Category Filters */}
+          {/* Category Filters - Compact */}
           {categories && categories.length > 0 && (
-            <div className="mb-8 flex items-center justify-center flex-wrap gap-4 animate-fade-in-up">
+            <div className="mb-5 flex items-center justify-center flex-wrap gap-2">
               <button
                 onClick={() => handleCategorySelect("")}
-                className={`px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-xl transform hover:-translate-y-1 ${selectedCategoryId === "" ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' : 'bg-white text-gray-700'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md ${selectedCategoryId === "" ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' : 'bg-white text-gray-700'}`}
               >
-                All Categories
+                ทั้งหมด
               </button>
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleCategorySelect(category.id)}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-xl transform hover:-translate-y-1 ${selectedCategoryId === category.id ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' : 'bg-white text-gray-700'}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md ${selectedCategoryId === category.id ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' : 'bg-white text-gray-700'}`}
                 >
                   {category.name}
                 </button>
@@ -300,88 +299,65 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                   <p className="text-gray-600">กรุณาลองใหม่ภายหลัง</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
-                  {menus.data.map((menu, index) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+                  {menus.data.map((menu) => (
                     <div
                       key={menu.id}
-                      className="group bg-white rounded-3xl shadow-xl hover:shadow-3xl transition-all duration-500 overflow-hidden border-2 border-gray-100 flex flex-col transform hover:-translate-y-3 hover:border-orange-300 animate-fade-in-up"
-                      style={{ animationDelay: `${index * 0.1}s` }}
+                      className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col transform hover:-translate-y-2 hover:border-orange-300"
                     >
-                      {/* Menu Image */}
-                      <div className="relative overflow-hidden h-52">
+                      {/* Menu Image - Compact */}
+                      <div className="relative overflow-hidden h-32">
                         <img
                           src={menu.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"}
                           alt={menu.name}
-                          className="w-full h-full object-cover group-hover:scale-125 group-hover:rotate-2 transition-all duration-700"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
                           onError={(e) => {
                             e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
                           }}
                         />
-                        
+
                         {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        
-                        {/* Price Badge */}
-                        <div className="absolute top-4 right-4 animate-slide-in-right">
-                          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-full font-bold shadow-2xl backdrop-blur-sm">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        {/* Price Badge - Compact */}
+                        <div className="absolute top-2 right-2">
+                          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
                             ฿{menu.price.toFixed(0)}
                           </div>
                         </div>
-
-                        {/* Quick Add Button on Hover */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button
-                            onClick={() => handleAddItem(menu.id)}
-                            disabled={isAdding && addingItemId === menu.id}
-                            className="bg-white text-orange-600 px-6 py-3 rounded-full font-bold shadow-2xl hover:bg-orange-600 hover:text-white transition-all transform hover:scale-110 flex items-center gap-2"
-                          >
-                            <MdAddShoppingCart className="w-5 h-5" />
-                            เพิ่มเลย!
-                          </button>
-                        </div>
                       </div>
 
-                      {/* Menu Info */}
-                      <div className="p-6 flex-grow flex flex-col">
-                        <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors line-clamp-2">
+                      {/* Menu Info - Compact */}
+                      <div className="p-3 flex-grow flex flex-col">
+                        <h3 className="text-sm font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors line-clamp-2 leading-tight">
                           {menu.name}
                         </h3>
-                        
-                        <p className="text-sm text-gray-500 mb-4 line-clamp-2 flex-grow leading-relaxed">
-                          {menu.description || "เมนูอาหารรสชาติเด็ด อร่อยถูกปาก คุณภาพดี"}
+
+                        <p className="text-xs text-gray-500 mb-2 line-clamp-1 flex-grow">
+                          {menu.description || "เมนูอาหารรสชาติเด็ด"}
                         </p>
 
-                        {/* Price Display */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-green-600">
-                              ฿{menu.price.toFixed(0)}
-                            </span>
-                            {menu.price > 100 && (
-                              <span className="text-sm text-gray-400 line-through">
-                                ฿{(menu.price * 1.2).toFixed(0)}
-                              </span>
-                            )}
-                          </div>
+                        {/* Price Display - Compact */}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-lg font-bold text-green-600">
+                            ฿{menu.price.toFixed(0)}
+                          </span>
                         </div>
 
-                        {/* Divider */}
-                        <div className="border-t-2 border-gray-100 mb-4"></div>
-
-                        {/* Add to Cart Button */}
+                        {/* Add to Cart Button - Compact */}
                         <button
                           onClick={() => handleAddItem(menu.id)}
                           disabled={isAdding && addingItemId === menu.id}
-                          className="w-full py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-2xl hover:from-orange-600 hover:to-yellow-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2 group/btn"
+                          className="w-full py-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-lg hover:from-orange-600 hover:to-yellow-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs"
                         >
                           {isAdding && addingItemId === menu.id ? (
                             <>
-                              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                              <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
                               กำลังเพิ่ม...
                             </>
                           ) : (
                             <>
-                              <FiShoppingCart className="w-5 h-5 group-hover/btn:animate-bounce" />
+                              <FiShoppingCart className="w-3.5 h-3.5" />
                               เพิ่มลงตะกร้า
                             </>
                           )}
@@ -394,19 +370,19 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
             </>
           )}
 
-          {/* Pagination */}
+          {/* Pagination - Compact */}
           {menus && menus.totalPages > 1 && (
-            <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5 animate-fade-in">
+            <div className="mt-6 mb-6 flex items-center justify-center gap-3">
               <button
                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 disabled={page === 1}
-                className="flex items-center gap-3 px-8 py-4 bg-white border-2 border-orange-200 rounded-2xl hover:border-orange-400 hover:bg-orange-50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-orange-200 transition-all shadow-xl hover:shadow-2xl font-bold text-gray-700 hover:-translate-x-1 transform"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-bold text-gray-700 text-sm"
               >
-                <FiChevronLeft className="w-6 h-6" />
-                <span className="hidden sm:inline">หน้าก่อน</span>
+                <FiChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">ก่อนหน้า</span>
               </button>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {[...Array(menus.totalPages)].map((_, idx) => {
                   const pageNum = idx + 1;
                   if (
@@ -418,10 +394,10 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
-                        className={`min-w-[56px] h-14 rounded-2xl font-bold transition-all transform ${
+                        className={`min-w-[40px] h-10 rounded-lg font-bold transition-all text-sm ${
                           pageNum === page
-                            ? "bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-2xl scale-125 border-2 border-orange-400 animate-pulse"
-                            : "bg-white border-2 border-orange-200 text-gray-700 hover:border-orange-400 hover:bg-orange-50 hover:scale-110"
+                            ? "bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-md border border-orange-400"
+                            : "bg-white border border-orange-200 text-gray-700 hover:border-orange-400 hover:bg-orange-50"
                         }`}
                       >
                         {pageNum}
@@ -429,7 +405,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                     );
                   } else if (pageNum === page - 2 || pageNum === page + 2) {
                     return (
-                      <span key={pageNum} className="text-orange-400 px-2 font-bold text-xl">
+                      <span key={pageNum} className="text-orange-400 px-1 font-bold">
                         ...
                       </span>
                     );
@@ -441,10 +417,10 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               <button
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page === menus.totalPages}
-                className="flex items-center gap-3 px-8 py-4 bg-white border-2 border-orange-200 rounded-2xl hover:border-orange-400 hover:bg-orange-50 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-orange-200 transition-all shadow-xl hover:shadow-2xl font-bold text-gray-700 hover:translate-x-1 transform"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-bold text-gray-700 text-sm"
               >
-                <span className="hidden sm:inline">หน้าถัดไป</span>
-                <FiChevronRight className="w-6 h-6" />
+                <span className="hidden sm:inline">ถัดไป</span>
+                <FiChevronRight className="w-4 h-4" />
               </button>
             </div>
           )}

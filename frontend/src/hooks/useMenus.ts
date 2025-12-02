@@ -39,11 +39,11 @@ export const useCreateMenu = () => {
             
             // ตอนนี้เรามั่นใจได้ 100% ว่า storeId จะมีค่าเสมอ
             queryClient.invalidateQueries({ queryKey: [MENUS_QUERY_KEY, storeId] });
-            toastService.success(`Menu created successfully!`);
+            toastService.success(`สร้างเมนูสำเร็จ!`);
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`Failed to create menu: ${errorMessage}`);
+            toastService.error(`ไม่สามารถสร้างเมนูได้: ${errorMessage}`);
         }
     });
 };
@@ -59,7 +59,7 @@ export const useUpdateMenu = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`Failed to update menu: ${errorMessage}`);
+            toastService.error(`ไม่สามารถอัปเดตเมนูได้: ${errorMessage}`);
         }
     });
 };
@@ -76,7 +76,7 @@ export const useDeleteMenu = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`Failed to delete menu: ${errorMessage}`);
+            toastService.error(`ไม่สามารถลบเมนูได้: ${errorMessage}`);
         }
     });
 };

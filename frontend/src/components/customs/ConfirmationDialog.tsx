@@ -1,14 +1,6 @@
 // @/components/customs/ConfirmationDialog.tsx
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+
+import { ModernDialog, DialogType } from "@/components/customs/dialog/ModernDialog";
 
 interface ConfirmationDialogProps {
     isOpen: boolean;
@@ -16,6 +8,9 @@ interface ConfirmationDialogProps {
     onConfirm: () => void;
     title: string;
     description: string;
+    type?: DialogType;
+    confirmText?: string;
+    cancelText?: string;
 }
 
 export const ConfirmationDialog = ({
@@ -24,28 +19,20 @@ export const ConfirmationDialog = ({
     onConfirm,
     title,
     description,
+    type = 'confirm',
+    confirmText = 'ยืนยัน',
+    cancelText = 'ยกเลิก',
 }: ConfirmationDialogProps) => {
-    if (!isOpen) {
-        return null;
-    }
-
     return (
-        <AlertDialog open={isOpen} onOpenChange={onClose}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>{title}</AlertDialogTitle>
-                    <AlertDialogDescription>{description}</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => {
-                        onConfirm();
-                        onClose();
-                    }}>
-                        Confirm
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <ModernDialog
+            isOpen={isOpen}
+            onClose={onClose}
+            onConfirm={onConfirm}
+            title={title}
+            description={description}
+            type={type}
+            confirmText={confirmText}
+            cancelText={cancelText}
+        />
     );
 };
