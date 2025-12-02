@@ -132,7 +132,7 @@ const OrderActions = ({ order }: { order: Order }) => {
 }
 
 // Component หลัก
-export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast }: { order: Order, queueDisplayNumber: number, isFirst: boolean, isLast: boolean }) => {
+export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast, highlightMenuId }: { order: Order, queueDisplayNumber: number, isFirst: boolean, isLast: boolean, highlightMenuId?: string }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: order.id });
     const { mutate: moveOrder, isPending } = useMoveOrderPosition();
     const [jumpPosition, setJumpPosition] = useState<string>("");
@@ -244,39 +244,45 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                 {/* ORDER ITEMS - ใช้ bg-neutral-50 ให้ดูเหมือนกระดาษ */}
                 <div className="p-4 bg-neutral-50">
                     <div className="space-y-3">
-                        {order.orderItems.map((item) => (
-                            <div
-                                key={item.id}
-                                // เพิ่ม hover effect ให้รายการอาหารย่อย
-                                className="bg-white rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm border border-orange-100 hover:shadow-lg hover:border-orange-200 transition-all"
-                            >
-                                <div className="flex items-center gap-4 flex-1 min-w-0">
-                                    {/* --- [รูปอาหาร] เพิ่มเงาและวงแหวน --- */}
-                                    <img
-                                        src={item.menu.image || ''}
-                                        alt={item.menu.name}
-                                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0 shadow-md ring-2 ring-orange-100"
-                                        onError={(e) => {
-                                            e.currentTarget.src = '';
-                                        }}
-                                    />
+                        {order.orderItems.map((item) => {
+                            const isHighlighted = highlightMenuId === item.menuId;
+                            return (
+                                <div
+                                    key={item.id}
+                                    // เพิ่ม hover effect ให้รายการอาหารย่อย
+                                    className={`rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm border transition-all ${isHighlighted
+                                        ? "bg-yellow-50 border-yellow-400 ring-2 ring-yellow-200 shadow-md"
+                                        : "bg-white border-orange-100 hover:shadow-lg hover:border-orange-200"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                                        {/* --- [รูปอาหาร] เพิ่มเงาและวงแหวน --- */}
+                                        <img
+                                            src={item.menu.image || ''}
+                                            alt={item.menu.name}
+                                            className="w-20 h-20 rounded-lg object-cover flex-shrink-0 shadow-md ring-2 ring-orange-100"
+                                            onError={(e) => {
+                                                e.currentTarget.src = '';
+                                            }}
+                                        />
 
-                                    {/* [ชื่อเมนู + ราคา] */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-gray-800 truncate mb-0.5 text-lg">{item.menu.name}</p>
-                                        <p className="text-base text-gray-600 font-medium">
-                                            ราคา: <span className="text-teal-600 font-bold">฿{item.menu.price.toFixed(0)}</span>
-                                        </p>
+                                        {/* [ชื่อเมนู + ราคา] */}
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`font-bold truncate mb-0.5 text-lg ${isHighlighted ? "text-yellow-800" : "text-gray-800"}`}>{item.menu.name}</p>
+                                            <p className="text-base text-gray-600 font-medium">
+                                                ราคา: <span className="text-teal-600 font-bold">฿{item.menu.price.toFixed(0)}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* --- [จำนวน] ปรับขนาด label --- */}
+                                    <div className="text-right flex-shrink-0 pl-2">
+                                        <span className="text-gray-500 text-sm">จำนวน:</span>
+                                        <p className={`font-black text-2xl ${isHighlighted ? "text-yellow-600" : "text-gray-900"}`}>{item.quantity}</p>
                                     </div>
                                 </div>
-
-                                {/* --- [จำนวน] ปรับขนาด label --- */}
-                                <div className="text-right flex-shrink-0 pl-2">
-                                    <span className="text-gray-500 text-sm">จำนวน:</span>
-                                    <p className="text-gray-900 font-black text-2xl">{item.quantity}</p>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -330,7 +336,7 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                         <button
                             onClick={() => handleMove(order.position + 1)}
                             disabled={isLast || isPending}
-                            className="w-10 h-10 bg-white border-2 border-orange-200 rounded-lg hover:bg-orange-100 hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
+                            className="w-10 h-10 bg-white border-2 border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
                             title="เลื่อนลง"
                         >
                             <FaArrowDown className="w-4 h-4 text-orange-600" />

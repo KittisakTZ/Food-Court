@@ -1,5 +1,3 @@
-// @/features/home/components/SellerDashboard.tsx
-
 import { useMyStoreOrders } from "@/hooks/useOrders";
 import { useMyStore } from "@/hooks/useStores";
 import { Link } from "react-router-dom";
@@ -23,12 +21,11 @@ import {
   FiRefreshCw,
   FiX,
   FiCheck,
-  FiUser, // Import FiCheck
+  FiUser,
 } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { Order } from "@/types/response/order.response";
 
-// (ปรับปรุง) อัปเดต Type `OrderStatus` ให้รวมสถานะใหม่
 type OrderStatus =
   | "PENDING"
   | "AWAITING_PAYMENT"
@@ -38,7 +35,6 @@ type OrderStatus =
 
 type ViewMode = "kanban" | "list";
 
-// (ปรับปรุง) เพิ่ม Config สำหรับสถานะใหม่
 const STATUS_CONFIG = {
   PENDING: {
     label: "รอดำเนินการ",
@@ -146,7 +142,7 @@ const KanbanColumn = ({
     {
       yellow: "from-yellow-500 to-orange-500",
       blue: "from-blue-500 to-cyan-500",
-      purple: "from-purple-500 to-indigo-500", // Add purple for the new status
+      purple: "from-purple-500 to-indigo-500",
       orange: "from-orange-500 to-red-500",
       green: "from-green-500 to-emerald-500",
     }[color] || "from-gray-500 to-gray-600";
@@ -205,6 +201,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | "ALL">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
 
   const statusFilter =
     selectedStatus === "ALL"
@@ -220,7 +217,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
   } = useMyStoreOrders({
     page,
     pageSize,
-    status: statusFilter as any, // Use `as any` or adjust the hook's type
+    status: statusFilter as any,
   });
 
   const { mutate: moveOrder } = useMoveOrderPosition();
@@ -228,14 +225,51 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
   // Filter orders by search query
   const filteredOrders = useMemo(() => {
     const orders = ordersData?.data ?? [];
-    if (!searchQuery.trim()) return orders;
+    let result = orders;
 
-    const query = searchQuery.toLowerCase();
-    return orders.filter(
-      (order) =>
-        order.id.toLowerCase().includes(query) ||
-        (order.buyer && order.buyer.username?.toLowerCase().includes(query))
-    );
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (order) =>
+          order.id.toLowerCase().includes(query) ||
+          (order.buyer && order.buyer.username?.toLowerCase().includes(query))
+      );
+    }
+
+    // Filter by selected menu
+    if (selectedMenuId) {
+      result = result.filter((order) =>
+        order.orderItems.some((item) => item.menuId === selectedMenuId)
+      );
+    }
+
+    return result;
+  }, [ordersData, searchQuery, selectedMenuId]);
+
+  // Calculate Menu Stats
+  const menuStats = useMemo(() => {
+    const stats: Record<string, { id: string; name: string; quantity: number; image: string }> = {};
+
+    const baseOrders = ordersData?.data ?? [];
+    const searchFiltered = searchQuery.trim()
+      ? baseOrders.filter(o => o.id.toLowerCase().includes(searchQuery.toLowerCase()) || o.buyer?.username?.toLowerCase().includes(searchQuery.toLowerCase()))
+      : baseOrders;
+
+    searchFiltered.forEach(order => {
+      order.orderItems.forEach(item => {
+        if (!stats[item.menuId]) {
+          stats[item.menuId] = {
+            id: item.menuId,
+            name: item.menu.name,
+            quantity: 0,
+            image: item.menu.image || "",
+          };
+        }
+        stats[item.menuId].quantity += item.quantity;
+      });
+    });
+
+    return Object.values(stats).sort((a, b) => b.quantity - a.quantity);
   }, [ordersData, searchQuery]);
 
   // Categorize filtered orders
@@ -265,6 +299,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
   const handleStatusChange = (status: OrderStatus | "ALL") => {
     setSelectedStatus(status);
     setPage(1);
+    setSelectedMenuId(null); // Reset menu filter when status changes
   };
 
   const handlePageSizeChange = (size: number) => {
@@ -426,6 +461,46 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
         </div>
       </div>
 
+      {/* Menu Summary Section */}
+      {menuStats.length > 0 && (
+        <div className="mb-6 bg-white rounded-2xl shadow-lg p-5 border border-orange-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <MdRestaurant className="text-orange-500" />
+            สรุปรายการอาหารที่ต้องทำ
+            <span className="text-sm font-normal text-gray-500 ml-2">(คลิกเพื่อกรองดูเฉพาะเมนูนี้)</span>
+          </h3>
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {menuStats.map((menu) => (
+              <button
+                key={menu.id}
+                onClick={() => setSelectedMenuId(selectedMenuId === menu.id ? null : menu.id)}
+                className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all min-w-[200px] ${selectedMenuId === menu.id
+                  ? "border-orange-500 bg-orange-50 shadow-md ring-2 ring-orange-200"
+                  : "border-gray-100 hover:border-orange-300 hover:shadow-sm bg-white"
+                  }`}
+              >
+                <div className="relative">
+                  <img
+                    src={menu.image || ""}
+                    alt={menu.name}
+                    className="w-12 h-12 rounded-lg object-cover bg-gray-100"
+                    onError={(e) => { e.currentTarget.src = ""; }}
+                  />
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                    {menu.quantity}
+                  </div>
+                </div>
+                <div className="text-left flex-1 min-w-0">
+                  <p className="font-bold text-gray-800 truncate text-sm">{menu.name}</p>
+                  <p className="text-xs text-gray-500">รวม {menu.quantity} ที่</p>
+                </div>
+                {selectedMenuId === menu.id && <FiCheck className="text-orange-500" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search and Filter Bar */}
       <div className="mb-6 bg-white rounded-2xl shadow-lg p-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -489,6 +564,18 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               </button>
             </span>
           )}
+          {selectedMenuId && (
+            <span className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-semibold border border-yellow-200">
+              <MdRestaurant className="w-4 h-4" />
+              เมนู: {menuStats.find(m => m.id === selectedMenuId)?.name}
+              <button
+                onClick={() => setSelectedMenuId(null)}
+                className="hover:bg-yellow-200 rounded-full p-0.5 transition-all"
+              >
+                <FiX className="w-3 h-3" />
+              </button>
+            </span>
+          )}
           {searchQuery && (
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-semibold">
               ค้นหา: "{searchQuery}"
@@ -521,14 +608,14 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <div className="text-center py-20 bg-white rounded-3xl shadow-lg border-2 border-dashed border-gray-200">
               <FiPackage className="w-24 h-24 text-gray-300 mx-auto mb-6" />
               <h2 className="text-3xl font-bold text-gray-800 mb-3">
-                {searchQuery ? "ไม่พบออเดอร์ที่ค้นหา" : "ไม่มีออเดอร์"}
+                {searchQuery || selectedMenuId ? "ไม่พบออเดอร์ที่ค้นหา" : "ไม่มีออเดอร์"}
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
-                {searchQuery ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง" : "ยังไม่มีออเดอร์ใหม่ในขณะนี้"}
+                {searchQuery || selectedMenuId ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง" : "ยังไม่มีออเดอร์ใหม่ในขณะนี้"}
               </p>
-              {searchQuery && (
+              {(searchQuery || selectedMenuId) && (
                 <button
-                  onClick={clearSearch}
+                  onClick={() => { clearSearch(); setSelectedMenuId(null); }}
                   className="mt-6 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg font-semibold"
                 >
                   เคลียร์การค้นหา
@@ -558,6 +645,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                       queueDisplayNumber={index + 1}
                       isFirst={index === 0}
                       isLast={index === filteredOrders.length - 1}
+                      highlightMenuId={selectedMenuId || undefined}
                     />
                   ))}
                 </div>
@@ -567,24 +655,25 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <div className="text-center py-20 bg-white rounded-3xl shadow-lg border-2 border-dashed border-gray-200">
               <FiPackage className="w-24 h-24 text-gray-300 mx-auto mb-6" />
               <h2 className="text-3xl font-bold text-gray-800 mb-3">
-                {searchQuery
+                {searchQuery || selectedMenuId
                   ? "ไม่พบออเดอร์ที่ค้นหา"
                   : selectedStatus === "ALL"
                     ? "ยังไม่มีออเดอร์"
                     : "ไม่พบออเดอร์ในสถานะนี้"}
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
-                {searchQuery
+                {searchQuery || selectedMenuId
                   ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง"
                   : selectedStatus === "ALL"
                     ? "เมื่อมีลูกค้าสั่งอาหาร ออเดอร์จะแสดงที่นี่"
                     : "ลองเปลี่ยนการกรองเพื่อดูสถานะอื่น"}
               </p>
-              {(searchQuery || selectedStatus !== "ALL") && (
+              {(searchQuery || selectedStatus !== "ALL" || selectedMenuId) && (
                 <button
                   onClick={() => {
                     clearSearch();
                     handleStatusChange("ALL");
+                    setSelectedMenuId(null);
                   }}
                   className="mt-6 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg font-semibold"
                 >
@@ -606,7 +695,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm" title="หน้าแรก">««</button>
-              <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold"><FiChevronLeft className="w-4 h-4" />ก่อนหน้า</button>
+              <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold">ถัดไป<FiChevronLeft className="w-4 h-4" /></button>
               <div className="hidden sm:flex items-center gap-1">
                 {(() => {
                   const pages = [];
