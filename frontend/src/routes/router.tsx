@@ -12,6 +12,7 @@ import StoreSettingsPage from "@/pages/my-store/settings";
 import CreateStorePage from "@/pages/my-store/create";
 import OrderDetailPage from "@/features/my-orders/order-detail";
 import ReviewsPage from "@/pages/my-store/ReviewsPage";
+import SellerAnalyticsPage from "@/pages/my-store/analytics/page";
 
 
 const router = createBrowserRouter([
@@ -59,11 +60,15 @@ const router = createBrowserRouter([
       },
       {
         path: "my-orders/:orderId",
-        element: <OrderDetailPage/>,
+        element: <OrderDetailPage />,
       },
       {
         path: "my-store/orders/:orderId", // Path ใหม่สำหรับ Seller
-        element: <OrderDetailPage/>,       // ใช้ Component เดิมได้เลย
+        element: <OrderDetailPage />,       // ใช้ Component เดิมได้เลย
+      },
+      {
+        path: "my-store/analytics",
+        element: <SellerAnalyticsPage />,
       },
     ],
   },

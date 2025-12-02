@@ -4,7 +4,7 @@ import { useAuthStore } from "@/zustand/useAuthStore";
 import { Avatar, Box, Flex, Text } from "@radix-ui/themes";
 import SidebarTriggerCustom from "@/components/customs/button/sidebarTriggerCustom";
 import { MdRestaurant, MdShoppingCart } from "react-icons/md";
-import { FiBell } from "react-icons/fi";
+import { FiBell, FiTrendingUp } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { IoIosLogOut } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
@@ -97,6 +97,13 @@ const NavbarMain = () => {
               >
                 <IoFastFoodOutline className="w-5 h-5" />
                 <span>จัดการเมนู</span>
+              </Link>
+              <Link
+                to="/my-store/analytics"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
+              >
+                <FiTrendingUp className="w-5 h-5" />
+                <span>แดชบอร์ด</span>
               </Link>
             </>
           )}

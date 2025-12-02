@@ -5,9 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import { rolesData } from "@common/models/roleData";
 
 function authorizeAdmin(req: Request, res: Response, next: NextFunction): void {
-    const role = req.token?.payload?.role; 
+    const role = req.token?.payload?.role;
 
-    if (!rolesData.includes(role)) {
+    if (!role || !rolesData.includes(role as any)) {
         handleServiceResponse(
             new ServiceResponse(
                 ResponseStatus.Failed,
