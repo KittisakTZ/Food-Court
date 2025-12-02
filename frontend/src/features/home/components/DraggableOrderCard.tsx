@@ -84,8 +84,8 @@ const OrderActions = ({ order }: { order: Order }) => {
                     // ✨ (ปรับปรุง) สถานะนี้ ร้านค้าไม่ต้องทำอะไร รอให้ลูกค้าจ่ายเงิน
                     case 'AWAITING_PAYMENT':
                         return (
-                            <div className="text-center p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
-                                <p className="font-semibold">รอการชำระเงินจากลูกค้า</p>
+                            <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-lg border-2 border-blue-300 shadow-sm">
+                                <p className="font-bold">⏳ รอการชำระเงินจากลูกค้า</p>
                             </div>
                         );
 
@@ -225,13 +225,16 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
 
                 {/* ✨ (เพิ่ม) ส่วนแสดงผลพิเศษสำหรับ Payment */}
                 {(order.status === 'AWAITING_CONFIRMATION' && order.paymentSlip) && (
-                    <div className="p-4 bg-yellow-50 border-b-2 border-dashed border-gray-300">
-                        <h4 className="font-bold text-yellow-800 mb-2">ตรวจสอบสลิปการโอนเงิน</h4>
-                        <a 
-                            href={order.paymentSlip} 
-                            target="_blank" 
+                    <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-dashed border-yellow-300">
+                        <h4 className="font-bold text-yellow-800 mb-3 flex items-center gap-2">
+                            <FiDollarSign className="w-5 h-5" />
+                            ตรวจสอบสลิปการโอนเงิน
+                        </h4>
+                        <a
+                            href={order.paymentSlip}
+                            target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-block bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-all"
+                            className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold py-2.5 px-5 rounded-xl hover:from-yellow-600 hover:to-amber-600 transition-all shadow-md hover:shadow-lg"
                         >
                             📄 ดูสลิปที่แนบมา
                         </a>
@@ -278,25 +281,29 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast 
                 </div>
 
                 {order.description && (
-                    <div className="p-4 bg-neutral-50 border-t-2 border-dashed border-gray-300">
-                        <h4 className="font-bold text-gray-700 mb-2">
-                            หมายเหตุจากลูกค้า:
+                    <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-t-2 border-dashed border-amber-200">
+                        <h4 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
+                            💬 หมายเหตุจากลูกค้า:
                         </h4>
-                        <p className="text-sm text-gray-600 italic">
+                        <p className="text-sm text-gray-700 italic bg-white px-4 py-3 rounded-lg border-l-4 border-amber-400 shadow-sm">
                             "{order.description}"
                         </p>
                     </div>
                 )}
 
                 {/* --- [TOTAL] - เปลี่ยนเป็นขอบประ (เหมือนใบเสร็จ) --- */}
-                <div className="bg-neutral-50 px-4 py-3 border-t-2 border-dashed border-gray-300">
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-3 border-t-2 border-dashed border-orange-300">
                     <div className="flex items-center justify-between">
-                        <div className="text-gray-600">
-                            <div className="text-xs font-medium">รวมทั้งหมด {totalItems} ชิ้น</div>
-                            <div className="text-xs opacity-75">ยอดชำระ</div>
+                        <div className="text-gray-700">
+                            <div className="text-sm font-bold flex items-center gap-2">
+                                <MdRestaurant className="w-4 h-4 text-orange-600" />
+                                รวมทั้งหมด {totalItems} ชิ้น
+                            </div>
+                            <div className="text-xs font-medium text-gray-500 mt-0.5">ยอดชำระทั้งสิ้น</div>
                         </div>
-                        <div className="text-gray-800 font-bold text-xl">
-                            ฿{order.totalAmount.toFixed(0)}
+                        <div className="text-orange-600 font-black text-2xl flex items-center gap-1">
+                            <FiDollarSign className="w-6 h-6" />
+                            {order.totalAmount.toFixed(0)}
                         </div>
                     </div>
                 </div>
