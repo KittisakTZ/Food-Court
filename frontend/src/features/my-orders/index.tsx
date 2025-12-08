@@ -4,9 +4,8 @@ import { useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiUpload,
-  FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag, FiMapPin
-} from "react-icons/fi";
-import { MdRestaurant, MdStorefront, MdPayment } from "react-icons/md";
+  FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag} from "react-icons/fi";
+import { MdRestaurant, MdPayment } from "react-icons/md";
 import { Order } from "@/types/response/order.response";
 import { useMyOrders, useUploadSlip } from "@/hooks/useOrders";
 import { toastService } from "@/services/toast.service";
@@ -325,11 +324,14 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           </div>
         </div>
 
-        {/* Queue Number */}
-        {order.queueNumber && (
-          <div className="bg-indigo-500 text-white rounded-lg px-3 py-2 flex items-center justify-between mb-4 flex-shrink-0">
-            <span className="text-xs font-semibold opacity-90">หมายเลขคิว</span>
-            <span className="text-lg font-black">{order.queueNumber}</span>
+        {/* Queue Position */}
+        {order.position > 0 && (
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg px-3 py-2 flex items-center justify-between mb-4 flex-shrink-0 shadow-md">
+            <span className="text-xs font-semibold opacity-90">ลำดับคิวของร้าน</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs opacity-75">คิวที่</span>
+              <span className="text-xl font-black">{order.position}</span>
+            </div>
           </div>
         )}
 

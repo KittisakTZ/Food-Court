@@ -246,7 +246,10 @@ const OrderDetailPage = () => {
                             <div className="space-y-3 text-sm">
                                 <div className="flex justify-between"><span className="text-gray-600">สถานะการชำระเงิน:</span> <span className={`font-semibold ${isPaid ? 'text-green-600' : 'text-amber-600'}`}>{isPaid ? 'ชำระเงินแล้ว' : 'ยังไม่ชำระเงิน'}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-600">วิธีชำระเงิน:</span> <span className="font-semibold">{order.paymentMethod === 'PROMPTPAY' ? 'PromptPay' : 'จ่ายเงินสด'}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-600">หมายเลขคิว:</span> <span className="font-semibold">{order.queueNumber}</span></div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">ลำดับคิวของร้าน:</span>
+                                    <span className="font-bold text-orange-600 text-lg">#{order.position}</span>
+                                </div>
                             </div>
                         </div>
                         <OrderTimeline order={order} />

@@ -5,11 +5,10 @@ import { useMenus } from "@/hooks/useMenus";
 import { useMenuCategories } from "@/hooks/useMenuCategories";
 import { useState } from "react";
 import { useAddItemToCart } from "@/hooks/useCart";
-import { FiStar, FiClock, FiMapPin, FiShoppingCart, FiChevronLeft, FiChevronRight, FiHeart, FiInfo } from "react-icons/fi";
+import { FiStar, FiClock, FiMapPin, FiShoppingCart, FiChevronLeft, FiChevronRight, FiInfo } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { HiSparkles } from "react-icons/hi";
 import { BiDish } from "react-icons/bi";
-import { MdAddShoppingCart } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 interface StoreDetailFeatureProps {

@@ -55,7 +55,7 @@ const ModernOrderCard = ({
                         <div className="flex-1">
                             <p className="font-semibold text-gray-800">{item.name}</p>
                             <p className="text-sm text-gray-500">{item.description}</p>
-                            <p className="text-sm font-bold text-orange-600">${item.price}</p>
+                            <p className="text-sm font-bold text-orange-600">฿{item.price}</p>
                         </div>
                         <div className="text-right">
                             <p className="text-xs text-gray-500">Qty:</p>
@@ -69,7 +69,7 @@ const ModernOrderCard = ({
             <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t-2 border-gray-100">
                 <div>
                     <p className="text-xs text-gray-500">X{items.length} Items</p>
-                    <p className="text-lg font-black text-gray-800">${total}</p>
+                    <p className="text-lg font-black text-gray-800">฿{total}</p>
                 </div>
                 <div className="flex gap-2">
                     {status === 'PENDING' && (

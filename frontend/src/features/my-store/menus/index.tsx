@@ -81,7 +81,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
+    <div className="bg-white rounded-2xl shadow-lg border-2 border-orange-100 overflow-hidden">
       <ConfirmationDialog
         isOpen={dialogState.isOpen}
         onClose={closeDialog}
@@ -89,47 +89,62 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
         title={dialogState.title}
         description={dialogState.description}
       />
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-5">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <MdCategory className="w-5 h-5" />
-          หมวดหมู่เมนู
-        </h2>
-        <p className="text-orange-100 text-sm mt-1">
-          {categories?.length || 0} หมวดหมู่
-        </p>
+      <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-yellow-500 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <MdCategory className="w-6 h-6" />
+              หมวดหมู่เมนู
+            </h2>
+            <p className="text-orange-100 text-sm mt-1 flex items-center gap-2">
+              <span className="bg-white/20 px-2 py-0.5 rounded-full font-semibold">
+                {categories?.length || 0}
+              </span>
+              หมวดหมู่
+            </p>
+          </div>
+          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <MdCategory className="w-8 h-8 text-white" />
+          </div>
+        </div>
       </div>
 
-      <div className="p-5">
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
-            placeholder="เพิ่มหมวดหมู่ใหม่..."
-            className="flex-grow px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all text-sm"
-          />
+      <div className="p-6 bg-gradient-to-b from-orange-50 to-white">
+        <div className="flex gap-3 mb-5">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
+              placeholder="เพิ่มหมวดหมู่ใหม่..."
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-sm bg-white shadow-sm"
+            />
+          </div>
           <button
             onClick={handleCreate}
             disabled={isCreating || !newCategoryName.trim()}
-            className="px-5 py-2.5 bg-orange-500 text-white font-medium rounded-xl hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow"
+            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-yellow-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
           >
-            <FiPlus className="w-4 h-4" />
-            {isCreating ? 'กำลังเพิ่ม...' : 'เพิ่ม'}
+            <FiPlus className="w-5 h-5" />
+            <span>{isCreating ? 'กำลังเพิ่ม...' : 'เพิ่ม'}</span>
           </button>
         </div>
 
-        <div className={`space-y-2 transition-all duration-300 ${isExpanded ? 'max-h-96' : 'max-h-48'} overflow-y-auto`}>
+        <div className={`space-y-3 ${isExpanded ? 'max-h-96' : 'max-h-52'} overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent`}>
           {categories?.length === 0 ? (
-            <div className="text-center py-8">
-              <MdCategory className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm">ยังไม่มีหมวดหมู่</p>
+            <div className="text-center py-12 bg-white rounded-xl border-2 border-dashed border-gray-200">
+              <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <MdCategory className="w-8 h-8 text-orange-300" />
+              </div>
+              <p className="text-gray-500 font-medium">ยังไม่มีหมวดหมู่</p>
+              <p className="text-gray-400 text-sm mt-1">เริ่มเพิ่มหมวดหมู่แรกของคุณ</p>
             </div>
           ) : (
             categories?.map(cat => (
               <div
                 key={cat.id}
-                className="group p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all flex items-center gap-3 border border-orange-100"
+                className="group p-4 bg-white rounded-xl hover:bg-orange-50 flex items-center gap-3 border-2 border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md"
               >
                 {editingCategoryId === cat.id ? (
                   <>
@@ -138,25 +153,43 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                       value={editingCategoryName}
                       onChange={(e) => setEditingCategoryName(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleUpdate()}
-                      className="flex-grow px-3 py-1 border border-orange-300 rounded-md focus:ring-1 focus:ring-orange-500 outline-none text-sm"
+                      className="flex-grow px-3 py-2 border-2 border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-sm font-medium"
                       autoFocus
                     />
-                    <button onClick={handleUpdate} disabled={isUpdating} className="p-2 text-green-600 hover:text-green-700 disabled:text-gray-400">
+                    <button
+                      onClick={handleUpdate}
+                      disabled={isUpdating}
+                      className="p-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 shadow-sm"
+                    >
                       <FiSave className="w-4 h-4" />
                     </button>
-                    <button onClick={handleCancelEdit} className="p-2 text-gray-500 hover:text-gray-700">
+                    <button
+                      onClick={handleCancelEdit}
+                      className="p-2.5 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 shadow-sm"
+                    >
                       <FiX className="w-4 h-4" />
                     </button>
                   </>
                 ) : (
                   <>
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span className="font-medium text-gray-800 text-sm flex-grow">{cat.name}</span>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(cat)} className="p-2 text-blue-500 hover:text-blue-700">
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MdCategory className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <span className="font-bold text-gray-800 text-base flex-grow">{cat.name}</span>
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                      <button
+                        onClick={() => handleEdit(cat)}
+                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 shadow-sm"
+                        title="แก้ไข"
+                      >
                         <FiEdit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete(cat.id, cat.name)} disabled={isDeleting} className="p-2 text-red-500 hover:text-red-700 disabled:text-gray-400">
+                      <button
+                        onClick={() => handleDelete(cat.id, cat.name)}
+                        disabled={isDeleting}
+                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 disabled:bg-gray-200 disabled:text-gray-400 shadow-sm"
+                        title="ลบ"
+                      >
                         <FiTrash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -184,7 +217,6 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
     const { data: menusData, isLoading } = useMenus({ storeId });
     const { mutate: deleteItem, isPending } = useDeleteMenu();
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [dialogState, setDialogState] = useState<{
       isOpen: boolean;
       title: string;
@@ -208,8 +240,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
 
     const filteredMenus = menusData?.data.filter(menu => {
       const matchesSearch = menu.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = !selectedCategory || menu.category?.id === selectedCategory;
-      return matchesSearch && matchesCategory;
+      return matchesSearch;
     });
 
     if (isLoading) {
@@ -235,7 +266,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
     };
 
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-lg border-2 border-orange-100 overflow-hidden">
         <ConfirmationDialog
           isOpen={dialogState.isOpen}
           onClose={closeDialog}
@@ -244,108 +275,116 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
           description={dialogState.description}
         />
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-yellow-500 p-6">
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                <MdRestaurant className="w-7 h-7" />
+              <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                <MdRestaurant className="w-8 h-8" />
                 เมนูทั้งหมด
               </h2>
-              <p className="text-orange-100 text-sm mt-1">
-                {filteredMenus?.length || 0} รายการ
+              <p className="text-orange-100 text-sm mt-2 flex items-center gap-2">
+                <span className="bg-white/20 px-3 py-0.5 rounded-full font-semibold">
+                  {filteredMenus?.length || 0}
+                </span>
+                รายการ
               </p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl">
+              <MdRestaurant className="w-10 h-10 text-white" />
             </div>
           </div>
 
           {/* Search Bar */}
           <div className="relative">
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 z-10" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="ค้นหาเมนู..."
-              className="w-full pl-12 pr-4 py-3 rounded-xl border-0 focus:ring-2 focus:ring-orange-300 outline-none transition-all text-gray-700"
+              placeholder="ค้นหาเมนูที่ต้องการ..."
+              className="w-full pl-12 pr-12 py-3.5 rounded-xl border-2 border-white/50 focus:ring-2 focus:ring-white focus:border-white outline-none text-gray-700 font-medium placeholder-gray-400 shadow-sm bg-white"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded-lg"
               >
-                <MdClose className="w-5 h-5" />
+                <MdClose className="w-4 h-4" />
               </button>
             )}
           </div>
         </div>
 
         {/* Menu List */}
-        <div className="p-6">
+        <div className="p-6 bg-gradient-to-b from-orange-50 to-white">
           {filteredMenus?.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="bg-orange-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MdRestaurant className="w-12 h-12 text-orange-300" />
+            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+              <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <MdRestaurant className="w-12 h-12 text-orange-500" />
               </div>
-              <p className="text-gray-500 text-lg font-medium mb-2">
+              <p className="text-gray-700 text-xl font-bold mb-2">
                 {searchTerm ? 'ไม่พบเมนูที่ค้นหา' : 'ยังไม่มีเมนู'}
               </p>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-500 text-sm">
                 {searchTerm ? 'ลองค้นหาด้วยคำอื่น' : 'เริ่มสร้างเมนูแรกของคุณได้เลย'}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {filteredMenus?.map((menu, index) => (
+              {filteredMenus?.map((menu) => (
                 <div
                   key={menu.id}
-                  className="group relative flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:border-orange-300 hover:shadow-md transition-all duration-300 bg-white animate-fadeIn"
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className="group relative flex items-center gap-5 p-5 bg-white border-2 border-gray-100 rounded-2xl hover:border-orange-300 hover:shadow-xl shadow-md"
                 >
                   {/* Image */}
-                  <div className="relative overflow-hidden rounded-xl flex-shrink-0">
+                  <div className="relative overflow-hidden rounded-2xl flex-shrink-0 shadow-md">
                     <img
-                      src={menu.image || 'https://via.placeholder.com/80'}
+                      src={menu.image || 'https://via.placeholder.com/100'}
                       alt={menu.name}
-                      className="w-24 h-24 object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="w-28 h-28 object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-lg text-gray-800 truncate mb-1">
+                    <h3 className="font-bold text-xl text-gray-800 truncate mb-2">
                       {menu.name}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <span className="flex items-center gap-1 bg-orange-50 px-2 py-1 rounded-md">
-                        <MdCategory className="w-4 h-4 text-orange-500" />
-                        {menu.category?.name || 'ไม่มีหมวดหมู่'}
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200">
+                        <MdCategory className="w-4 h-4 text-orange-600" />
+                        <span className="text-sm font-semibold text-orange-700">
+                          {menu.category?.name || 'ไม่มีหมวดหมู่'}
+                        </span>
                       </span>
                     </div>
                   </div>
 
                   {/* Price & Actions */}
-                  <div className="flex items-center gap-4 flex-shrink-0">
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-orange-600">
-                        ฿{menu.price.toFixed(2)}
+                  <div className="flex items-center gap-5 flex-shrink-0">
+                    <div className="text-right bg-gradient-to-br from-orange-50 to-yellow-50 px-5 py-3 rounded-xl border-2 border-orange-200">
+                      <p className="text-xs text-gray-500 font-medium mb-1">ราคา</p>
+                      <p className="text-3xl font-black text-orange-600">
+                        ฿{menu.price.toFixed(0)}
                       </p>
                     </div>
 
                     <div className="flex gap-2">
                       <button
                         onClick={() => onEdit(menu)}
-                        className="p-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all shadow-sm hover:shadow active:scale-95"
+                        className="p-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 shadow-md hover:shadow-lg"
                         title="แก้ไข"
                       >
-                        <FiEdit2 className="w-4 h-4" />
+                        <FiEdit2 className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(menu.id, menu.name)}
                         disabled={isPending}
-                        className="p-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition-all shadow-sm hover:shadow active:scale-95"
+                        className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 disabled:bg-gray-300 shadow-md hover:shadow-lg"
                         title="ลบ"
                       >
-                        <FiTrash2 className="w-4 h-4" />
+                        <FiTrash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
@@ -445,24 +484,6 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
             </div>
           </div>
         </div>
-
-        {/* Add CSS for animations */}
-        <style dangerouslySetInnerHTML={{
-          __html: `
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out forwards;
-        }
-      `}} />
       </div>
     );
   };
