@@ -158,6 +158,7 @@ const FileUploadComponent: React.FC<FileUploadProps> = ({
       {previewImage && (
         <Dialog.Root open onOpenChange={() => setPreviewImage(null)}>
           <Dialog.Content className="w-auto flex justify-center items-center bg-white p-4 rounded shadow">
+            <Dialog.Title className="sr-only">ดูรูปภาพ</Dialog.Title>
             <img
               src={previewImage}
               className="max-h-[80vh] object-contain"

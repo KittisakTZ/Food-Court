@@ -9,11 +9,13 @@ import { MdDelete } from 'react-icons/md';
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { ConfirmationDialog } from "@/components/customs/ConfirmationDialog";
+import { useScreenSize } from "@/hooks/use-mobile";
 
 export const Cart = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const cart = useCartStore(state => state.cart);
     const [isConfirmOpen, setConfirmOpen] = useState(false);
+    const { isMobile, isTablet } = useScreenSize();
 
     // คำนวณค่า totals ด้วย useMemo
     const { totalItems, totalPrice } = useMemo(() => {
@@ -55,50 +57,68 @@ export const Cart = () => {
                 description="คุณต้องการล้างตะกร้าสินค้าทั้งหมดใช่หรือไม่? 🗑️"
             />
             {/* Floating Cart Button */}
-            <div className="fixed bottom-6 right-6 z-50 animate-fade-in">
+            <div className={`fixed z-[45] animate-fade-in ${
+                isMobile ? 'bottom-4 right-4' : 'bottom-6 right-6'
+            }`}>
                 {!isExpanded ? (
                     // Collapsed State - Floating Button
                     <button
                         onClick={() => setIsExpanded(true)}
-                        className="relative group bg-gradient-to-r from-orange-500 to-yellow-500 text-white p-5 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 hover:-translate-y-2"
+                        className={`relative group bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 ${
+                            isMobile ? 'p-4' : 'p-5'
+                        }`}
                     >
                         {/* Badge */}
-                        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-8 h-8 flex items-center justify-center shadow-lg animate-bounce-slow border-2 border-white">
+                        <div className={`absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-bounce-slow border-2 border-white ${
+                            isMobile ? 'w-6 h-6' : 'w-8 h-8'
+                        }`}>
                             {totalItems}
                         </div>
-                        
+
                         {/* Icon */}
-                        <FiShoppingCart className="w-8 h-8 group-hover:animate-wiggle" />
-                        
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                            <div className="bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xl whitespace-nowrap">
-                                ดูตะกร้า ({totalItems} รายการ)
-                                <div className="absolute top-full right-6 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        <FiShoppingCart className={`group-hover:animate-wiggle ${
+                            isMobile ? 'w-6 h-6' : 'w-8 h-8'
+                        }`} />
+
+                        {/* Tooltip - ซ่อนใน mobile */}
+                        {!isMobile && (
+                            <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                <div className="bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xl whitespace-nowrap">
+                                    ดูตะกร้า ({totalItems} รายการ)
+                                    <div className="absolute top-full right-6 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </button>
                 ) : (
                     // Expanded State - Cart Panel
-                    <div className="bg-white rounded-3xl shadow-3xl w-96 border-2 border-orange-200 overflow-hidden animate-slide-up">
+                    <div className={`bg-white rounded-3xl shadow-3xl border-2 border-orange-200 overflow-hidden animate-slide-up ${
+                        isMobile ? 'w-[calc(100vw-2rem)] max-w-sm' : isTablet ? 'w-80' : 'w-96'
+                    }`}>
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-orange-500 to-yellow-500 p-6 text-white relative overflow-hidden">
+                        <div className={`bg-gradient-to-r from-orange-500 to-yellow-500 text-white relative overflow-hidden ${
+                            isMobile ? 'p-4' : 'p-6'
+                        }`}>
                             {/* Decorative Elements */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
                             
                             <div className="relative z-10">
-                                <div className="flex justify-between items-center mb-4">
+                                <div className={`flex justify-between items-center ${isMobile ? 'mb-3' : 'mb-4'}`}>
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                                            <FiShoppingBag className="w-6 h-6" />
+                                        <div className={`bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg ${
+                                            isMobile ? 'w-10 h-10' : 'w-12 h-12'
+                                        }`}>
+                                            <FiShoppingBag className={isMobile ? 'w-5 h-5' : 'w-6 h-6'} />
                                         </div>
                                         <div>
-                                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                            <h2 className={`font-bold flex items-center gap-2 ${
+                                                isMobile ? 'text-xl' : 'text-2xl'
+                                            }`}>
                                                 ตะกร้าของคุณ
-                                                <HiSparkles className="w-5 h-5 animate-spin-slow" />
+                                                <HiSparkles className={`animate-spin-slow ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
                                             </h2>
-                                            <p className="text-orange-100 text-sm">{totalItems} รายการ</p>
+                                            <p className={`text-orange-100 ${isMobile ? 'text-xs' : 'text-sm'}`}>{totalItems} รายการ</p>
                                         </div>
                                     </div>
                                     
@@ -124,17 +144,21 @@ export const Cart = () => {
                         </div>
 
                         {/* Cart Items */}
-                        <div className="max-h-96 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-orange-50/30 to-white">
+                        <div className={`overflow-y-auto space-y-3 bg-gradient-to-b from-orange-50/30 to-white ${
+                            isMobile ? 'max-h-64 p-4' : isTablet ? 'max-h-80 p-5' : 'max-h-96 p-6'
+                        }`}>
                             {cart?.items.map((item, index) => (
                                 <div
                                     key={item.id}
                                     className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all p-4 border-2 border-gray-100 hover:border-orange-200 group animate-fade-in-up"
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
                                         {/* Menu Image */}
                                         <div className="relative">
-                                            <div className="w-20 h-20 rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                                            <div className={`rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow ${
+                                                isMobile ? 'w-16 h-16' : 'w-20 h-20'
+                                            }`}>
                                                 <img
                                                     src={item.menu.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100"}
                                                     alt={item.menu.name}
@@ -152,49 +176,61 @@ export const Cart = () => {
 
                                         {/* Menu Info */}
                                         <div className="flex-grow min-w-0">
-                                            <h3 className="font-bold text-gray-800 truncate group-hover:text-orange-600 transition-colors" title={item.menu.name}>
+                                            <h3 className={`font-bold text-gray-800 truncate group-hover:text-orange-600 transition-colors ${
+                                                isMobile ? 'text-sm' : 'text-base'
+                                            }`} title={item.menu.name}>
                                                 {item.menu.name}
                                             </h3>
-                                            <p className="text-sm text-gray-500 mt-1">
+                                            <p className={`text-gray-500 mt-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
                                                 ฿{item.menu.price.toFixed(0)} / ชิ้น
                                             </p>
                                             
                                             {/* Quantity Controls */}
-                                            <div className="flex items-center gap-3 mt-3">
+                                            <div className={`flex items-center gap-2 ${isMobile ? 'mt-2' : 'mt-3'}`}>
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                                                     disabled={isPending}
-                                                    className="w-8 h-8 bg-gradient-to-r from-red-100 to-red-200 hover:from-red-500 hover:to-red-600 text-red-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-110"
+                                                    className={`bg-gradient-to-r from-red-100 to-red-200 hover:from-red-500 hover:to-red-600 text-red-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-110 ${
+                                                        isMobile ? 'w-7 h-7' : 'w-8 h-8'
+                                                    }`}
                                                 >
-                                                    <FiMinus className="w-4 h-4" />
+                                                    <FiMinus className={isMobile ? 'w-3 h-3' : 'w-4 h-4'} />
                                                 </button>
-                                                
-                                                <span className="w-8 text-center font-bold text-lg text-gray-800">
+
+                                                <span className={`w-8 text-center font-bold text-gray-800 ${
+                                                    isMobile ? 'text-base' : 'text-lg'
+                                                }`}>
                                                     {item.quantity}
                                                 </span>
-                                                
+
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                                                     disabled={isPending}
-                                                    className="w-8 h-8 bg-gradient-to-r from-green-100 to-green-200 hover:from-green-500 hover:to-green-600 text-green-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-110"
+                                                    className={`bg-gradient-to-r from-green-100 to-green-200 hover:from-green-500 hover:to-green-600 text-green-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-110 ${
+                                                        isMobile ? 'w-7 h-7' : 'w-8 h-8'
+                                                    }`}
                                                 >
-                                                    <FiPlus className="w-4 h-4" />
+                                                    <FiPlus className={isMobile ? 'w-3 h-3' : 'w-4 h-4'} />
                                                 </button>
                                             </div>
                                         </div>
 
                                         {/* Item Total */}
                                         <div className="text-right">
-                                            <div className="text-xl font-bold text-green-600">
+                                            <div className={`font-bold text-green-600 ${
+                                                isMobile ? 'text-lg' : 'text-xl'
+                                            }`}>
                                                 ฿{(item.menu.price * item.quantity).toFixed(0)}
                                             </div>
                                             <button
                                                 onClick={() => handleUpdateQuantity(item.id, 0)}
                                                 disabled={isPending}
-                                                className="mt-2 text-red-500 hover:text-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                                className={`text-red-500 hover:text-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                                                    isMobile ? 'mt-1' : 'mt-2'
+                                                }`}
                                                 title="ลบออกจากตะกร้า"
                                             >
-                                                <FiTrash2 className="w-4 h-4" />
+                                                <FiTrash2 className={isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
                                             </button>
                                         </div>
                                     </div>
@@ -211,7 +247,9 @@ export const Cart = () => {
                         </div>
 
                         {/* Footer - Total & Checkout */}
-                        <div className="p-6 bg-white border-t-2 border-gray-100">
+                        <div className={`bg-white border-t-2 border-gray-100 ${
+                            isMobile ? 'p-4' : 'p-6'
+                        }`}>
                             {/* Delivery Info */}
                             <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-4 mb-4 border border-orange-200">
                                 <div className="flex items-center justify-between text-sm mb-2">
@@ -234,7 +272,9 @@ export const Cart = () => {
                             <Link to="/checkout" className="block" onClick={() => setIsExpanded(false)}>
                                 <button
                                     disabled={isPending}
-                                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold rounded-2xl transition-all disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-3 group/checkout"
+                                    className={`w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold rounded-2xl transition-all disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-3 group/checkout ${
+                                        isMobile ? 'py-3 text-sm' : 'py-4'
+                                    }`}
                                 >
                                     {isPending ? (
                                         <>
