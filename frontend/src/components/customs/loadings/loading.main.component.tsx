@@ -18,7 +18,7 @@ export default function LoadingMain() {
             fill="currentFill"
           />
         </svg>
-        <span className="sr-only">Loading...</span>
+        <span className="sr-only">กำลังโหลด...</span>
       </div>
     </div>
   );

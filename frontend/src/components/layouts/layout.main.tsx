@@ -68,7 +68,8 @@ const MainLayout = () => {
         ];
       case 'SELLER':
         return [
-          { title: "คิวออเดอร์", url: "/", icon: FaShoppingBag },
+          { title: "แดชบอร์ด", url: "/", icon: MdDashboard },
+          { title: "คิวออเดอร์", url: "/orders", icon: FaShoppingBag },
           { title: "จัดการเมนู", url: "/my-store/menus", icon: FaUtensils },
           { title: "ตั้งค่าร้าน", url: "/my-store/settings", icon: IoIosSettings },
         ];
@@ -106,25 +107,28 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="relative w-screen h-screen bg-gradient-to-br from-orange-50 to-yellow-50">
+    <div className="relative w-screen h-screen bg-gradient-to-br from-orange-50 to-yellow-50 overflow-hidden">
+      {/* Navbar - Fixed อยู่นอก SidebarProvider */}
+      <NavbarMain />
+
+      {/* Sidebar & Content */}
       <SidebarProvider
         style={{
           height: "100%",
           width: "100%",
           paddingTop: "70px",
           overflow: "hidden",
-          boxShadow: "0 2px 12px rgba(251, 146, 60, 0.1)",
         }}
       >
-        <NavbarMain />
         <SidebarComponent data={dataSidebar} />
         <SidebarInset className="m-0 p-0 bg-gradient-to-br from-orange-50/30 to-yellow-50/30 w-full max-w-full">
-          <div className="px-4 py-4 overflow-auto max-h-[calc(100%-70px)]">
+          <div className="px-2 sm:px-4 py-2 sm:py-4 overflow-auto max-h-[calc(100%-70px)]">
             <Outlet />
           </div>
         </SidebarInset>
       </SidebarProvider>
-      
+
+      {/* Cart - Fixed */}
       <Cart />
     </div>
   );

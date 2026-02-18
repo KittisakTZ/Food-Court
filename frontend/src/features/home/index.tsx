@@ -10,12 +10,12 @@ export default function HomeFeature() {
 
   // แสดง Loading ขณะรอข้อมูล user
   if (isLoading) {
-    return <div>Loading user profile...</div>;
+    return <div>กำลังโหลดข้อมูลผู้ใช้...</div>;
   }
-  
+
   // ถ้าไม่มี user (อาจจะเข้าถึงหน้านี้โดยตรง)
   if (!user) {
-      return <div>Error: User not found. Please try logging in again.</div>;
+      return <div>เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ใช้ กรุณาลองเข้าสู่ระบบอีกครั้ง</div>;
   }
 
   // แสดงผล Component ตาม Role
@@ -27,6 +27,6 @@ export default function HomeFeature() {
     case 'BUYER':
       return <BuyerDashboard />;
     default:
-      return <div>Unknown role. Please contact support.</div>;
+      return <div>ไม่ทราบบทบาท กรุณาติดต่อฝ่ายสนับสนุน</div>;
   }
 }

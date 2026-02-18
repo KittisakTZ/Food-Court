@@ -35,7 +35,7 @@ const NavbarMain = () => {
 
   return (
     <Flex
-      className="fixed w-full top-0 h-[70px] bg-white z-30 border-b border-gray-100"
+      className="fixed w-full top-0 left-0 right-0 h-[70px] bg-white z-50 border-b border-gray-100"
       justify="center"
       align="center"
       style={{ boxShadow: "0 2px 8px rgba(251, 146, 60, 0.1)" }}

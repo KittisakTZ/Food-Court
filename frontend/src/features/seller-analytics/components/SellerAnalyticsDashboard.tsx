@@ -12,13 +12,16 @@ import {
     ResponsiveContainer,
     LineChart,
     Line,
+    AreaChart,
+    Area,
 } from "recharts";
-import { FiCalendar, FiDollarSign, FiShoppingBag, FiTrendingUp, FiChevronDown } from "react-icons/fi";
+import { FiCalendar, FiShoppingBag, FiTrendingUp, FiChevronDown, FiBarChart2, FiActivity } from "react-icons/fi";
 import { MdRestaurant } from "react-icons/md";
+import { HiOutlineChartBar } from "react-icons/hi";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { th } from "date-fns/locale";
-import { startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
+import { startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, startOfWeek, endOfWeek } from "date-fns";
 
 interface DashboardData {
     stats: {
@@ -29,6 +32,7 @@ interface DashboardData {
     salesChart: {
         date: string;
         amount: number;
+        orderCount?: number;
     }[];
     topMenus: {
         id: string;
@@ -39,7 +43,8 @@ interface DashboardData {
     }[];
 }
 
-type ViewMode = "daily" | "monthly" | "yearly";
+type ViewMode = "daily" | "weekly" | "monthly" | "yearly";
+type ChartType = "line" | "bar" | "area";
 
 export const SellerAnalyticsDashboard = () => {
     const { data: myStore } = useMyStore();
@@ -49,6 +54,7 @@ export const SellerAnalyticsDashboard = () => {
 
     // New State for View Mode
     const [viewMode, setViewMode] = useState<ViewMode>("monthly");
+    const [chartType, setChartType] = useState<ChartType>("line");
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
     useEffect(() => {
@@ -67,6 +73,11 @@ export const SellerAnalyticsDashboard = () => {
                     startDate = startOfDay(selectedDate);
                     endDate = endOfDay(selectedDate);
                     interval = "day"; // Chart will show 1 point (or we could enhance backend for hourly)
+                    break;
+                case "weekly":
+                    startDate = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Start on Monday
+                    endDate = endOfWeek(selectedDate, { weekStartsOn: 1 }); // End on Sunday
+                    interval = "day"; // Breakdown by day
                     break;
                 case "monthly":
                     startDate = startOfMonth(selectedDate);
@@ -138,48 +149,92 @@ export const SellerAnalyticsDashboard = () => {
     return (
         <div className="space-y-8">
             {/* Header & Filters */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <FiTrendingUp className="text-orange-500" />
-                        แดชบอร์ดวิเคราะห์ยอดขาย
-                    </h1>
-                    <p className="text-gray-500 text-sm mt-1">
-                        ข้อมูลร้าน: <span className="font-semibold text-gray-700">{myStore?.name}</span>
-                    </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    {/* View Mode Selector */}
-                    <div className="relative">
-                        <select
-                            value={viewMode}
-                            onChange={(e) => setViewMode(e.target.value as ViewMode)}
-                            className="appearance-none pl-4 pr-10 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors cursor-pointer"
-                        >
-                            <option value="daily">รายวัน</option>
-                            <option value="monthly">รายเดือน</option>
-                            <option value="yearly">รายปี</option>
-                        </select>
-                        <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                            <FiTrendingUp className="text-orange-500" />
+                            แดชบอร์ดวิเคราะห์ยอดขาย
+                        </h1>
+                        <p className="text-gray-500 text-sm mt-1">
+                            ข้อมูลร้าน: <span className="font-semibold text-gray-700">{myStore?.name}</span>
+                        </p>
                     </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* View Mode Selector */}
+                        <div className="relative">
+                            <select
+                                value={viewMode}
+                                onChange={(e) => setViewMode(e.target.value as ViewMode)}
+                                className="appearance-none pl-4 pr-10 py-2.5 bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-xl text-sm font-semibold text-gray-700 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-300 transition-all cursor-pointer hover:shadow-md"
+                            >
+                                <option value="daily">รายวัน</option>
+                                <option value="weekly">รายสัปดาห์</option>
+                                <option value="monthly">รายเดือน</option>
+                                <option value="yearly">รายปี</option>
+                            </select>
+                            <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none" />
+                        </div>
 
-                    {/* Smart Date Picker */}
-                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-gray-200 shadow-sm hover:border-orange-300 transition-colors">
-                        <FiCalendar className="text-orange-500" />
-                        <DatePicker
-                            selected={selectedDate}
-                            onChange={(date: Date | null) => date && setSelectedDate(date)}
-                            locale={th}
-                            dateFormat={
-                                viewMode === "daily" ? "dd MMMM yyyy" :
-                                    viewMode === "monthly" ? "MMMM yyyy" :
-                                        "yyyy"
-                            }
-                            showMonthYearPicker={viewMode === "monthly"}
-                            showYearPicker={viewMode === "yearly"}
-                            className="bg-transparent outline-none w-32 text-sm font-medium text-gray-700 cursor-pointer text-center"
-                            maxDate={new Date()}
-                        />
+                        {/* Smart Date Picker */}
+                        <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-2.5 rounded-xl border-2 border-blue-200 shadow-sm hover:border-blue-400 hover:shadow-md transition-all">
+                            <FiCalendar className="text-blue-500" />
+                            <DatePicker
+                                selected={selectedDate}
+                                onChange={(date: Date | null) => date && setSelectedDate(date)}
+                                locale={th}
+                                dateFormat={
+                                    viewMode === "daily" ? "dd MMMM yyyy" :
+                                        viewMode === "weekly" ? "dd MMMM yyyy" :
+                                            viewMode === "monthly" ? "MMMM yyyy" :
+                                                "yyyy"
+                                }
+                                showMonthYearPicker={viewMode === "monthly"}
+                                showYearPicker={viewMode === "yearly"}
+                                className="bg-transparent outline-none w-32 text-sm font-semibold text-gray-700 cursor-pointer text-center"
+                                maxDate={new Date()}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Chart Type Selector */}
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-600">รูปแบบกราฟ:</span>
+                    <div className="flex gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
+                        <button
+                            onClick={() => setChartType("line")}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${chartType === "line"
+                                ? "bg-white text-orange-600 shadow-md border-2 border-orange-200"
+                                : "text-gray-600 hover:bg-white/50"
+                                }`}
+                            title="กราฟเส้น"
+                        >
+                            <FiActivity className="w-4 h-4" />
+                            เส้น
+                        </button>
+                        <button
+                            onClick={() => setChartType("bar")}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${chartType === "bar"
+                                ? "bg-white text-orange-600 shadow-md border-2 border-orange-200"
+                                : "text-gray-600 hover:bg-white/50"
+                                }`}
+                            title="กราฟแท่ง"
+                        >
+                            <FiBarChart2 className="w-4 h-4" />
+                            แท่ง
+                        </button>
+                        <button
+                            onClick={() => setChartType("area")}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${chartType === "area"
+                                ? "bg-white text-orange-600 shadow-md border-2 border-orange-200"
+                                : "text-gray-600 hover:bg-white/50"
+                                }`}
+                            title="กราฟพื้นที่"
+                        >
+                            <HiOutlineChartBar className="w-4 h-4" />
+                            พื้นที่
+                        </button>
                     </div>
                 </div>
             </div>
@@ -189,13 +244,13 @@ export const SellerAnalyticsDashboard = () => {
                 <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 text-white shadow-lg transform hover:-translate-y-1 transition-transform duration-300">
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
-                            <FiDollarSign className="w-6 h-6" />
+                            <span className="text-3xl font-bold">฿</span>
                         </div>
                         <span className="text-orange-100 text-sm font-medium">ยอดขายรวม</span>
                     </div>
                     <h3 className="text-3xl font-bold mb-1">฿{data.stats.totalRevenue.toLocaleString()}</h3>
                     <p className="text-sm text-orange-100 opacity-80">
-                        {viewMode === 'daily' ? 'วันนี้' : viewMode === 'monthly' ? 'เดือนนี้' : 'ปีนี้'}
+                        {viewMode === 'daily' ? 'วันนี้' : viewMode === 'weekly' ? 'สัปดาห์นี้' : viewMode === 'monthly' ? 'เดือนนี้' : 'ปีนี้'}
                     </p>
                 </div>
 
@@ -213,7 +268,7 @@ export const SellerAnalyticsDashboard = () => {
                 <div className="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-3xl p-6 text-white shadow-lg transform hover:-translate-y-1 transition-transform duration-300">
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
-                            <FiTrendingUp className="w-6 h-6" />
+                            <span className="text-3xl font-bold">฿</span>
                         </div>
                         <span className="text-purple-100 text-sm font-medium">ยอดเฉลี่ยต่อออเดอร์</span>
                     </div>
@@ -225,49 +280,279 @@ export const SellerAnalyticsDashboard = () => {
             {/* Charts & Top Menus */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Sales Chart */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <FiTrendingUp className="text-orange-500" />
-                        แนวโน้มยอดขาย
-                    </h3>
-                    <div className="h-[400px] w-full">
+                <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <FiTrendingUp className="text-orange-500" />
+                            แนวโน้มยอดขาย
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                            <span>กราฟแสดงยอดขายและจำนวนออเดอร์</span>
+                        </div>
+                    </div>
+                    <div className="h-[450px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={data.salesChart} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                <XAxis
-                                    dataKey="date"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#9ca3af', fontSize: 12 }}
-                                    tickFormatter={(value) => {
-                                        const date = new Date(value);
-                                        return viewMode === 'yearly'
-                                            ? date.toLocaleDateString('th-TH', { month: 'short' })
-                                            : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-                                    }}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#9ca3af', fontSize: 12 }}
-                                    tickFormatter={(value) => `฿${value}`}
-                                />
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                                    formatter={(value: number) => [`฿${value.toLocaleString()}`, 'ยอดขาย']}
-                                    labelFormatter={(label) => new Date(label).toLocaleDateString('th-TH', { dateStyle: 'long' })}
-                                />
-                                <Legend />
-                                <Line
-                                    type="monotone"
-                                    dataKey="amount"
-                                    name="ยอดขาย"
-                                    stroke="#f97316"
-                                    strokeWidth={3}
-                                    dot={{ r: 4, fill: '#f97316', strokeWidth: 2, stroke: '#fff' }}
-                                    activeDot={{ r: 6, strokeWidth: 0 }}
-                                />
-                            </LineChart>
+                            {chartType === "line" ? (
+                                <LineChart data={data.salesChart} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <defs>
+                                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                    <XAxis
+                                        dataKey="date"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                        tickFormatter={(value) => {
+                                            const date = new Date(value);
+                                            return viewMode === 'yearly'
+                                                ? date.toLocaleDateString('th-TH', { month: 'short' })
+                                                : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                                        }}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                        tickFormatter={(value) => `฿${(value / 1000).toFixed(0)}k`}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            borderRadius: '16px',
+                                            border: 'none',
+                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                                            padding: '12px',
+                                            backgroundColor: 'white'
+                                        }}
+                                        content={({ active, payload, label }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
+                                                return (
+                                                    <div className="bg-white p-4 rounded-2xl shadow-xl border-2 border-orange-200">
+                                                        <p className="font-bold text-gray-800 mb-3 text-sm border-b pb-2">
+                                                            📅 {new Date(label).toLocaleDateString('th-TH', {
+                                                                weekday: 'long',
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </p>
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center justify-between gap-4">
+                                                                <span className="text-xs text-gray-600 flex items-center gap-1">
+                                                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                                                    ยอดขาย:
+                                                                </span>
+                                                                <span className="font-bold text-orange-600">฿{data.amount.toLocaleString()}</span>
+                                                            </div>
+                                                            {data.orderCount !== undefined && (
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    <span className="text-xs text-gray-600 flex items-center gap-1">
+                                                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                        จำนวนออเดอร์:
+                                                                    </span>
+                                                                    <span className="font-bold text-blue-600">{data.orderCount} รายการ</span>
+                                                                </div>
+                                                            )}
+                                                            {data.orderCount && data.orderCount > 0 && (
+                                                                <div className="flex items-center justify-between gap-4 pt-2 border-t">
+                                                                    <span className="text-xs text-gray-600">ค่าเฉลี่ย/ออเดอร์:</span>
+                                                                    <span className="font-bold text-green-600">฿{(data.amount / data.orderCount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="amount"
+                                        name="ยอดขาย (บาท)"
+                                        stroke="#f97316"
+                                        strokeWidth={3}
+                                        dot={{ r: 5, fill: '#f97316', strokeWidth: 2, stroke: '#fff' }}
+                                        activeDot={{ r: 7, strokeWidth: 0, fill: '#ea580c' }}
+                                    />
+                                </LineChart>
+                            ) : chartType === "bar" ? (
+                                <BarChart data={data.salesChart} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                    <XAxis
+                                        dataKey="date"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                        tickFormatter={(value) => {
+                                            const date = new Date(value);
+                                            return viewMode === 'yearly'
+                                                ? date.toLocaleDateString('th-TH', { month: 'short' })
+                                                : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                                        }}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                        tickFormatter={(value) => `฿${(value / 1000).toFixed(0)}k`}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            borderRadius: '16px',
+                                            border: 'none',
+                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                                            padding: '12px',
+                                            backgroundColor: 'white'
+                                        }}
+                                        content={({ active, payload, label }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
+                                                return (
+                                                    <div className="bg-white p-4 rounded-2xl shadow-xl border-2 border-orange-200">
+                                                        <p className="font-bold text-gray-800 mb-3 text-sm border-b pb-2">
+                                                            📅 {new Date(label).toLocaleDateString('th-TH', {
+                                                                weekday: 'long',
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </p>
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center justify-between gap-4">
+                                                                <span className="text-xs text-gray-600 flex items-center gap-1">
+                                                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                                                    ยอดขาย:
+                                                                </span>
+                                                                <span className="font-bold text-orange-600">฿{data.amount.toLocaleString()}</span>
+                                                            </div>
+                                                            {data.orderCount !== undefined && (
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    <span className="text-xs text-gray-600 flex items-center gap-1">
+                                                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                        จำนวนออเดอร์:
+                                                                    </span>
+                                                                    <span className="font-bold text-blue-600">{data.orderCount} รายการ</span>
+                                                                </div>
+                                                            )}
+                                                            {data.orderCount && data.orderCount > 0 && (
+                                                                <div className="flex items-center justify-between gap-4 pt-2 border-t">
+                                                                    <span className="text-xs text-gray-600">ค่าเฉลี่ย/ออเดอร์:</span>
+                                                                    <span className="font-bold text-green-600">฿{(data.amount / data.orderCount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                    <Bar
+                                        dataKey="amount"
+                                        name="ยอดขาย (บาท)"
+                                        fill="#f97316"
+                                        radius={[8, 8, 0, 0]}
+                                        maxBarSize={60}
+                                    />
+                                </BarChart>
+                            ) : (
+                                <AreaChart data={data.salesChart} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <defs>
+                                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#f97316" stopOpacity={0.1} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                    <XAxis
+                                        dataKey="date"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                        tickFormatter={(value) => {
+                                            const date = new Date(value);
+                                            return viewMode === 'yearly'
+                                                ? date.toLocaleDateString('th-TH', { month: 'short' })
+                                                : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                                        }}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                                        tickFormatter={(value) => `฿${(value / 1000).toFixed(0)}k`}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            borderRadius: '16px',
+                                            border: 'none',
+                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                                            padding: '12px',
+                                            backgroundColor: 'white'
+                                        }}
+                                        content={({ active, payload, label }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
+                                                return (
+                                                    <div className="bg-white p-4 rounded-2xl shadow-xl border-2 border-orange-200">
+                                                        <p className="font-bold text-gray-800 mb-3 text-sm border-b pb-2">
+                                                            📅 {new Date(label).toLocaleDateString('th-TH', {
+                                                                weekday: 'long',
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </p>
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center justify-between gap-4">
+                                                                <span className="text-xs text-gray-600 flex items-center gap-1">
+                                                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                                                    ยอดขาย:
+                                                                </span>
+                                                                <span className="font-bold text-orange-600">฿{data.amount.toLocaleString()}</span>
+                                                            </div>
+                                                            {data.orderCount !== undefined && (
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    <span className="text-xs text-gray-600 flex items-center gap-1">
+                                                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                        จำนวนออเดอร์:
+                                                                    </span>
+                                                                    <span className="font-bold text-blue-600">{data.orderCount} รายการ</span>
+                                                                </div>
+                                                            )}
+                                                            {data.orderCount && data.orderCount > 0 && (
+                                                                <div className="flex items-center justify-between gap-4 pt-2 border-t">
+                                                                    <span className="text-xs text-gray-600">ค่าเฉลี่ย/ออเดอร์:</span>
+                                                                    <span className="font-bold text-green-600">฿{(data.amount / data.orderCount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="amount"
+                                        name="ยอดขาย (บาท)"
+                                        stroke="#f97316"
+                                        strokeWidth={3}
+                                        fillOpacity={1}
+                                        fill="url(#colorAmount)"
+                                    />
+                                </AreaChart>
+                            )}
                         </ResponsiveContainer>
                     </div>
                 </div>
@@ -299,7 +584,7 @@ export const SellerAnalyticsDashboard = () => {
                                             <FiShoppingBag className="w-3 h-3" /> {menu.quantity}
                                         </span>
                                         <span className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-md text-green-700 font-medium">
-                                            <FiDollarSign className="w-3 h-3" /> ฿{menu.sales.toLocaleString()}
+                                            <span className="font-bold">฿</span> {menu.sales.toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

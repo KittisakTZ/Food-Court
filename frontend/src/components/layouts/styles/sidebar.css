@@ -1,0 +1,216 @@
+/* Modern Sidebar Styles */
+
+/* Sidebar Item Custom Styles */
+.sidebar-item-custom {
+  position: relative;
+  overflow: visible;
+}
+
+/* Left border indicator animation */
+.sidebar-item-custom::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  width: 4px;
+  height: 0;
+  background: linear-gradient(to bottom, #f97316, #fbbf24);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+  z-index: 1;
+}
+
+.sidebar-item-custom:hover::before {
+  height: 70%;
+  top: 15%;
+  width: 5px;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.8);
+}
+
+/* Active state indicator */
+.sidebar-item-custom[data-active="true"]::before {
+  height: 80%;
+  top: 10%;
+  width: 6px;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 1);
+  animation: pulse-border 2s infinite;
+}
+
+/* Pulse animation for active border */
+@keyframes pulse-border {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 16px rgba(251, 191, 36, 1);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 24px rgba(251, 191, 36, 1);
+  }
+}
+
+/* Dropdown Menu Custom Styles */
+.DropdownMenuItemCustom {
+  position: relative;
+  overflow: hidden;
+}
+
+.DropdownMenuItemCustom::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.2), transparent);
+  transition: left 0.4s ease;
+}
+
+.DropdownMenuItemCustom:hover::after {
+  left: 100%;
+}
+
+/* Scrollbar Styling for Sidebar */
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #fdba74, #fbbf24);
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #fb923c, #fbbf24);
+}
+
+/* Slide in animation for menu items */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scale pulse animation */
+@keyframes scalePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Glow pulse animation */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(251, 146, 60, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(251, 146, 60, 0.5);
+  }
+}
+
+/* Apply animations */
+.sidebar-item-custom {
+  animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active menu glow effect */
+.sidebar-item-custom[data-active="true"] {
+  animation: glowPulse 3s infinite ease-in-out;
+}
+
+/* Hover bounce effect */
+.sidebar-item-custom:hover {
+  animation: none;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Collapsible smooth transition */
+.CollapsibleContent {
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.CollapsibleContent[data-state="open"] {
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.CollapsibleContent[data-state="closed"] {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Icon rotation animation */
+.sidebar-item-custom svg {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sidebar-item-custom:hover svg {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.sidebar-item-custom:active svg {
+  transform: scale(0.95);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar-item-custom {
+    height: 44px !important;
+  }
+
+  .sidebar-item-custom span {
+    font-size: 14px;
+  }
+}
+
+/* Dark mode support (if needed in future) */
+@media (prefers-color-scheme: dark) {
+  .sidebar-item-custom:not([data-active="true"]) {
+    color: #e5e7eb;
+  }
+}
