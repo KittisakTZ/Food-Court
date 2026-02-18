@@ -3,11 +3,13 @@ import { useOrder } from "@/hooks/useOrders";
 import { Order } from "@/types/response/order.response";
 import { ProgressBar, Step } from "react-step-progress-bar";
 import "react-step-progress-bar/styles.css";
-import { FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiChevronLeft, FiCalendar, FiCreditCard, FiHash, FiUser, FiStar } from "react-icons/fi";
+import { FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiChevronLeft, FiCreditCard, FiUser, FiStar, FiRefreshCw } from "react-icons/fi";
 import { MdRestaurant, MdStorefront } from "react-icons/md";
 import { useState } from "react";
 import ReviewForm from "./ReviewForm";
 import { Button } from "@/components/ui/button";
+import { useAddItemToCart } from "@/hooks/useCart";
+import { toastService } from "@/services/toast.service";
 
 // --- Configuration & Helper Functions ---
 
@@ -111,6 +113,7 @@ const OrderDetailPage = () => {
     const [isReviewing, setIsReviewing] = useState(false);
     const location = useLocation();
     const isSellerView = location.pathname.includes('/my-store/');
+    const { mutate: addToCart, isPending: isAddingToCart } = useAddItemToCart();
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen"><p>กำลังโหลดรายละเอียดคำสั่งซื้อ...</p></div>;
@@ -121,6 +124,37 @@ const OrderDetailPage = () => {
 
     const statusConfig = getStatusConfig(order.status);
     const isPaid = !!order.paidAt;
+
+    const handleReorder = async () => {
+        try {
+            let successCount = 0;
+            for (const item of order.orderItems) {
+                await new Promise<void>((resolve, reject) => {
+                    addToCart(
+                        { menuId: item.menuId, quantity: item.quantity },
+                        {
+                            onSuccess: () => {
+                                successCount++;
+                                resolve();
+                            },
+                            onError: (error) => {
+                                console.error('Error adding item to cart:', error);
+                                reject(error);
+                            }
+                        }
+                    );
+                });
+            }
+
+            if (successCount === order.orderItems.length) {
+                toastService.success(`เพิ่ม ${successCount} รายการลงตะกร้าเรียบร้อยแล้ว`);
+            } else if (successCount > 0) {
+                toastService.warning(`เพิ่มได้เพียง ${successCount} จาก ${order.orderItems.length} รายการ`);
+            }
+        } catch (error) {
+            toastService.error('ไม่สามารถสั่งซ้ำได้ กรุณาลองใหม่อีกครั้ง');
+        }
+    };
 
     const DisplayReview = ({ review }: { review: Order['review'] }) => {
         if (!review) return null;
@@ -251,10 +285,58 @@ const OrderDetailPage = () => {
                                     <span className="font-bold text-orange-600 text-lg">#{order.position}</span>
                                 </div>
                             </div>
+
+                            {/* Payment Slip Preview */}
+                            {order.paymentSlip && (
+                                <div className="mt-6 pt-6 border-t border-gray-200">
+                                    <h4 className="text-md font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                        <FiCreditCard className="text-green-600" />
+                                        สลิปการโอนเงิน
+                                    </h4>
+                                    <div className="relative group">
+                                        <img
+                                            src={order.paymentSlip}
+                                            alt="Payment Slip"
+                                            className="w-full rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-400 transition-all"
+                                            onClick={() => window.open(order.paymentSlip, '_blank')}
+                                        />
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center cursor-pointer"
+                                             onClick={() => window.open(order.paymentSlip, '_blank')}>
+                                            <div className="text-white text-center">
+                                                <FiPackage className="w-8 h-8 mx-auto mb-2" />
+                                                <p className="font-semibold">คลิกเพื่อดูขนาดเต็ม</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <OrderTimeline order={order} />
                     </div>
                 </div>
+
+                {/* Reorder Button - แสดงสำหรับออเดอร์ที่เสร็จสิ้นหรือถูกยกเลิก (ไม่แสดงสำหรับฝั่งผู้ขาย) */}
+                {!isSellerView && ['COMPLETED', 'CANCELLED', 'REJECTED'].includes(order.status) && (
+                    <div className="mt-6">
+                        <button
+                            onClick={handleReorder}
+                            disabled={isAddingToCart}
+                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                        >
+                            {isAddingToCart ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                                    กำลังเพิ่มลงตะกร้า...
+                                </>
+                            ) : (
+                                <>
+                                    <FiRefreshCw className="w-5 h-5" />
+                                    สั่งซ้ำ
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
 
                 {/* Review Section */}
                 <ReviewSection />

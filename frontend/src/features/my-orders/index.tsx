@@ -4,11 +4,12 @@ import { useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiUpload,
-  FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag} from "react-icons/fi";
+  FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag, FiRefreshCw} from "react-icons/fi";
 import { MdRestaurant, MdPayment } from "react-icons/md";
 import { Order } from "@/types/response/order.response";
 import { useMyOrders, useUploadSlip } from "@/hooks/useOrders";
 import { toastService } from "@/services/toast.service";
+import { useAddItemToCart } from "@/hooks/useCart";
 
 
 /**
@@ -88,6 +89,8 @@ const getStatusConfig = (status: Order['status']) => {
 const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => void }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { mutate: uploadSlip, isPending: isUploading } = useUploadSlip();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   if (!order) return null;
 
@@ -99,11 +102,34 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
         return;
       }
 
-      uploadSlip({ orderId: order.id, slipFile: file }, {
+      // Create preview URL
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setSelectedFile(file);
+    }
+  };
+
+  const handleUpload = () => {
+    if (selectedFile) {
+      uploadSlip({ orderId: order.id, slipFile: selectedFile }, {
         onSuccess: () => {
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+          }
           onClose();
         },
       });
+    }
+  };
+
+  const handleCancelPreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -111,46 +137,52 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
     fileInputRef.current?.click();
   };
 
+  const handleViewSlip = () => {
+    if (order.paymentSlip) {
+      window.open(order.paymentSlip, '_blank');
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-300">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 sm:p-6 text-white relative flex-shrink-0">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-2 hover:bg-white/20 rounded-lg"
           >
             <FiXCircle className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-              <FiDollarSign className="w-8 h-8" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-xl flex items-center justify-center">
+              <FiDollarSign className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">ชำระเงิน</h2>
-              <p className="text-blue-100 text-sm">Order #{order.id.substring(0, 8)}...</p>
+              <h2 className="text-xl sm:text-2xl font-bold">ชำระเงิน</h2>
+              <p className="text-blue-100 text-xs sm:text-sm">Order #{order.id.substring(0, 8)}...</p>
             </div>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto flex-1">
           {/* Store Info */}
-          <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
+          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-slate-50 rounded-xl">
             <img
               src={order.store.image}
               alt={order.store.name}
-              className="w-12 h-12 rounded-lg object-cover"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
             />
             <div className="flex-1">
-              <p className="font-bold text-slate-900">{order.store.name}</p>
-              <p className="text-sm text-slate-600">{order.orderItems.length} รายการ</p>
+              <p className="font-bold text-slate-900 text-sm sm:text-base">{order.store.name}</p>
+              <p className="text-xs sm:text-sm text-slate-600">{order.orderItems.length} รายการ</p>
             </div>
           </div>
 
           {/* Total Amount */}
-          <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
-            <p className="text-slate-600 text-sm mb-2">ยอดชำระทั้งหมด</p>
-            <p className="text-5xl font-black text-blue-600">
+          <div className="text-center p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+            <p className="text-slate-600 text-xs sm:text-sm mb-2">ยอดชำระทั้งหมด</p>
+            <p className="text-3xl sm:text-4xl md:text-5xl font-black text-blue-600">
               ฿{order.totalAmount.toFixed(2)}
             </p>
           </div>
@@ -158,28 +190,28 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
           {/* QR Code */}
           <div className="flex justify-center">
             {order.paymentQrCode ? (
-              <div className="bg-white p-4 rounded-xl border-2 border-slate-200">
+              <div className="bg-white p-3 sm:p-4 rounded-xl border-2 border-slate-200">
                 <img
                   src={order.paymentQrCode}
                   alt="QR Code"
-                  className="w-64 h-64 rounded-lg"
+                  className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-lg"
                 />
               </div>
             ) : (
-              <div className="w-64 h-64 bg-red-50 rounded-xl flex items-center justify-center border-2 border-red-200">
-                <p className="text-red-600 font-semibold">ไม่สามารถโหลด QR Code</p>
+              <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 bg-red-50 rounded-xl flex items-center justify-center border-2 border-red-200">
+                <p className="text-red-600 font-semibold text-sm sm:text-base">ไม่สามารถโหลด QR Code</p>
               </div>
             )}
           </div>
 
           {/* Instructions */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <div className="flex gap-3">
-              <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold">!</span>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 sm:p-4">
+            <div className="flex gap-2 sm:gap-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-sm sm:text-base">!</span>
               </div>
               <div className="flex-1">
-                <p className="text-sm text-amber-900 font-medium">
+                <p className="text-xs sm:text-sm text-amber-900 font-medium leading-relaxed">
                   <strong>วิธีชำระเงิน:</strong><br />
                   1. สแกน QR Code ด้วยแอปธนาคาร<br />
                   2. ชำระเงินตามยอดที่แสดง<br />
@@ -194,32 +226,84 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
             </div>
           </div>
 
+          {/* Preview Image */}
+          {previewUrl && (
+            <div className="bg-slate-50 rounded-xl p-3 sm:p-4 border-2 border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-semibold text-slate-700 text-sm sm:text-base">ภาพตัวอย่างสลิป</p>
+                <button
+                  onClick={handleCancelPreview}
+                  className="text-red-600 hover:text-red-700 font-semibold text-sm sm:text-base px-3 py-1.5 -mr-2 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="w-full rounded-lg border border-slate-200 max-h-64 sm:max-h-80 md:max-h-96 object-contain bg-white"
+              />
+            </div>
+          )}
+
+          {/* View Uploaded Slip Button */}
+          {order.paymentSlip && !previewUrl && (
+            <button
+              onClick={handleViewSlip}
+              className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base min-h-[48px]"
+            >
+              <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+              ดูสลิปที่อัปโหลดแล้ว
+            </button>
+          )}
+
           {/* Upload Button */}
           <input
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept="image/png, image/jpeg"
+            accept="image/png, image/jpeg, image/jpg, image/jfif"
             className="hidden"
             disabled={isUploading}
           />
-          <button
-            onClick={handleUploadClick}
-            disabled={isUploading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-          >
-            {isUploading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                กำลังอัปโหลด...
-              </>
-            ) : (
-              <>
-                <FiUpload className="w-5 h-5" />
-                แนบสลิปการโอนเงิน
-              </>
-            )}
-          </button>
+
+          {previewUrl ? (
+            <button
+              onClick={handleUpload}
+              disabled={isUploading}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base min-h-[48px] active:scale-[0.98]"
+            >
+              {isUploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent"></div>
+                  กำลังอัปโหลด...
+                </>
+              ) : (
+                <>
+                  <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                  ยืนยันการอัปโหลด
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleUploadClick}
+              disabled={isUploading || !!order.paymentSlip}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 sm:py-4 px-4 sm:px-6 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base min-h-[48px] active:scale-[0.98]"
+            >
+              {order.paymentSlip ? (
+                <>
+                  <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                  อัปโหลดสลิปเรียบร้อยแล้ว
+                </>
+              ) : (
+                <>
+                  <FiUpload className="w-4 h-4 sm:w-5 sm:h-5" />
+                  แนบสลิปการโอนเงิน
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -232,6 +316,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
 const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Order) => void }) => {
   const statusConfig = getStatusConfig(order.status);
   const isPaid = !!order.paidAt;
+  const { mutate: addToCart, isPending: isAddingToCart } = useAddItemToCart();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -242,6 +327,38 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
       hour: '2-digit',
       minute: '2-digit'
     }) + ' น.';
+  };
+
+  const handleReorder = async () => {
+    try {
+      // เพิ่มรายการทั้งหมดจากออเดอร์ลงตะกร้า
+      let successCount = 0;
+      for (const item of order.orderItems) {
+        await new Promise<void>((resolve, reject) => {
+          addToCart(
+            { menuId: item.menuId, quantity: item.quantity },
+            {
+              onSuccess: () => {
+                successCount++;
+                resolve();
+              },
+              onError: (error) => {
+                console.error('Error adding item to cart:', error);
+                reject(error);
+              }
+            }
+          );
+        });
+      }
+
+      if (successCount === order.orderItems.length) {
+        toastService.success(`เพิ่ม ${successCount} รายการลงตะกร้าเรียบร้อยแล้ว`);
+      } else if (successCount > 0) {
+        toastService.warning(`เพิ่มได้เพียง ${successCount} จาก ${order.orderItems.length} รายการ`);
+      }
+    } catch (error) {
+      toastService.error('ไม่สามารถสั่งซ้ำได้ กรุณาลองใหม่อีกครั้ง');
+    }
   };
 
   return (
@@ -257,7 +374,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
         {!isPaid && order.status === 'AWAITING_PAYMENT' && (
           <div className="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded">
             <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-semibold">ด่วน!</span>
+            <span className="text-xs font-semibold">รอชำระเงิน</span>
           </div>
         )}
       </div>
@@ -335,7 +452,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           </div>
         )}
 
-        {/* Action Button */}
+        {/* Action Buttons */}
         {order.status === 'AWAITING_PAYMENT' ? (
           <button
             onClick={() => onPayClick(order)}
@@ -345,12 +462,35 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
             ชำระเงินทันที
           </button>
         ) : (
-          <Link to={`/my-orders/${order.id}`} className="block">
-            <button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm">
-              <span>ดูรายละเอียด</span>
-              <FiChevronRight className="w-4 h-4" />
-            </button>
-          </Link>
+          <div className="space-y-2">
+            <Link to={`/my-orders/${order.id}`} className="block">
+              <button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm">
+                <span>ดูรายละเอียด</span>
+                <FiChevronRight className="w-4 h-4" />
+              </button>
+            </Link>
+
+            {/* ปุ่มสั่งซ้ำ สำหรับออเดอร์ที่เสร็จสิ้นหรือถูกยกเลิก */}
+            {['COMPLETED', 'CANCELLED', 'REJECTED'].includes(order.status) && (
+              <button
+                onClick={handleReorder}
+                disabled={isAddingToCart}
+                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAddingToCart ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    กำลังเพิ่มลงตะกร้า...
+                  </>
+                ) : (
+                  <>
+                    <FiRefreshCw className="w-4 h-4" />
+                    สั่งซ้ำ
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

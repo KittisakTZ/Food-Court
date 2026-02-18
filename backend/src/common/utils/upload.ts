@@ -29,12 +29,13 @@ const storage = multer.diskStorage({
 
 // 2. การสร้าง File Filter
 const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-    // อนุญาตเฉพาะไฟล์รูปภาพ (jpeg, jpg, png)
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
+    // อนุญาตเฉพาะไฟล์รูปภาพ (jpeg, jpg, png, jfif)
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true); // true = อนุญาตให้อัปโหลดไฟล์นี้
     } else {
         // ถ้าเป็นไฟล์ชนิดอื่น, ให้ปฏิเสธและส่ง Error กลับไป
-        cb(new Error('Invalid file type, only JPEG and PNG is allowed!'));
+        cb(new Error('Invalid file type, only JPEG, JPG, PNG, and JFIF are allowed!'));
     }
 };
 

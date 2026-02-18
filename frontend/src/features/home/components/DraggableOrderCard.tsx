@@ -7,7 +7,7 @@ import { useUpdateOrderStatus } from '@/hooks/useOrders';
 import { FaGripVertical, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { useMoveOrderPosition } from '@/hooks/useOrders';
 import { useState } from 'react';
-import { FiCheck, FiX, FiDollarSign, FiPackage, FiClock, FiUser } from "react-icons/fi";
+import { FiCheck, FiX, FiPackage, FiClock, FiUser } from "react-icons/fi";
 import { MdRestaurant } from "react-icons/md";
 import { ConfirmationDialog } from '@/components/customs/ConfirmationDialog';
 
@@ -47,7 +47,7 @@ const OrderActions = ({ order }: { order: Order }) => {
         setDialogState({ isOpen: false, title: '', description: '', onConfirm: null });
     };
 
-    const commonButtonClass = "px-4 py-3 rounded-lg transition-all font-bold shadow-sm flex items-center justify-center gap-2 disabled:bg-gray-300";
+    const commonButtonClass = "px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all font-bold shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base disabled:bg-gray-300 disabled:cursor-not-allowed";
 
     return (
         <>
@@ -167,31 +167,31 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
             {/* ปรับเงา และขอบเล็กน้อย */}
             <div className="bg-white rounded-xl shadow-md border-2 border-orange-200 hover:border-orange-400 hover:shadow-lg transition-all overflow-hidden">
 
-                {/* HEADER - Queue Number & Customer */}
-                <div className="bg-gradient-to-r from-orange-500 to-orange-400 p-4">
-                    <div className="flex items-start justify-between gap-3">
+                {/* HEADER - Queue Number & Customer (Responsive) */}
+                <div className="bg-gradient-to-r from-orange-500 to-orange-400 p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3">
                         {/* Left Side - Drag + Queue */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                             <div
                                 {...attributes}
                                 {...listeners}
-                                className="text-orange-200 cursor-grab active:cursor-grabbing hover:text-white transition-colors"
+                                className="text-orange-200 cursor-grab active:cursor-grabbing hover:text-white transition-colors hidden sm:block"
                             >
-                                <FaGripVertical className="w-6 h-6" />
+                                <FaGripVertical className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             {/* [คิว] */}
-                            <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg border-4 border-orange-300">
-                                <span className="text-orange-600 font-black text-4xl">{queueDisplayNumber}</span>
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-xl flex items-center justify-center shadow-lg border-3 sm:border-4 border-orange-300 flex-shrink-0">
+                                <span className="text-orange-600 font-black text-3xl sm:text-4xl">{queueDisplayNumber}</span>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2 text-white mb-1">
-                                    <FiUser className="w-5 h-5" />
-                                    <span className="font-semibold text-base">{order.buyer?.username ?? 'ลูกค้า'}</span>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 sm:gap-2 text-white mb-1">
+                                    <FiUser className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                                    <span className="font-semibold text-sm sm:text-base truncate">{order.buyer?.username ?? 'ลูกค้า'}</span>
                                 </div>
                                 {order.scheduledPickup && (
-                                    <div className="flex items-center gap-2 text-orange-100">
-                                        <FiClock className="w-4 h-4" />
-                                        <span className="font-bold text-sm">
+                                    <div className="flex items-center gap-1.5 sm:gap-2 text-orange-100">
+                                        <FiClock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                        <span className="font-bold text-xs sm:text-sm">
                                             {new Date(order.scheduledPickup).toLocaleString('th-TH', {
                                                 hour: '2-digit',
                                                 minute: '2-digit',
@@ -202,23 +202,11 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                             </div>
                         </div>
 
-                        {/* Right Side - Status & Time */}
-                        <div className="text-right">
-                            {/* [สถานะ] */}
-                            <div className={`inline-block px-3 py-1.5 rounded-lg text-sm font-bold mb-2 ${getStatusColor(order.status)} shadow-sm`}>
+                        {/* Right Side - Status (Responsive) */}
+                        <div className="w-full sm:w-auto">
+                            <div className={`inline-block px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold ${getStatusColor(order.status)} shadow-sm`}>
                                 {getStatusName(order.status)}
                             </div>
-                            {order.scheduledPickup && (
-                                <div className="flex items-center justify-end gap-1.5 text-white">
-                                    <FiClock className="w-4 h-4" />
-                                    <span className="font-bold text-sm">
-                                        {new Date(order.scheduledPickup).toLocaleString('th-TH', {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        })}
-                                    </span>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -227,40 +215,67 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                 {(order.status === 'AWAITING_CONFIRMATION' && order.paymentSlip) && (
                     <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-dashed border-yellow-300">
                         <h4 className="font-bold text-yellow-800 mb-3 flex items-center gap-2">
-                            <FiDollarSign className="w-5 h-5" />
                             ตรวจสอบสลิปการโอนเงิน
                         </h4>
-                        <a
-                            href={order.paymentSlip}
-                            target="_blank"
-                            rel="noopener noreferrer"
+
+                        {/* Preview Image */}
+                        <div className="relative group mb-3">
+                            <img
+                                src={order.paymentSlip}
+                                alt="Payment Slip"
+                                className="w-full max-w-md mx-auto rounded-xl border-2 border-yellow-300 shadow-lg cursor-pointer hover:border-yellow-500 transition-all"
+                                onClick={() => window.open(order.paymentSlip, '_blank')}
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    const fallbackDiv = e.currentTarget.nextElementSibling as HTMLElement;
+                                    if (fallbackDiv) fallbackDiv.style.display = 'flex';
+                                }}
+                            />
+                            {/* Fallback if image fails to load */}
+                            <div className="hidden w-full max-w-md mx-auto p-8 bg-red-50 rounded-xl border-2 border-red-300 items-center justify-center">
+                                <p className="text-red-600 font-semibold text-center">ไม่สามารถโหลดรูปสลีปได้</p>
+                            </div>
+
+                            {/* Hover Overlay */}
+                            <div
+                                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center cursor-pointer max-w-md mx-auto"
+                                onClick={() => window.open(order.paymentSlip, '_blank')}
+                            >
+                                <div className="text-white text-center">
+                                    <p className="font-bold text-lg mb-1">🔍 คลิกเพื่อดูขนาดเต็ม</p>
+                                    <p className="text-sm">เปิดในแท็บใหม่</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => window.open(order.paymentSlip, '_blank')}
                             className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold py-2.5 px-5 rounded-xl hover:from-yellow-600 hover:to-amber-600 transition-all shadow-md hover:shadow-lg"
                         >
-                            📄 ดูสลิปที่แนบมา
-                        </a>
+                            🔍 ดูสลิปแบบขยาย
+                        </button>
                     </div>
                 )}
 
-                {/* ORDER ITEMS - ใช้ bg-neutral-50 ให้ดูเหมือนกระดาษ */}
-                <div className="p-4 bg-neutral-50">
-                    <div className="space-y-3">
+                {/* ORDER ITEMS - Responsive */}
+                <div className="p-3 sm:p-4 bg-neutral-50">
+                    <div className="space-y-2 sm:space-y-3">
                         {order.orderItems.map((item) => {
                             const isHighlighted = highlightMenuId === item.menuId;
                             return (
                                 <div
                                     key={item.id}
-                                    // เพิ่ม hover effect ให้รายการอาหารย่อย
-                                    className={`rounded-xl p-3 flex items-center justify-between gap-4 shadow-sm border transition-all ${isHighlighted
+                                    className={`rounded-xl p-2.5 sm:p-3 flex items-center justify-between gap-2 sm:gap-4 shadow-sm border transition-all ${isHighlighted
                                         ? "bg-yellow-50 border-yellow-400 ring-2 ring-yellow-200 shadow-md"
                                         : "bg-white border-orange-100 hover:shadow-lg hover:border-orange-200"
                                         }`}
                                 >
-                                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                                        {/* --- [รูปอาหาร] เพิ่มเงาและวงแหวน --- */}
+                                    <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                                        {/* [รูปอาหาร] - Responsive */}
                                         <img
                                             src={item.menu.image || ''}
                                             alt={item.menu.name}
-                                            className="w-20 h-20 rounded-lg object-cover flex-shrink-0 shadow-md ring-2 ring-orange-100"
+                                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0 shadow-md ring-2 ring-orange-100"
                                             onError={(e) => {
                                                 e.currentTarget.src = '';
                                             }}
@@ -268,17 +283,17 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
 
                                         {/* [ชื่อเมนู + ราคา] */}
                                         <div className="flex-1 min-w-0">
-                                            <p className={`font-bold truncate mb-0.5 text-lg ${isHighlighted ? "text-yellow-800" : "text-gray-800"}`}>{item.menu.name}</p>
-                                            <p className="text-base text-gray-600 font-medium">
+                                            <p className={`font-bold truncate mb-0.5 text-base sm:text-lg ${isHighlighted ? "text-yellow-800" : "text-gray-800"}`}>{item.menu.name}</p>
+                                            <p className="text-sm sm:text-base text-gray-600 font-medium">
                                                 ราคา: <span className="text-teal-600 font-bold">฿{item.menu.price.toFixed(0)}</span>
                                             </p>
                                         </div>
                                     </div>
 
-                                    {/* --- [จำนวน] ปรับขนาด label --- */}
-                                    <div className="text-right flex-shrink-0 pl-2">
-                                        <span className="text-gray-500 text-sm">จำนวน:</span>
-                                        <p className={`font-black text-2xl ${isHighlighted ? "text-yellow-600" : "text-gray-900"}`}>{item.quantity}</p>
+                                    {/* [จำนวน] - Responsive */}
+                                    <div className="text-right flex-shrink-0">
+                                        <span className="text-gray-500 text-xs sm:text-sm block">จำนวน:</span>
+                                        <p className={`font-black text-xl sm:text-2xl ${isHighlighted ? "text-yellow-600" : "text-gray-900"}`}>{item.quantity}</p>
                                     </div>
                                 </div>
                             );
@@ -287,65 +302,65 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                 </div>
 
                 {order.description && (
-                    <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-t-2 border-dashed border-amber-200">
-                        <h4 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
+                    <div className="p-3 sm:p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-t-2 border-dashed border-amber-200">
+                        <h4 className="font-bold text-amber-800 mb-2 flex items-center gap-2 text-sm sm:text-base">
                             💬 หมายเหตุจากลูกค้า:
                         </h4>
-                        <p className="text-sm text-gray-700 italic bg-white px-4 py-3 rounded-lg border-l-4 border-amber-400 shadow-sm">
+                        <p className="text-xs sm:text-sm text-gray-700 italic bg-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border-l-4 border-amber-400 shadow-sm">
                             "{order.description}"
                         </p>
                     </div>
                 )}
 
-                {/* --- [TOTAL] - เปลี่ยนเป็นขอบประ (เหมือนใบเสร็จ) --- */}
-                <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-3 border-t-2 border-dashed border-orange-300">
-                    <div className="flex items-center justify-between">
+                {/* [TOTAL] - ยอดรวมเป็นบาท (Responsive) */}
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-3 sm:px-4 py-3 border-t-2 border-dashed border-orange-300">
+                    <div className="flex items-center justify-between gap-3">
                         <div className="text-gray-700">
-                            <div className="text-sm font-bold flex items-center gap-2">
-                                <MdRestaurant className="w-4 h-4 text-orange-600" />
-                                รวมทั้งหมด {totalItems} ชิ้น
+                            <div className="text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2">
+                                <MdRestaurant className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600 flex-shrink-0" />
+                                <span>รวมทั้งหมด {totalItems} ชิ้น</span>
                             </div>
                             <div className="text-xs font-medium text-gray-500 mt-0.5">ยอดชำระทั้งสิ้น</div>
                         </div>
-                        <div className="text-orange-600 font-black text-2xl flex items-center gap-1">
-                            <FiDollarSign className="w-6 h-6" />
-                            {order.totalAmount.toFixed(0)}
+                        <div className="text-orange-600 font-black text-xl sm:text-2xl flex items-center gap-1">
+                            <span className="text-lg sm:text-xl">฿</span>
+                            <span>{order.totalAmount.toFixed(0)}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* ACTION BUTTONS */}
-                <div className="p-4 bg-white border-t border-gray-100">
+                <div className="p-3 sm:p-4 bg-white border-t border-gray-100">
                     <OrderActions order={order} />
                 </div>
 
-                {/* QUEUE MANAGEMENT */}
-                <div className="bg-neutral-50 px-4 py-3 border-t-2 border-orange-100">
-                    <div className="flex items-center justify-center gap-2">
+                {/* QUEUE MANAGEMENT - Responsive */}
+                <div className="bg-neutral-50 px-3 sm:px-4 py-2.5 sm:py-3 border-t-2 border-orange-100">
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
                         <button
                             onClick={() => handleMove(order.position - 1)}
                             disabled={isFirst || isPending}
-                            className="w-10 h-10 bg-white border-2 border-orange-200 rounded-lg hover:bg-orange-100 hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-white border-2 border-orange-200 rounded-lg hover:bg-orange-100 hover:border-orange-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm active:scale-95"
                             title="เลื่อนขึ้น"
                         >
-                            <FaArrowUp className="w-4 h-4 text-orange-600" />
+                            <FaArrowUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" />
                         </button>
 
-                        <div className="text-orange-400 font-bold">|</div>
+                        <div className="text-orange-400 font-bold text-sm sm:text-base">|</div>
 
                         <button
                             onClick={() => handleMove(order.position + 1)}
                             disabled={isLast || isPending}
-                            className="w-10 h-10 bg-white border-2 border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-white border-2 border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm active:scale-95"
                             title="เลื่อนลง"
                         >
-                            <FaArrowDown className="w-4 h-4 text-orange-600" />
+                            <FaArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" />
                         </button>
 
-                        <div className="text-orange-400 font-bold">|</div>
+                        <div className="text-orange-400 font-bold text-sm sm:text-base">|</div>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-orange-700 text-sm font-bold">ไปคิว:</span>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="text-orange-700 text-xs sm:text-sm font-bold">ไปคิว:</span>
                             <input
                                 type="number"
                                 value={jumpPosition}
@@ -354,7 +369,7 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                                 onBlur={() => setJumpPosition("")}
                                 disabled={isPending}
                                 placeholder={`${order.position}`}
-                                className="w-16 text-center px-2 py-2 bg-white border-2 border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none font-bold text-sm shadow-sm"
+                                className="w-14 sm:w-16 text-center px-1.5 sm:px-2 py-1.5 sm:py-2 bg-white border-2 border-orange-200 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none font-bold text-xs sm:text-sm shadow-sm"
                                 min="1"
                             />
                         </div>
