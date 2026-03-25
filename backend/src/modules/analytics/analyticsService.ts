@@ -16,7 +16,7 @@ export const analyticsService = {
                 },
                 where: {
                     storeId,
-                    createdAt: {
+                    orderDate: {
                         gte: startDate,
                         lte: endDate,
                     },
@@ -40,7 +40,7 @@ export const analyticsService = {
             const orders = await prisma.order.findMany({
                 where: {
                     storeId,
-                    createdAt: {
+                    orderDate: {
                         gte: startDate,
                         lte: endDate,
                     },
@@ -49,19 +49,19 @@ export const analyticsService = {
                     },
                 },
                 select: {
-                    createdAt: true,
+                    orderDate: true,
                     totalAmount: true,
                 },
                 orderBy: {
-                    createdAt: "asc",
+                    orderDate: "asc",
                 },
             });
 
             const chartData: Record<string, number> = {};
 
-            orders.forEach((order: { createdAt: Date; totalAmount: number }) => {
+            orders.forEach((order: { orderDate: Date; totalAmount: number }) => {
                 let key = "";
-                const date = new Date(order.createdAt);
+                const date = new Date(order.orderDate);
                 if (interval === "day") {
                     key = date.toISOString().split("T")[0]; // YYYY-MM-DD
                 } else {
@@ -85,7 +85,7 @@ export const analyticsService = {
                 where: {
                     order: {
                         storeId,
-                        createdAt: {
+                        orderDate: {
                             gte: startDate,
                             lte: endDate,
                         },

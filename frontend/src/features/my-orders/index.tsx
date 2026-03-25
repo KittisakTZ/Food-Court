@@ -442,7 +442,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
         </div>
 
         {/* Queue Position */}
-        {order.position > 0 && (
+        {/* {order.position > 0 && (
           <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg px-3 py-2 flex items-center justify-between mb-4 flex-shrink-0 shadow-md">
             <span className="text-xs font-semibold opacity-90">ลำดับคิวของร้าน</span>
             <div className="flex items-center gap-1.5">
@@ -450,7 +450,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
               <span className="text-xl font-black">{order.position}</span>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Action Buttons */}
         {order.status === 'AWAITING_PAYMENT' ? (
