@@ -51,3 +51,5 @@ app.use("/v1/analytics", analyticsRouter);
 
 app.use(errorHandler() as any);
 export { app, logger };
+
+// Trigger restart

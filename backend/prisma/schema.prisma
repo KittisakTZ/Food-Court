@@ -195,3 +195,33 @@ model CartItem {
   @@unique([cartId, menuId]) // **สำคัญ:** ป้องกันไม่ให้มี Menu เดียวกันซ้ำ 2 แถวใน Cart เดียว
   @@map("cart_items") // (Optional) ตั้งชื่อตาราง
 }
+
+// (ใหม่) โมเดลสำหรับห้องแชท
+model ChatRoom {
+  id        String   @id @default(cuid())
+  buyerId   String
+  buyer     User     @relation(fields: [buyerId], references: [id])
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages  ChatMessage[]
+
+  @@unique([buyerId, storeId]) // 1 Buyer คุยกับ 1 ร้าน จะมีแชทหลักแค่ห้องเดียว
+  @@map("chat_rooms")
+}
+
+// (ใหม่) โมเดลสำหรับข้อความแชท
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  senderId  String   
+  sender    User     @relation(fields: [senderId], references: [id]) // อ้างอิงว่า User ไหน (Buyer หรือ Store Owner) เป็นคนส่ง
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("chat_messages")
+}

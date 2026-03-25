@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
+import path from "path";
 import { cleanEnv, host, num, port, str, url } from "envalid"; // ✨ 1. import `url` เพิ่ม
 
-dotenv.config();
+// Load .env from the project root (one level up from backend/)
+dotenv.config({ path: path.resolve(process.cwd(), '../.env'), override: true });
 
 export const env = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ["development", "test", "production"] }),
