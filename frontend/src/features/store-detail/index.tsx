@@ -10,6 +10,8 @@ import { IoFastFoodOutline } from "react-icons/io5";
 import { HiSparkles } from "react-icons/hi";
 import { BiDish } from "react-icons/bi";
 import { Link } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
+import { useChatStore } from "@/zustand/useChatStore";
 
 interface StoreDetailFeatureProps {
   storeId: string;
@@ -19,6 +21,8 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
   const [page, setPage] = useState(1);
   const [addingItemId, setAddingItemId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  
+  const { openChatWith } = useChatStore();
 
   const { mutate: addItem, isPending: isAdding } = useAddItemToCart();
   const {
@@ -167,13 +171,22 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                 </div>
                 <div className="flex-grow">
                   <h1 className="text-2xl md:text-3xl font-bold mb-1 drop-shadow-lg">{store.name}</h1>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center flex-wrap gap-2 mt-2">
                     {/* Rating - Compact */}
                     <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
                       <FiStar className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
                       <span className="font-bold text-sm">{store.avgRating.toFixed(1)}</span>
                       <span className="text-white/80 text-xs">({store.reviewCount})</span>
                     </div>
+
+                    {/* Chat Button */}
+                    <button 
+                        onClick={(e) => { e.preventDefault(); openChatWith(storeId); }}
+                        className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg transition-colors border border-orange-400"
+                    >
+                        <MessageCircle className="w-4 h-4" />
+                        คุยกับร้านค้า
+                    </button>
                   </div>
                 </div>
               </div>

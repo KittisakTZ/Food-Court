@@ -202,3 +202,42 @@ ALTER TABLE "Review" ADD COLUMN "orderId" TEXT;
 ALTER TABLE "Order" ADD COLUMN "description" TEXT;
 CREATE UNIQUE INDEX "Review_orderId_key" ON "Review"("orderId") WHERE "orderId" IS NOT NULL;
 ALTER TABLE "Review" ADD CONSTRAINT "Review_orderId_storeId_fkey" FOREIGN KEY ("orderId", "storeId") REFERENCES "Order"("id", "storeId") ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+-- =================================================================
+--  Chat System Models
+-- =================================================================
+
+-- CreateTable
+CREATE TABLE "chat_rooms" (
+    "id" TEXT NOT NULL,
+    "buyerId" TEXT NOT NULL,
+    "storeId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "chat_rooms_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "chat_messages" (
+    "id" TEXT NOT NULL,
+    "roomId" TEXT NOT NULL,
+    "senderId" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "isRead" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "chat_messages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "chat_rooms_buyerId_storeId_key" ON "chat_rooms"("buyerId", "storeId");
+
+-- AddForeignKey
+ALTER TABLE "chat_rooms" ADD CONSTRAINT "chat_rooms_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "chat_rooms" ADD CONSTRAINT "chat_rooms_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "chat_rooms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -16,6 +16,7 @@ import { IoIosSettings } from "react-icons/io";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FiStar } from "react-icons/fi";
+import { ChatBox } from "../customs/chat/ChatBox";
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -142,6 +143,7 @@ const MainLayout = () => {
       </SidebarProvider>
 
       <Cart />
+      <ChatBox />
     </div>
   );
 };

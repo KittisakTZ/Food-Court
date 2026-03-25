@@ -14,6 +14,7 @@ import { reviewRouter } from "@modules/review/reviewRouter";
 import { orderRouter } from "@modules/order/orderRouter";
 import { cartRouter } from "@modules/cart/cartRouter";
 import { analyticsRouter } from "@modules/analytics/analyticsRouter";
+import { chatRouter } from "@modules/chat/chatRouter";
 
 const logger = pino({ name: "server start" });
 const app = express();
@@ -48,6 +49,7 @@ app.use("/v1/reviews", reviewRouter);
 app.use("/v1/orders", orderRouter);
 app.use("/v1/cart", cartRouter);
 app.use("/v1/analytics", analyticsRouter);
+app.use("/v1/chats", chatRouter);
 
 app.use(errorHandler() as any);
 export { app, logger };

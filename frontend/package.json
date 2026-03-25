@@ -66,6 +66,7 @@
     "recharts": "^2.15.1",
     "rollup": "^4.29.1",
     "select": "^1.1.2",
+    "socket.io-client": "^4.8.3",
     "styled-components": "^6.1.14",
     "swiper": "^11.2.1",
     "tailwind-merge": "^2.5.4",

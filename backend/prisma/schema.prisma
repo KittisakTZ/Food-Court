@@ -45,6 +45,10 @@ model User {
 
   orders  Order[]
   reviews Review[]
+
+  // (ใหม่) ระบบแชท
+  chatRooms    ChatRoom[]    @relation("UserChatRooms")
+  chatMessages ChatMessage[] @relation("UserChatMessages")
 }
 
 model Store {
@@ -67,6 +71,9 @@ model Store {
   menus      Menu[]
   orders     Order[]
   reviews    Review[]
+
+  // (ใหม่) ระบบแชท
+  chatRooms  ChatRoom[]
 }
 
 model MenuCategory {
@@ -200,7 +207,7 @@ model CartItem {
 model ChatRoom {
   id        String   @id @default(cuid())
   buyerId   String
-  buyer     User     @relation(fields: [buyerId], references: [id])
+  buyer     User     @relation("UserChatRooms", fields: [buyerId], references: [id])
   storeId   String
   store     Store    @relation(fields: [storeId], references: [id])
   createdAt DateTime @default(now())
@@ -218,7 +225,7 @@ model ChatMessage {
   roomId    String
   room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
   senderId  String   
-  sender    User     @relation(fields: [senderId], references: [id]) // อ้างอิงว่า User ไหน (Buyer หรือ Store Owner) เป็นคนส่ง
+  sender    User     @relation("UserChatMessages", fields: [senderId], references: [id]) // อ้างอิงว่า User ไหน (Buyer หรือ Store Owner) เป็นคนส่ง
   content   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
