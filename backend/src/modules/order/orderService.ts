@@ -99,8 +99,8 @@ export const orderService = {
             const orderCreationData = {
                 buyerId: user.id,
                 storeId: payload.storeId,
-                paymentMethod: payload.paymentMethod, // <-- เพิ่มตรงนี้
-                description: payload.description, // Add this line
+                paymentMethod: payload.paymentMethod,
+                description: payload.description,
                 position: maxPosition + 1,
                 queueNumber: nextQueueNumber,
                 orderDate: orderDate,
@@ -155,7 +155,7 @@ export const orderService = {
     },
 
     // 2. Seller จัดการ Order (Approve, Reject, Confirm Payment, etc.)
-    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP", user: UserPayload) => {
+    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE", user: UserPayload, issueReason?: string) => {
         const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
         if (!store) {
             return new ServiceResponse(ResponseStatus.Failed, "You do not own a store.", null, StatusCodes.FORBIDDEN);
@@ -254,6 +254,23 @@ export const orderService = {
                 }
                 await orderRepository.updateOrder(orderId, updateData);
                 return new ServiceResponse(ResponseStatus.Success, "Order has been completed.", null, StatusCodes.OK);
+
+            case 'REPORT_ISSUE':
+                if (!issueReason || issueReason.trim() === '') {
+                    return new ServiceResponse(ResponseStatus.Failed, "Issue reason is required.", null, StatusCodes.BAD_REQUEST);
+                }
+                await orderRepository.updateOrder(orderId, {
+                    hasIssue: true,
+                    issueReason: issueReason.trim(),
+                } as any);
+                return new ServiceResponse(ResponseStatus.Success, "Order issue reported successfully.", null, StatusCodes.OK);
+
+            case 'CLEAR_ISSUE':
+                await orderRepository.updateOrder(orderId, {
+                    hasIssue: false,
+                    issueReason: null,
+                } as any);
+                return new ServiceResponse(ResponseStatus.Success, "Order issue cleared.", null, StatusCodes.OK);
 
             default:
                 return new ServiceResponse(ResponseStatus.Failed, "Invalid action.", null, StatusCodes.BAD_REQUEST);
@@ -416,8 +433,9 @@ export const orderService = {
             }
 
             // 3. สร้าง URL ของไฟล์ที่อัปโหลด
-            // (ต้องตั้งค่า server.ts ให้ serve static file จาก /uploads ด้วย)
-            const fileUrl = `${process.env.APP_URL}/uploads/${file.filename}`;
+            // ตัด trailing slash ออกก่อน เพื่อป้องกัน double slash เช่น "http://host//uploads/..."
+            const baseUrl = (process.env.APP_URL || '').replace(/\/$/, '');
+            const fileUrl = `${baseUrl}/uploads/${file.filename}`;
 
             // 4. อัปเดต Order
             await orderRepository.updateOrder(orderId, {

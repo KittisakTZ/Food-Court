@@ -469,32 +469,35 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             สรุปรายการอาหารที่ต้องทำ
             <span className="text-sm font-normal text-gray-500 ml-2">(คลิกเพื่อกรองดูเฉพาะเมนูนี้)</span>
           </h3>
-          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {menuStats.map((menu) => (
               <button
                 key={menu.id}
                 onClick={() => setSelectedMenuId(selectedMenuId === menu.id ? null : menu.id)}
-                className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all min-w-[200px] ${selectedMenuId === menu.id
-                  ? "border-orange-500 bg-orange-50 shadow-md ring-2 ring-orange-200"
-                  : "border-gray-100 hover:border-orange-300 hover:shadow-sm bg-white"
-                  }`}
+                className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all min-w-[220px] flex-shrink-0 ${
+                  selectedMenuId === menu.id
+                    ? "border-orange-500 bg-orange-50 shadow-md ring-2 ring-orange-200"
+                    : "border-gray-200 hover:border-orange-300 hover:shadow-md bg-white"
+                }`}
               >
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <img
                     src={menu.image || ""}
                     alt={menu.name}
-                    className="w-12 h-12 rounded-lg object-cover bg-gray-100"
+                    className="w-16 h-16 rounded-xl object-cover bg-gray-100"
                     onError={(e) => { e.currentTarget.src = ""; }}
                   />
-                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center border-2 border-white shadow-md">
                     {menu.quantity}
                   </div>
                 </div>
                 <div className="text-left flex-1 min-w-0">
-                  <p className="font-bold text-gray-800 truncate text-sm">{menu.name}</p>
-                  <p className="text-xs text-gray-500">รวม {menu.quantity} ที่</p>
+                  <p className="font-bold text-gray-800 truncate text-base leading-tight">{menu.name}</p>
+                  <p className="text-sm text-gray-500 mt-1">รวม <span className="font-semibold text-orange-600">{menu.quantity}</span> ที่</p>
                 </div>
-                {selectedMenuId === menu.id && <FiCheck className="text-orange-500" />}
+                {selectedMenuId === menu.id && (
+                  <FiCheck className="text-orange-500 w-5 h-5 flex-shrink-0" />
+                )}
               </button>
             ))}
           </div>

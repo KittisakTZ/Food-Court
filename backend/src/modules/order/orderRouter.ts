@@ -195,9 +195,9 @@ export const sellerOrderRouter = (() => {
         async (req: Request, res: Response) => {
             if (!req.token) { res.sendStatus(StatusCodes.UNAUTHORIZED); return; }
             const { orderId } = req.params;
-            const { action } = req.body;
+            const { action, issueReason } = req.body;
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
-            const serviceResponse = await orderService.reviewOrder(orderId, action, userForService);
+            const serviceResponse = await orderService.reviewOrder(orderId, action, userForService, issueReason);
             handleServiceResponse(serviceResponse, res);
         }
     );

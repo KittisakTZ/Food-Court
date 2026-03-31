@@ -92,33 +92,34 @@ export const Cart = () => {
                     </button>
                 ) : (
                     // Expanded State - Cart Panel
-                    <div className={`bg-white rounded-3xl shadow-3xl border-2 border-orange-200 overflow-hidden animate-slide-up ${
-                        isMobile ? 'w-[calc(100vw-2rem)] max-w-sm' : isTablet ? 'w-80' : 'w-96'
+                    // max-h = 100vh - navbar(70px) - bottom offset - buffer
+                    <div className={`bg-white rounded-3xl shadow-3xl border-2 border-orange-200 overflow-hidden animate-slide-up flex flex-col ${
+                        isMobile
+                            ? 'w-[calc(100vw-2rem)] max-w-sm max-h-[calc(100vh-6rem)]'
+                            : isTablet
+                                ? 'w-80 max-h-[calc(100vh-7rem)]'
+                                : 'w-96 max-h-[calc(100vh-7rem)]'
                     }`}>
                         {/* Header */}
-                        <div className={`bg-gradient-to-r from-orange-500 to-yellow-500 text-white relative overflow-hidden ${
-                            isMobile ? 'p-4' : 'p-6'
+                        <div className={`bg-gradient-to-r from-orange-500 to-yellow-500 text-white relative overflow-hidden flex-shrink-0 ${
+                            isMobile ? 'p-4' : 'p-5'
                         }`}>
                             {/* Decorative Elements */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
                             
                             <div className="relative z-10">
-                                <div className={`flex justify-between items-center ${isMobile ? 'mb-3' : 'mb-4'}`}>
+                                <div className="flex justify-between items-center mb-3">
                                     <div className="flex items-center gap-3">
-                                        <div className={`bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg ${
-                                            isMobile ? 'w-10 h-10' : 'w-12 h-12'
-                                        }`}>
-                                            <FiShoppingBag className={isMobile ? 'w-5 h-5' : 'w-6 h-6'} />
+                                        <div className="bg-white/20 backdrop-blur-sm rounded-xl w-10 h-10 flex items-center justify-center shadow-lg">
+                                            <FiShoppingBag className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <h2 className={`font-bold flex items-center gap-2 ${
-                                                isMobile ? 'text-xl' : 'text-2xl'
-                                            }`}>
+                                            <h2 className="font-bold text-lg flex items-center gap-2">
                                                 ตะกร้าของคุณ
-                                                <HiSparkles className={`animate-spin-slow ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                                                <HiSparkles className="animate-spin-slow w-4 h-4" />
                                             </h2>
-                                            <p className={`text-orange-100 ${isMobile ? 'text-xs' : 'text-sm'}`}>{totalItems} รายการ</p>
+                                            <p className="text-orange-100 text-xs">{totalItems} รายการ</p>
                                         </div>
                                     </div>
                                     
@@ -143,22 +144,20 @@ export const Cart = () => {
                             </div>
                         </div>
 
-                        {/* Cart Items */}
-                        <div className={`overflow-y-auto space-y-3 bg-gradient-to-b from-orange-50/30 to-white ${
-                            isMobile ? 'max-h-64 p-4' : isTablet ? 'max-h-80 p-5' : 'max-h-96 p-6'
+                        {/* Cart Items — flex-1 ทำให้ scroll ในพื้นที่ที่เหลือระหว่าง header กับ footer */}
+                        <div className={`flex-1 overflow-y-auto space-y-3 bg-gradient-to-b from-orange-50/30 to-white min-h-0 ${
+                            isMobile ? 'p-3' : 'p-4'
                         }`}>
                             {cart?.items.map((item, index) => (
                                 <div
                                     key={item.id}
-                                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all p-4 border-2 border-gray-100 hover:border-orange-200 group animate-fade-in-up"
+                                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-3 border border-gray-100 hover:border-orange-200 group"
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
                                     <div className="flex items-center gap-3">
                                         {/* Menu Image */}
-                                        <div className="relative">
-                                            <div className={`rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-shadow ${
-                                                isMobile ? 'w-16 h-16' : 'w-20 h-20'
-                                            }`}>
+                                        <div className="relative flex-shrink-0">
+                                            <div className="w-14 h-14 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                                                 <img
                                                     src={item.menu.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100"}
                                                     alt={item.menu.name}
@@ -169,68 +168,56 @@ export const Cart = () => {
                                                 />
                                             </div>
                                             {/* Quantity Badge */}
-                                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                                            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md">
                                                 {item.quantity}
                                             </div>
                                         </div>
 
                                         {/* Menu Info */}
                                         <div className="flex-grow min-w-0">
-                                            <h3 className={`font-bold text-gray-800 truncate group-hover:text-orange-600 transition-colors ${
-                                                isMobile ? 'text-sm' : 'text-base'
-                                            }`} title={item.menu.name}>
+                                            <h3 className="font-bold text-gray-800 truncate text-sm group-hover:text-orange-600 transition-colors" title={item.menu.name}>
                                                 {item.menu.name}
                                             </h3>
-                                            <p className={`text-gray-500 mt-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                                            <p className="text-gray-500 text-xs mt-0.5">
                                                 ฿{item.menu.price.toFixed(0)} / ชิ้น
                                             </p>
-                                            
+
                                             {/* Quantity Controls */}
-                                            <div className={`flex items-center gap-2 ${isMobile ? 'mt-2' : 'mt-3'}`}>
+                                            <div className="flex items-center gap-2 mt-1.5">
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                                                     disabled={isPending}
-                                                    className={`bg-gradient-to-r from-red-100 to-red-200 hover:from-red-500 hover:to-red-600 text-red-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-110 ${
-                                                        isMobile ? 'w-7 h-7' : 'w-8 h-8'
-                                                    }`}
+                                                    className="w-7 h-7 bg-red-100 hover:bg-red-500 text-red-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                                 >
-                                                    <FiMinus className={isMobile ? 'w-3 h-3' : 'w-4 h-4'} />
+                                                    <FiMinus className="w-3 h-3" />
                                                 </button>
 
-                                                <span className={`w-8 text-center font-bold text-gray-800 ${
-                                                    isMobile ? 'text-base' : 'text-lg'
-                                                }`}>
+                                                <span className="w-6 text-center font-bold text-gray-800 text-sm">
                                                     {item.quantity}
                                                 </span>
 
                                                 <button
                                                     onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                                                     disabled={isPending}
-                                                    className={`bg-gradient-to-r from-green-100 to-green-200 hover:from-green-500 hover:to-green-600 text-green-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:scale-110 ${
-                                                        isMobile ? 'w-7 h-7' : 'w-8 h-8'
-                                                    }`}
+                                                    className="w-7 h-7 bg-green-100 hover:bg-green-500 text-green-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                                 >
-                                                    <FiPlus className={isMobile ? 'w-3 h-3' : 'w-4 h-4'} />
+                                                    <FiPlus className="w-3 h-3" />
                                                 </button>
                                             </div>
                                         </div>
 
                                         {/* Item Total */}
-                                        <div className="text-right">
-                                            <div className={`font-bold text-green-600 ${
-                                                isMobile ? 'text-lg' : 'text-xl'
-                                            }`}>
+                                        <div className="text-right flex-shrink-0">
+                                            <div className="font-bold text-green-600 text-base">
                                                 ฿{(item.menu.price * item.quantity).toFixed(0)}
                                             </div>
                                             <button
                                                 onClick={() => handleUpdateQuantity(item.id, 0)}
                                                 disabled={isPending}
-                                                className={`text-red-500 hover:text-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                                                    isMobile ? 'mt-1' : 'mt-2'
-                                                }`}
+                                                className="mt-1 text-red-400 hover:text-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                                 title="ลบออกจากตะกร้า"
                                             >
-                                                <FiTrash2 className={isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+                                                <FiTrash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
                                     </div>
@@ -246,13 +233,11 @@ export const Cart = () => {
                             )}
                         </div>
 
-                        {/* Footer - Total & Checkout */}
-                        <div className={`bg-white border-t-2 border-gray-100 ${
-                            isMobile ? 'p-4' : 'p-6'
-                        }`}>
-                            {/* Delivery Info */}
-                            <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-4 mb-4 border border-orange-200">
-                                <div className="flex items-center justify-between text-sm mb-2">
+                        {/* Footer - Total & Checkout — flex-shrink-0 ไม่ให้หดเมื่อของเยอะ */}
+                        <div className="bg-white border-t-2 border-gray-100 p-4 flex-shrink-0">
+                            {/* Summary row */}
+                            <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl px-4 py-3 mb-3 border border-orange-200">
+                                <div className="flex items-center justify-between text-sm mb-1">
                                     <span className="text-gray-600">ค่าอาหาร</span>
                                     <span className="font-semibold text-gray-800">฿{totalPrice.toFixed(0)}</span>
                                 </div>
@@ -263,29 +248,27 @@ export const Cart = () => {
                             </div>
 
                             {/* Total */}
-                            <div className="flex justify-between items-center mb-4 pb-4 border-b-2 border-gray-100">
-                                <span className="text-xl font-bold text-gray-800">ยอดรวมทั้งหมด</span>
-                                <span className="text-3xl font-bold text-orange-600">฿{totalPrice.toFixed(0)}</span>
+                            <div className="flex justify-between items-center mb-3 pb-3 border-b-2 border-gray-100">
+                                <span className="text-base font-bold text-gray-800">ยอดรวมทั้งหมด</span>
+                                <span className="text-2xl font-bold text-orange-600">฿{totalPrice.toFixed(0)}</span>
                             </div>
 
                             {/* Checkout Button */}
                             <Link to="/checkout" className="block" onClick={() => setIsExpanded(false)}>
                                 <button
                                     disabled={isPending}
-                                    className={`w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold rounded-2xl transition-all disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-3 group/checkout ${
-                                        isMobile ? 'py-3 text-sm' : 'py-4'
-                                    }`}
+                                    className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold rounded-2xl py-3 transition-all disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3 group/checkout text-sm"
                                 >
                                     {isPending ? (
                                         <>
-                                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                                             กำลังดำเนินการ...
                                         </>
                                     ) : (
                                         <>
-                                            <FiShoppingBag className="w-5 h-5 group-hover/checkout:animate-bounce" />
+                                            <FiShoppingBag className="w-4 h-4 group-hover/checkout:animate-bounce" />
                                             ไปชำระเงิน
-                                            <FiArrowRight className="w-5 h-5 group-hover/checkout:translate-x-1 transition-transform" />
+                                            <FiArrowRight className="w-4 h-4 group-hover/checkout:translate-x-1 transition-transform" />
                                         </>
                                     )}
                                 </button>
@@ -294,7 +277,7 @@ export const Cart = () => {
                             {/* Continue Shopping */}
                             <button
                                 onClick={() => setIsExpanded(false)}
-                                className="w-full mt-3 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all"
+                                className="w-full mt-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all text-sm"
                             >
                                 เลือกซื้อต่อ
                             </button>

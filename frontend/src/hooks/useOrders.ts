@@ -58,9 +58,28 @@ export const useUpdateOrderStatus = () => {
             queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
         },
         onError: (error) => {
-            // เราสามารถเข้าถึง message ของ error ที่ axios ส่งกลับมาได้
             const errorMessage = (error as any)?.response?.data?.message || error.message;
             toastService.error(`ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: ${errorMessage}`);
+        }
+    });
+};
+
+// Hook สำหรับรายงานปัญหาออเดอร์
+export const useReportOrderIssue = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: updateOrderStatus,
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
+            if (variables.action === 'REPORT_ISSUE') {
+                toastService.success('รายงานปัญหาออเดอร์เรียบร้อยแล้ว');
+            } else {
+                toastService.success('ล้างปัญหาออเดอร์เรียบร้อยแล้ว');
+            }
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || error.message;
+            toastService.error(`เกิดข้อผิดพลาด: ${errorMessage}`);
         }
     });
 };

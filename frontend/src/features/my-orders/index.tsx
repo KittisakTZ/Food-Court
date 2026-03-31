@@ -4,7 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiUpload,
-  FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag, FiRefreshCw} from "react-icons/fi";
+  FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag, FiRefreshCw, FiAlertTriangle} from "react-icons/fi";
 import { MdRestaurant, MdPayment } from "react-icons/md";
 import { Order } from "@/types/response/order.response";
 import { useMyOrders, useUploadSlip } from "@/hooks/useOrders";
@@ -94,6 +94,10 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
 
   if (!order) return null;
 
+  // normalize URL — ตัด double slash ที่อาจเกิดจาก APP_URL มี trailing slash
+  const normalizeUrl = (url: string | null) =>
+    url ? url.replace(/([^:])\/\/+/g, '$1/') : null;
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -138,8 +142,9 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
   };
 
   const handleViewSlip = () => {
-    if (order.paymentSlip) {
-      window.open(order.paymentSlip, '_blank');
+    const slip = normalizeUrl(order.paymentSlip);
+    if (slip) {
+      window.open(slip, '_blank');
     }
   };
 
@@ -189,10 +194,10 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
 
           {/* QR Code */}
           <div className="flex justify-center">
-            {order.paymentQrCode ? (
+            {normalizeUrl(order.paymentQrCode) ? (
               <div className="bg-white p-3 sm:p-4 rounded-xl border-2 border-slate-200">
                 <img
-                  src={order.paymentQrCode}
+                  src={normalizeUrl(order.paymentQrCode)!}
                   alt="QR Code"
                   className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-lg"
                 />
@@ -362,7 +367,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-300 overflow-hidden h-full flex flex-col">
+    <div className={`bg-white rounded-xl border hover:shadow-md transition-all duration-300 overflow-hidden h-full flex flex-col ${order.hasIssue ? 'border-red-400 shadow-red-100 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}>
       {/* Status Badge */}
       <div className={`${statusConfig.bgColor} ${statusConfig.color} px-4 py-2.5 flex items-center justify-between flex-shrink-0`}>
         <div className="flex items-center gap-2">
@@ -378,6 +383,17 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           </div>
         )}
       </div>
+
+      {/* Issue Banner */}
+      {order.hasIssue && order.issueReason && (
+        <div className="bg-red-50 border-b-2 border-red-200 px-4 py-3 flex items-start gap-3">
+          <FiAlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-bold text-red-800 uppercase tracking-wide">ร้านค้าแจ้งปัญหา</p>
+            <p className="text-sm text-red-700 font-medium mt-0.5">{order.issueReason}</p>
+          </div>
+        </div>
+      )}
 
       <div className="p-4 flex-1 flex flex-col">
         {/* Store Info */}

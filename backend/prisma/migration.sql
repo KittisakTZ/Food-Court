@@ -94,6 +94,8 @@ CREATE TABLE "Order" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "orderDate" DATE NOT NULL,
     "queueNumber" INTEGER NOT NULL,
+    "hasIssue" BOOLEAN NOT NULL DEFAULT false,
+    "issueReason" TEXT,
 
     -- Primary Key MUST include the partition key ("storeId")
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id", "storeId")
@@ -241,3 +243,7 @@ ALTER TABLE "chat_rooms" ADD CONSTRAINT "chat_rooms_storeId_fkey" FOREIGN KEY ("
 -- AddForeignKey
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "chat_rooms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- Add missing columns to existing Order table (if already created without them)
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "hasIssue" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "issueReason" TEXT;

@@ -47,7 +47,10 @@ export const SellerUpdateOrderStatusSchema = z.object({
             "CONFIRM_PAYMENT", // ยืนยันสลิป PromptPay
             "PREPARE_COMPLETE",
             "CUSTOMER_PICKED_UP", // ลูกค้ารับของ (และอาจจะจ่ายเงินสด)
+            "REPORT_ISSUE",       // แจ้งปัญหาออเดอร์
+            "CLEAR_ISSUE",        // ล้างปัญหาออเดอร์
         ]),
+        issueReason: z.string().optional(), // เหตุผลสำหรับ REPORT_ISSUE
     }),
 });
 

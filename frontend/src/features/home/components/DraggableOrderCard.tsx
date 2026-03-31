@@ -3,17 +3,204 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Order } from '@/types/response/order.response';
 import { getStatusColor, getStatusName } from '@/utils/statusUtils';
-import { useUpdateOrderStatus } from '@/hooks/useOrders';
+import { useUpdateOrderStatus, useReportOrderIssue } from '@/hooks/useOrders';
 import { FaGripVertical, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { useMoveOrderPosition } from '@/hooks/useOrders';
 import { useState } from 'react';
-import { FiCheck, FiX, FiPackage, FiClock, FiUser } from "react-icons/fi";
+import { FiCheck, FiX, FiPackage, FiClock, FiUser, FiAlertTriangle, FiEye } from "react-icons/fi";
 import { MdRestaurant } from "react-icons/md";
 import { ConfirmationDialog } from '@/components/customs/ConfirmationDialog';
+
+// Modal สำหรับรายงานปัญหาออเดอร์
+const IssueReportModal = ({ order, onClose }: { order: Order; onClose: () => void }) => {
+    const { mutate: reportIssue, isPending } = useReportOrderIssue();
+    const [selectedReason, setSelectedReason] = useState<string>(order.issueReason || '');
+    const [customReason, setCustomReason] = useState('');
+
+    const presetReasons = [
+        'วัตถุดิบไม่พอ',
+        'สินค้าหมด',
+        'ร้านปิด',
+        'เมนูหยุดให้บริการชั่วคราว',
+        'ไม่สามารถรับออเดอร์ได้',
+    ];
+
+    const handleSubmit = () => {
+        const reason = selectedReason === '__custom__' ? customReason.trim() : selectedReason;
+        if (!reason) return;
+        reportIssue({ orderId: order.id, action: 'REPORT_ISSUE', issueReason: reason }, {
+            onSuccess: () => onClose(),
+        });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+                <div className="bg-gradient-to-r from-red-500 to-orange-500 p-5 rounded-t-2xl text-white">
+                    <div className="flex items-center gap-3">
+                        <FiAlertTriangle className="w-7 h-7" />
+                        <div>
+                            <h3 className="text-lg font-bold">แจ้งปัญหาออเดอร์</h3>
+                            <p className="text-red-100 text-sm">ลูกค้า: {order.buyer?.username} · คิว #{order.queueNumber}</p>
+                        </div>
+                        <button onClick={onClose} className="ml-auto text-white/80 hover:text-white">
+                            <FiX className="w-6 h-6" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="p-5 space-y-4">
+                    <p className="text-sm text-slate-600">เลือกเหตุผลที่ทำให้ออเดอร์นี้มีปัญหา:</p>
+
+                    <div className="space-y-2">
+                        {presetReasons.map((reason) => (
+                            <label key={reason} className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedReason === reason ? 'border-red-400 bg-red-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                                <input
+                                    type="radio"
+                                    name="issueReason"
+                                    value={reason}
+                                    checked={selectedReason === reason}
+                                    onChange={() => setSelectedReason(reason)}
+                                    className="accent-red-500"
+                                />
+                                <span className="text-sm font-medium text-slate-800">{reason}</span>
+                            </label>
+                        ))}
+
+                        <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedReason === '__custom__' ? 'border-red-400 bg-red-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                            <input
+                                type="radio"
+                                name="issueReason"
+                                value="__custom__"
+                                checked={selectedReason === '__custom__'}
+                                onChange={() => setSelectedReason('__custom__')}
+                                className="accent-red-500"
+                            />
+                            <span className="text-sm font-medium text-slate-800">อื่นๆ (ระบุเอง)</span>
+                        </label>
+
+                        {selectedReason === '__custom__' && (
+                            <input
+                                type="text"
+                                value={customReason}
+                                onChange={(e) => setCustomReason(e.target.value)}
+                                placeholder="ระบุเหตุผล..."
+                                className="w-full px-4 py-2.5 border-2 border-slate-300 rounded-xl text-sm focus:outline-none focus:border-red-400"
+                                autoFocus
+                            />
+                        )}
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                        <button
+                            onClick={onClose}
+                            className="flex-1 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-all"
+                        >
+                            ยกเลิก
+                        </button>
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isPending || !selectedReason || (selectedReason === '__custom__' && !customReason.trim())}
+                            className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                        >
+                            {isPending ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> : <FiAlertTriangle className="w-4 h-4" />}
+                            แจ้งปัญหา
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Modal สำหรับดูรายละเอียดออเดอร์ (Seller)
+const OrderDetailModal = ({ order, onClose }: { order: Order; onClose: () => void }) => {
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+                <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-5 rounded-t-2xl text-white flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                        <FiEye className="w-6 h-6" />
+                        <div>
+                            <h3 className="text-lg font-bold">รายละเอียดออเดอร์</h3>
+                            <p className="text-orange-100 text-sm">คิว #{order.queueNumber} · {order.buyer?.username}</p>
+                        </div>
+                        <button onClick={onClose} className="ml-auto text-white/80 hover:text-white">
+                            <FiX className="w-6 h-6" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="overflow-y-auto flex-1 p-5 space-y-4">
+                    {/* Issue Banner */}
+                    {order.hasIssue && order.issueReason && (
+                        <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 flex items-start gap-3">
+                            <FiAlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-bold text-red-800 text-sm">ออเดอร์มีปัญหา</p>
+                                <p className="text-red-700 text-sm mt-0.5">{order.issueReason}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Order Items */}
+                    <div>
+                        <h4 className="font-bold text-slate-800 mb-3 text-sm">รายการอาหาร ({order.orderItems.length} รายการ)</h4>
+                        <div className="space-y-2">
+                            {order.orderItems.map((item) => (
+                                <div key={item.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                    <img src={item.menu.image || ''} alt={item.menu.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" onError={(e) => { e.currentTarget.src = '' }} />
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-slate-800 text-sm truncate">{item.menu.name}</p>
+                                        <p className="text-xs text-slate-500">฿{item.menu.price.toFixed(0)} × {item.quantity}</p>
+                                    </div>
+                                    <p className="font-bold text-slate-900 text-sm">฿{item.subtotal.toFixed(0)}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Description */}
+                    {order.description && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                            <p className="font-semibold text-amber-800 text-sm mb-1">หมายเหตุจากลูกค้า</p>
+                            <p className="text-sm text-slate-700 italic">"{order.description}"</p>
+                        </div>
+                    )}
+
+                    {/* Summary */}
+                    <div className="bg-orange-50 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-slate-600">ยอดรวมทั้งหมด</p>
+                            <p className="text-xs text-slate-500">{order.paymentMethod === 'PROMPTPAY' ? 'PromptPay' : 'เงินสด'}</p>
+                        </div>
+                        <p className="text-2xl font-black text-orange-600">฿{order.totalAmount.toFixed(0)}</p>
+                    </div>
+
+                    {/* Payment Slip */}
+                    {order.paymentSlip && (
+                        <div>
+                            <p className="font-semibold text-slate-700 text-sm mb-2">สลิปการโอนเงิน</p>
+                            <img src={order.paymentSlip} alt="Payment Slip" className="w-full rounded-xl border border-slate-200 cursor-pointer" onClick={() => window.open(order.paymentSlip!, '_blank')} />
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-5 border-t border-slate-100 flex-shrink-0">
+                    <button onClick={onClose} className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-all">
+                        ปิด
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 // Component สำหรับปุ่ม Action (ปรับปรุง Icon)
 const OrderActions = ({ order }: { order: Order }) => {
     const { mutate: updateStatus, isPending } = useUpdateOrderStatus();
+    const { mutate: reportIssue, isPending: isReportingIssue } = useReportOrderIssue();
+    const [showIssueModal, setShowIssueModal] = useState(false);
     const [dialogState, setDialogState] = useState<{
         isOpen: boolean;
         title: string;
@@ -43,14 +230,22 @@ const OrderActions = ({ order }: { order: Order }) => {
         });
     };
 
+    const handleClearIssue = () => {
+        reportIssue({ orderId: order.id, action: 'CLEAR_ISSUE' });
+    };
+
     const closeDialog = () => {
         setDialogState({ isOpen: false, title: '', description: '', onConfirm: null });
     };
 
     const commonButtonClass = "px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all font-bold shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base disabled:bg-gray-300 disabled:cursor-not-allowed";
 
+    // ปุ่มแจ้งปัญหา — แสดงเฉพาะ PENDING เท่านั้น (ก่อนกดอนุมัติ)
+    const showIssueButton = order.status === 'PENDING';
+
     return (
         <>
+            {showIssueModal && <IssueReportModal order={order} onClose={() => setShowIssueModal(false)} />}
             <ConfirmationDialog
                 isOpen={dialogState.isOpen}
                 onClose={closeDialog}
@@ -58,75 +253,97 @@ const OrderActions = ({ order }: { order: Order }) => {
                 title={dialogState.title}
                 description={dialogState.description}
             />
-            {(() => {
-                switch (order.status) {
-                    case 'PENDING':
-                        return (
-                            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+                {(() => {
+                    switch (order.status) {
+                        case 'PENDING':
+                            return (
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => handleUpdate('APPROVE')}
+                                        disabled={isPending}
+                                        className={`${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
+                                    >
+                                        <FiCheck className="w-5 h-5" />
+                                        <span>อนุมัติ</span>
+                                    </button>
+                                    <button
+                                        onClick={() => handleUpdate('REJECT')}
+                                        disabled={isPending}
+                                        className={`${commonButtonClass} bg-gray-400 text-white hover:bg-gray-500`}
+                                    >
+                                        <FiX className="w-5 h-5" />
+                                        <span>ปฏิเสธ</span>
+                                    </button>
+                                </div>
+                            );
+                        case 'AWAITING_PAYMENT':
+                            return (
+                                <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-lg border-2 border-blue-300 shadow-sm">
+                                    <p className="font-bold">⏳ รอการชำระเงินจากลูกค้า</p>
+                                </div>
+                            );
+                        case 'AWAITING_CONFIRMATION':
+                            return (
                                 <button
-                                    onClick={() => handleUpdate('APPROVE')}
+                                    onClick={() => handleUpdate('CONFIRM_PAYMENT')}
                                     disabled={isPending}
-                                    className={`${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
+                                    className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
                                 >
                                     <FiCheck className="w-5 h-5" />
-                                    <span>อนุมัติ</span>
+                                    <span>ยืนยันการชำระเงิน</span>
                                 </button>
+                            );
+                        case 'COOKING':
+                            return (
                                 <button
-                                    onClick={() => handleUpdate('REJECT')}
+                                    onClick={() => handleUpdate('PREPARE_COMPLETE')}
                                     disabled={isPending}
-                                    className={`${commonButtonClass} bg-gray-400 text-white hover:bg-gray-500`}
+                                    className={`w-full ${commonButtonClass} bg-orange-500 text-white hover:bg-orange-600`}
                                 >
-                                    <FiX className="w-5 h-5" />
-                                    <span>ปฏิเสธ</span>
+                                    <FiPackage className="w-5 h-5" />
+                                    <span>อาหารพร้อม</span>
                                 </button>
-                            </div>
-                        );
-                    // ✨ (ปรับปรุง) สถานะนี้ ร้านค้าไม่ต้องทำอะไร รอให้ลูกค้าจ่ายเงิน
-                    case 'AWAITING_PAYMENT':
-                        return (
-                            <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-lg border-2 border-blue-300 shadow-sm">
-                                <p className="font-bold">⏳ รอการชำระเงินจากลูกค้า</p>
-                            </div>
-                        );
+                            );
+                        case 'READY_FOR_PICKUP':
+                            return (
+                                <button
+                                    onClick={() => handleUpdate('CUSTOMER_PICKED_UP')}
+                                    disabled={isPending}
+                                    className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
+                                >
+                                    <FiCheck className="w-5 h-5" />
+                                    <span>ลูกค้ารับแล้ว</span>
+                                </button>
+                            );
+                        default:
+                            return null;
+                    }
+                })()}
 
-                    // ✨ (เพิ่ม) สถานะใหม่สำหรับตรวจสอบสลิป
-                    case 'AWAITING_CONFIRMATION':
-                        return (
-                            <button
-                                onClick={() => handleUpdate('CONFIRM_PAYMENT')}
-                                disabled={isPending}
-                                className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
-                            >
-                                <FiCheck className="w-5 h-5" />
-                                <span>ยืนยันการชำระเงิน</span>
-                            </button>
-                        );
-                    case 'COOKING':
-                        return (
-                            <button
-                                onClick={() => handleUpdate('PREPARE_COMPLETE')}
-                                disabled={isPending}
-                                className={`w-full ${commonButtonClass} bg-orange-500 text-white hover:bg-orange-600`}
-                            >
-                                <FiPackage className="w-5 h-5" />
-                                <span>อาหารพร้อม</span>
-                            </button>
-                        );
-                    case 'READY_FOR_PICKUP':
-                        return (
-                            <button
-                                onClick={() => handleUpdate('CUSTOMER_PICKED_UP')}
-                                disabled={isPending}
-                                className={`w-full ${commonButtonClass} bg-teal-500 text-white hover:bg-teal-600`}
-                            >
-                                <FiCheck className="w-5 h-5" />
-                                <span>ลูกค้ารับแล้ว</span>
-                            </button>
-                        );
-                    default:
-                        return null;
-                }
-            })()}
+                {/* ปุ่มแจ้งปัญหา / ล้างปัญหา */}
+                {showIssueButton && (
+                    order.hasIssue ? (
+                        <button
+                            onClick={handleClearIssue}
+                            disabled={isReportingIssue}
+                            className={`w-full ${commonButtonClass} bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-2 border-emerald-300`}
+                        >
+                            <FiCheck className="w-4 h-4" />
+                            <span>ล้างปัญหาออเดอร์</span>
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowIssueModal(true)}
+                            disabled={isPending}
+                            className={`w-full ${commonButtonClass} bg-red-50 text-red-600 hover:bg-red-100 border-2 border-red-200`}
+                        >
+                            <FiAlertTriangle className="w-4 h-4" />
+                            <span>แจ้งปัญหาออเดอร์</span>
+                        </button>
+                    )
+                )}
+            </div>
         </>
     );
 }
@@ -136,6 +353,7 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: order.id });
     const { mutate: moveOrder, isPending } = useMoveOrderPosition();
     const [jumpPosition, setJumpPosition] = useState<string>("");
+    const [showDetailModal, setShowDetailModal] = useState(false);
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -164,8 +382,9 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
 
     return (
         <div ref={setNodeRef} style={style}>
+            {showDetailModal && <OrderDetailModal order={order} onClose={() => setShowDetailModal(false)} />}
             {/* ปรับเงา และขอบเล็กน้อย */}
-            <div className="bg-white rounded-xl shadow-md border-2 border-orange-200 hover:border-orange-400 hover:shadow-lg transition-all overflow-hidden">
+            <div className={`bg-white rounded-xl shadow-md border-2 hover:shadow-lg transition-all overflow-hidden ${order.hasIssue ? 'border-red-400' : 'border-orange-200 hover:border-orange-400'}`}>
 
                 {/* HEADER - Queue Number & Customer (Responsive) */}
                 <div className="bg-gradient-to-r from-orange-500 to-orange-400 p-3 sm:p-4">
@@ -211,8 +430,22 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                     </div>
                 </div>
 
+                {/* ✨ แบนเนอร์แจ้งปัญหาออเดอร์ */}
+                {order.hasIssue && order.issueReason && (
+                    <div className="px-4 py-3 bg-red-50 border-b-2 border-red-200 flex items-center gap-3">
+                        <FiAlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-red-800 uppercase tracking-wide">มีปัญหาในออเดอร์</p>
+                            <p className="text-sm text-red-700 font-medium">{order.issueReason}</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* ✨ (เพิ่ม) ส่วนแสดงผลพิเศษสำหรับ Payment */}
-                {(order.status === 'AWAITING_CONFIRMATION' && order.paymentSlip) && (
+                {(order.status === 'AWAITING_CONFIRMATION' && order.paymentSlip) && (() => {
+                    // normalize URL — ตัด double slash ที่อาจเกิดจาก APP_URL มี trailing slash
+                    const slipUrl = order.paymentSlip!.replace(/([^:])\/\/+/g, '$1/');
+                    return (
                     <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-b-2 border-dashed border-yellow-300">
                         <h4 className="font-bold text-yellow-800 mb-3 flex items-center gap-2">
                             ตรวจสอบสลิปการโอนเงิน
@@ -221,10 +454,10 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                         {/* Preview Image */}
                         <div className="relative group mb-3">
                             <img
-                                src={order.paymentSlip}
+                                src={slipUrl}
                                 alt="Payment Slip"
                                 className="w-full max-w-md mx-auto rounded-xl border-2 border-yellow-300 shadow-lg cursor-pointer hover:border-yellow-500 transition-all"
-                                onClick={() => window.open(order.paymentSlip, '_blank')}
+                                onClick={() => window.open(slipUrl, '_blank')}
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     const fallbackDiv = e.currentTarget.nextElementSibling as HTMLElement;
@@ -233,13 +466,13 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                             />
                             {/* Fallback if image fails to load */}
                             <div className="hidden w-full max-w-md mx-auto p-8 bg-red-50 rounded-xl border-2 border-red-300 items-center justify-center">
-                                <p className="text-red-600 font-semibold text-center">ไม่สามารถโหลดรูปสลีปได้</p>
+                                <p className="text-red-600 font-semibold text-center">ไม่สามารถโหลดรูปสลิปได้</p>
                             </div>
 
                             {/* Hover Overlay */}
                             <div
                                 className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center cursor-pointer max-w-md mx-auto"
-                                onClick={() => window.open(order.paymentSlip, '_blank')}
+                                onClick={() => window.open(slipUrl, '_blank')}
                             >
                                 <div className="text-white text-center">
                                     <p className="font-bold text-lg mb-1">🔍 คลิกเพื่อดูขนาดเต็ม</p>
@@ -249,13 +482,14 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                         </div>
 
                         <button
-                            onClick={() => window.open(order.paymentSlip, '_blank')}
+                            onClick={() => window.open(slipUrl, '_blank')}
                             className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold py-2.5 px-5 rounded-xl hover:from-yellow-600 hover:to-amber-600 transition-all shadow-md hover:shadow-lg"
                         >
                             🔍 ดูสลิปแบบขยาย
                         </button>
                     </div>
-                )}
+                    );
+                })()}
 
                 {/* ORDER ITEMS - Responsive */}
                 <div className="p-3 sm:p-4 bg-neutral-50">
@@ -330,8 +564,15 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                 </div>
 
                 {/* ACTION BUTTONS */}
-                <div className="p-3 sm:p-4 bg-white border-t border-gray-100">
+                <div className="p-3 sm:p-4 bg-white border-t border-gray-100 space-y-2">
                     <OrderActions order={order} />
+                    <button
+                        onClick={() => setShowDetailModal(true)}
+                        className="w-full px-3 py-2 rounded-lg border-2 border-slate-200 hover:border-slate-400 text-slate-600 hover:text-slate-800 font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                    >
+                        <FiEye className="w-4 h-4" />
+                        ดูรายละเอียดออเดอร์
+                    </button>
                 </div>
 
                 {/* QUEUE MANAGEMENT - Responsive */}

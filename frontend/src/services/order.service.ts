@@ -71,13 +71,14 @@ export const getMyStoreOrders = async (params: GetStoreOrdersParams) => {
 
 type UpdateOrderStatusParams = {
     orderId: string;
-    action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP";
+    action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE";
+    issueReason?: string;
 }
 
-export const updateOrderStatus = async ({ orderId, action }: UpdateOrderStatusParams) => {
+export const updateOrderStatus = async ({ orderId, action, issueReason }: UpdateOrderStatusParams) => {
     const { data: response } = await mainApi.patch<APIResponseType<Order>>(
         `/v1/stores/my-store/orders/${orderId}`,
-        { action }
+        { action, issueReason }
     );
     return response.responseObject;
 };

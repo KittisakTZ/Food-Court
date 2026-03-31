@@ -13,7 +13,7 @@ type OrderCreationData = {
     queueNumber: number;
     orderDate: Date;
     paymentMethod: PaymentMethod;
-    description?: string; // Add this line
+    description?: string;
     items: Array<{
         menuId: string;
         quantity: number;
@@ -36,7 +36,7 @@ export const orderRepository = {
                     queueNumber: data.queueNumber,
                     orderDate: data.orderDate,
                     paymentMethod: data.paymentMethod,
-                    description: data.description, // Add this line
+                    description: data.description,
                 },
             });
 

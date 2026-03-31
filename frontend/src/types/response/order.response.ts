@@ -30,6 +30,10 @@ export interface Order {
     paidAt: string | null;
     confirmedAt: string | null;
     completedAt: string | null;
+
+    // ✨ Fields สำหรับแจ้งปัญหาออเดอร์
+    hasIssue: boolean;
+    issueReason: string | null;
 }
 
 export interface Review {
