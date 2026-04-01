@@ -247,3 +247,5 @@ ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_senderId_fkey" FOREIGN
 -- Add missing columns to existing Order table (if already created without them)
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "hasIssue" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "issueReason" TEXT;
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "startCookingAt" TIMESTAMP(3);
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "estimatedReadyAt" TIMESTAMP(3);

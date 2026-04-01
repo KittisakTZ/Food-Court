@@ -13,6 +13,7 @@ import CreateStorePage from "@/pages/my-store/create";
 import OrderDetailPage from "@/features/my-orders/order-detail";
 import ReviewsPage from "@/pages/my-store/ReviewsPage";
 import SellerAnalyticsPage from "@/pages/my-store/analytics/page";
+import KDSPage from "@/pages/my-store/kds";
 
 
 const router = createBrowserRouter([
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
       {
         path: "my-store/analytics",
         element: <SellerAnalyticsPage />,
+      },
+      {
+        path: "my-store/kds",
+        element: <KDSPage />,
       },
     ],
   },

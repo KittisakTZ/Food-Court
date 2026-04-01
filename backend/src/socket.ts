@@ -9,6 +9,17 @@ const logger = pino({ name: "socket.io" });
 
 export let io: SocketIOServer;
 
+// ── KDS Helper ──────────────────────────────────────────────────────────────
+export const emitKdsUpdate = (storeId: string, event: string, data: unknown) => {
+    if (io) io.to(`kds:${storeId}`).emit(event, data);
+};
+
+// ── Buyer Order Helper ───────────────────────────────────────────────────────
+// แจ้ง buyer ว่าสถานะ order ของตัวเองเปลี่ยนแปลง
+export const emitOrderUpdate = (orderId: string, data: unknown) => {
+    if (io) io.to(`order:${orderId}`).emit("order:status_update", data);
+};
+
 export const initializeSocket = (server: HttpServer) => {
     io = new SocketIOServer(server, {
         cors: {
@@ -56,11 +67,22 @@ export const initializeSocket = (server: HttpServer) => {
         }
         logger.info(`✅ User connected: ${userId} (Socket ID: ${socket.id})`);
 
-        // กรณีการ Join ห้องแชท (ต้องบังคับให้ Join ห้องเฉพาะของตัวเอง)
+        // กรณีการ Join ห้องแชท
         socket.on("join_room", (roomId: string) => {
-            // TODO: สามารถเช็กสิทธิ์ตรงนี้ได้ว่า userId คนนี้ มีสิทธิ์เข้า roomId นี้มั้ย
             socket.join(roomId);
             logger.info(`User ${userId} joined room ${roomId}`);
+        });
+
+        // KDS: Seller เข้าร่วมห้อง KDS ของร้านตัวเอง
+        socket.on("join_kds", (storeId: string) => {
+            socket.join(`kds:${storeId}`);
+            logger.info(`User ${userId} joined KDS room kds:${storeId}`);
+        });
+
+        // Buyer ติดตามสถานะ order ของตัวเอง
+        socket.on("join_order", (orderId: string) => {
+            socket.join(`order:${orderId}`);
+            logger.info(`User ${userId} joined order room order:${orderId}`);
         });
 
         // เมื่อมีการส่งข้อความ

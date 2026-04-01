@@ -131,7 +131,9 @@ model Order {
   paidAt          DateTime?
   confirmedAt     DateTime?
   completedAt     DateTime?
-  createdAt       DateTime  @default(now())
+  startCookingAt   DateTime? // เวลาที่เริ่มทำอาหาร (สำหรับ KDS timer)
+  estimatedReadyAt DateTime? // เวลาที่คาดว่าจะพร้อม (สำหรับ countdown timer)
+  createdAt        DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   // --- ✨ Fields สำหรับแจ้งปัญหาออเดอร์ ---

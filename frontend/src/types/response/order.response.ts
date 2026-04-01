@@ -30,6 +30,8 @@ export interface Order {
     paidAt: string | null;
     confirmedAt: string | null;
     completedAt: string | null;
+    startCookingAt: string | null;
+    estimatedReadyAt: string | null;
 
     // ✨ Fields สำหรับแจ้งปัญหาออเดอร์
     hasIssue: boolean;

@@ -7,6 +7,29 @@ import prisma from "@src/db";
 import { OrderStatus, Role, PaymentMethod } from "@prisma/client";
 import { paymentGateway } from "@common/utils/paymentGateway"; // Import QR Code service (ตัวจำลอง)
 import { env } from "@common/utils/envConfig";
+import { emitKdsUpdate, emitOrderUpdate } from "@src/socket";
+
+// เวลาทำอาหารเฉลี่ยต่อ 1 คิว (นาที)
+const COOKING_MINUTES_PER_ORDER = 15;
+
+// คำนวณ estimatedReadyAt สำหรับทุก COOKING orders ในร้าน ตาม position
+async function recalcEstimatedReadyAt(storeId: string, tx?: any): Promise<void> {
+    const db = tx ?? prisma;
+    const cookingOrders = await db.order.findMany({
+        where: { storeId, status: { in: ['COOKING', 'AWAITING_PAYMENT', 'AWAITING_CONFIRMATION'] } },
+        orderBy: { position: 'asc' },
+        select: { id: true },
+    });
+    const now = new Date();
+    await Promise.all(
+        cookingOrders.map((o: { id: string }, idx: number) =>
+            db.order.update({
+                where: { id: o.id },
+                data: { estimatedReadyAt: new Date(now.getTime() + (idx + 1) * COOKING_MINUTES_PER_ORDER * 60 * 1000) },
+            })
+        )
+    );
+}
 
 // Type สำหรับข้อมูลที่ Frontend ส่งมาเพื่อสร้าง Order
 type CreateOrderPayload = {
@@ -110,6 +133,18 @@ export const orderService = {
             };
 
             const newOrder = await orderRepository.createOrderTransaction(orderCreationData);
+
+            // KDS: แจ้ง Kitchen ว่ามี order ใหม่เข้ามา
+            emitKdsUpdate(payload.storeId, "kds:new_order", {
+                id: newOrder.id,
+                queueNumber: newOrder.queueNumber,
+                status: newOrder.status,
+                totalAmount: newOrder.totalAmount,
+                createdAt: newOrder.createdAt,
+                startCookingAt: null,
+                orderItems: (newOrder as any).orderItems ?? [],
+            });
+
             return new ServiceResponse(ResponseStatus.Success, "Order created successfully.", newOrder, StatusCodes.CREATED);
 
         } catch (error) {
@@ -146,6 +181,7 @@ export const orderService = {
             }
 
             await orderRepository.updateOrderPositions(updates);
+            await recalcEstimatedReadyAt(store.id);
             return new ServiceResponse(ResponseStatus.Success, "Queue has been reordered successfully.", null, StatusCodes.OK);
 
         } catch (error) {
@@ -196,12 +232,16 @@ export const orderService = {
                     return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting payment.", null, StatusCodes.OK);
 
                 } else if (order.paymentMethod === 'CASH_ON_PICKUP') {
-                    // --- Flow จ่ายหน้าร้าน ---
-                    // เมื่อร้านค้ากด Approve ก็เริ่มทำอาหารได้เลย
+                    const cookingAt = new Date();
                     await orderRepository.updateOrder(orderId, {
                         status: 'COOKING',
-                        confirmedAt: new Date(),
-                    });
+                        confirmedAt: cookingAt,
+                        startCookingAt: cookingAt,
+                    } as any);
+                    await recalcEstimatedReadyAt(store.id);
+                    const updatedOrder = await orderRepository.findOrderById(orderId);
+                    emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: cookingAt, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
+                    emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: cookingAt, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
                     return new ServiceResponse(ResponseStatus.Success, "Order approved and moved to cooking.", null, StatusCodes.OK);
                 }
                 // กรณีไม่มี paymentMethod (เผื่อข้อมูลเก่า)
@@ -209,35 +249,44 @@ export const orderService = {
 
 
             case 'REJECT':
-                // Logic เหมือนเดิม
                 if (order.status !== 'PENDING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot reject an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
                 await orderRepository.updateOrder(orderId, { status: 'REJECTED' });
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'REJECTED' });
+                emitOrderUpdate(orderId, { status: 'REJECTED' });
                 return new ServiceResponse(ResponseStatus.Success, "Order has been rejected.", null, StatusCodes.OK);
 
             case 'CONFIRM_PAYMENT':
-                // ✨ (ปรับปรุง Logic) Action นี้ใช้สำหรับยืนยัน "สลิป"
                 if (order.status !== 'AWAITING_CONFIRMATION') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot confirm payment for an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
                 if (!order.paymentSlip) {
                     return new ServiceResponse(ResponseStatus.Failed, "No payment slip has been uploaded for this order.", null, StatusCodes.BAD_REQUEST);
                 }
+                const cookingNow = new Date();
                 await orderRepository.updateOrder(orderId, {
                     status: 'COOKING',
-                    paidAt: new Date(),
-                    paymentQrCode: null, // ล้าง QR Code และวันหมดอายุออกไป
+                    paidAt: cookingNow,
+                    startCookingAt: cookingNow,
+                    paymentQrCode: null,
                     paymentExpiresAt: null,
-                });
+                } as any);
+                await recalcEstimatedReadyAt(store.id);
+                const updatedAfterPayment = await orderRepository.findOrderById(orderId);
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: cookingNow, estimatedReadyAt: updatedAfterPayment?.estimatedReadyAt });
+                emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: cookingNow, estimatedReadyAt: updatedAfterPayment?.estimatedReadyAt });
                 return new ServiceResponse(ResponseStatus.Success, "Payment confirmed. Order is now cooking.", null, StatusCodes.OK);
 
             case 'PREPARE_COMPLETE':
-                // Logic เหมือนเดิม
                 if (order.status !== 'COOKING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot complete an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
                 await orderRepository.updateOrder(orderId, { status: 'READY_FOR_PICKUP' });
+                // order นี้ออกจากคิวแล้ว คำนวณเวลาใหม่สำหรับออเดอร์ที่เหลือ
+                await recalcEstimatedReadyAt(store.id);
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'READY_FOR_PICKUP' });
+                emitOrderUpdate(orderId, { status: 'READY_FOR_PICKUP' });
                 return new ServiceResponse(ResponseStatus.Success, "Order is ready for pickup.", null, StatusCodes.OK);
 
             case 'CUSTOMER_PICKED_UP':
@@ -253,6 +302,10 @@ export const orderService = {
                     updateData.paidAt = new Date();
                 }
                 await orderRepository.updateOrder(orderId, updateData);
+                // order สำเร็จแล้ว คำนวณเวลาใหม่สำหรับออเดอร์ที่เหลือ
+                await recalcEstimatedReadyAt(store.id);
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COMPLETED' });
+                emitOrderUpdate(orderId, { status: 'COMPLETED' });
                 return new ServiceResponse(ResponseStatus.Success, "Order has been completed.", null, StatusCodes.OK);
 
             case 'REPORT_ISSUE':
@@ -395,6 +448,7 @@ export const orderService = {
 
             // 🔹 พยายามย้ายตำแหน่ง order
             await orderRepository.moveOrderPosition(store.id, orderId, newPosition);
+            await recalcEstimatedReadyAt(store.id);
 
             return new ServiceResponse(
                 ResponseStatus.Success,
