@@ -93,11 +93,17 @@ export const updateMyStore = async (payload: UpdateStorePayload) => {
     return response.responseObject;
 };
 
-// (ใหม่) ฟังก์ชันสำหรับ Seller เปิด/ปิดร้าน
-export const toggleMyStoreStatus = async (isOpen: boolean) => {
+type ToggleStoreStatusPayload = {
+    isOpen: boolean;
+    closeReason?: string | null;
+    reopenAt?: string | null;
+};
+
+// ฟังก์ชันสำหรับ Seller เปิด/ปิดร้าน
+export const toggleMyStoreStatus = async (payload: ToggleStoreStatusPayload) => {
     const { data: response } = await mainApi.patch<APIResponseType<Store>>(
         `/v1/stores/my-store/status`,
-        { isOpen }
+        payload
     );
     return response.responseObject;
 };

@@ -10,6 +10,7 @@ import {
     OrderIdParamSchema,
     ReorderQueueSchema,
     MoveOrderSchema,
+    AdjustOrderTimeSchema,
 } from "./orderModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { authorizeRoles } from "@common/middleware/authorizeRoles";
@@ -155,6 +156,20 @@ export const sellerOrderRouter = (() => {
     //    เรียงจากยาวและเฉพาะเจาะจงที่สุด ไปหาสั้นและทั่วไปที่สุด
     // =====================================================================
 
+    // PATCH /:orderId/adjust-time (ปรับเวลาคาดว่าจะเสร็จ)
+    router.patch(
+        "/:orderId/adjust-time",
+        validateRequest(AdjustOrderTimeSchema),
+        async (req: Request, res: Response) => {
+            if (!req.token) { res.sendStatus(StatusCodes.UNAUTHORIZED); return; }
+            const { orderId } = req.params;
+            const { estimatedMinutes } = req.body;
+            const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
+            const serviceResponse = await orderService.adjustOrderTime(orderId, estimatedMinutes, userForService);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
     // PATCH /:orderId/move (ยาวและเฉพาะเจาะจงกว่า)
     router.patch(
         "/:orderId/move",
@@ -195,9 +210,9 @@ export const sellerOrderRouter = (() => {
         async (req: Request, res: Response) => {
             if (!req.token) { res.sendStatus(StatusCodes.UNAUTHORIZED); return; }
             const { orderId } = req.params;
-            const { action, issueReason } = req.body;
+            const { action, issueReason, cancelReason } = req.body;
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
-            const serviceResponse = await orderService.reviewOrder(orderId, action, userForService, issueReason);
+            const serviceResponse = await orderService.reviewOrder(orderId, action, userForService, issueReason, cancelReason);
             handleServiceResponse(serviceResponse, res);
         }
     );

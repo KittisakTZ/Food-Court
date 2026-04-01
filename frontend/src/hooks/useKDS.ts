@@ -17,6 +17,7 @@ export interface KdsOrder {
     totalAmount: number;
     createdAt: string;
     startCookingAt: string | null;
+    estimatedReadyAt: string | null;
     orderItems: KdsOrderItem[];
 }
 
@@ -43,6 +44,7 @@ export const useKDS = (storeId: string | undefined) => {
                     totalAmount: o.totalAmount,
                     createdAt: o.createdAt,
                     startCookingAt: (o as any).startCookingAt ?? null,
+                    estimatedReadyAt: (o as any).estimatedReadyAt ?? null,
                     orderItems: o.orderItems.map((item) => ({
                         menuId: item.menuId,
                         quantity: item.quantity,
@@ -85,18 +87,19 @@ export const useKDS = (storeId: string | undefined) => {
         // สถานะ order เปลี่ยน
         socketRef.current.on(
             "kds:order_update",
-            (update: { id: string; status: string; startCookingAt?: string }) => {
+            (update: { id: string; status?: string; startCookingAt?: string; estimatedReadyAt?: string }) => {
                 setOrders((prev) => {
                     // ถ้า COMPLETED / REJECTED / CANCELLED ให้เอาออกจาก KDS
-                    if (["COMPLETED", "REJECTED", "CANCELLED"].includes(update.status)) {
+                    if (update.status && ["COMPLETED", "REJECTED", "CANCELLED"].includes(update.status)) {
                         return prev.filter((o) => o.id !== update.id);
                     }
                     return prev.map((o) =>
                         o.id === update.id
                             ? {
                                   ...o,
-                                  status: update.status,
-                                  startCookingAt: update.startCookingAt ?? o.startCookingAt,
+                                  ...(update.status && { status: update.status }),
+                                  ...(update.startCookingAt && { startCookingAt: update.startCookingAt }),
+                                  ...(update.estimatedReadyAt !== undefined && { estimatedReadyAt: update.estimatedReadyAt }),
                               }
                             : o
                     );

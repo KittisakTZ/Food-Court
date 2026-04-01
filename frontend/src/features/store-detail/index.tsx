@@ -5,7 +5,7 @@ import { useMenus } from "@/hooks/useMenus";
 import { useMenuCategories } from "@/hooks/useMenuCategories";
 import { useState } from "react";
 import { useAddItemToCart } from "@/hooks/useCart";
-import { FiStar, FiClock, FiMapPin, FiShoppingCart, FiChevronLeft, FiChevronRight, FiInfo } from "react-icons/fi";
+import { FiStar, FiClock, FiMapPin, FiShoppingCart, FiChevronLeft, FiChevronRight, FiInfo, FiAlertCircle } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { HiSparkles } from "react-icons/hi";
 import { BiDish } from "react-icons/bi";
@@ -192,6 +192,25 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               </div>
             </div>
           </div>
+
+          {/* Banner ร้านปิด */}
+          {!store.isOpen && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-start gap-3">
+              <FiAlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-red-700">ร้านนี้ปิดให้บริการอยู่</p>
+                {store.closeReason && (
+                  <p className="text-red-600 text-sm mt-0.5">{store.closeReason}</p>
+                )}
+                {store.reopenAt && (
+                  <p className="text-red-500 text-sm mt-0.5 flex items-center gap-1">
+                    <FiClock className="w-3.5 h-3.5" />
+                    เปิดอีกครั้งเมื่อ {new Date(store.reopenAt).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Store Info Cards - Compact */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

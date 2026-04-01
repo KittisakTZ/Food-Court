@@ -1,6 +1,6 @@
 // @/hooks/useOrders.ts
 
-import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, createOrder, uploadPaymentSlip, getOrderById } from "@/services/order.service";
+import { getMyOrders, getMyStoreOrders, updateOrderStatus, moveOrderPosition, createOrder, uploadPaymentSlip, getOrderById, adjustOrderTime } from "@/services/order.service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Order } from "@/types/response/order.response"; // **1. Import 'Order' Type ของเรา**
 import { toastService } from '@/services/toast.service';
@@ -122,6 +122,22 @@ export const useCreateOrder = () => {
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             toastService.error(`ไม่สามารถสร้างคำสั่งซื้อได้: ${errorMessage}`);
+        }
+    });
+};
+
+// Hook สำหรับปรับเวลาคาดว่าจะเสร็จ
+export const useAdjustOrderTime = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: adjustOrderTime,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
+            toastService.success('ปรับเวลาเสร็จเรียบร้อยแล้ว');
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || error.message;
+            toastService.error(`ไม่สามารถปรับเวลาได้: ${errorMessage}`);
         }
     });
 };

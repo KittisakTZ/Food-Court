@@ -262,3 +262,11 @@ ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "firstName" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastName" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "gender" "Gender";
+
+-- =================================================================
+--  Store Temporary Close System
+-- =================================================================
+
+-- Add close reason and reopen time to Store table
+ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "closeReason" TEXT;
+ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "reopenAt" TIMESTAMP(3);

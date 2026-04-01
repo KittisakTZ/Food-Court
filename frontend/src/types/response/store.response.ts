@@ -10,6 +10,8 @@ export interface Store {
     promptPayId: string | null;
     isApproved: boolean;
     isOpen: boolean;
+    closeReason: string | null;
+    reopenAt: string | null;
     avgRating: number;
     reviewCount: number;
     createdAt: string;

@@ -49,8 +49,21 @@ export const SellerUpdateOrderStatusSchema = z.object({
             "CUSTOMER_PICKED_UP", // ลูกค้ารับของ (และอาจจะจ่ายเงินสด)
             "REPORT_ISSUE",       // แจ้งปัญหาออเดอร์
             "CLEAR_ISSUE",        // ล้างปัญหาออเดอร์
+            "CANCEL_BY_STORE",    // ร้านค้ายกเลิกออเดอร์กลางทาง
+            "FORCE_COOKING",      // ข้ามขั้นตอนการชำระเงิน → เข้าสู่การทำอาหารทันที
         ]),
         issueReason: z.string().optional(), // เหตุผลสำหรับ REPORT_ISSUE
+        cancelReason: z.string().optional(), // เหตุผลสำหรับ CANCEL_BY_STORE
+    }),
+});
+
+// Schema สำหรับการปรับเวลาคาดว่าจะเสร็จ
+export const AdjustOrderTimeSchema = z.object({
+    params: z.object({
+        orderId: z.string().cuid("Invalid order ID"),
+    }),
+    body: z.object({
+        estimatedMinutes: z.number().int().min(1, "Estimated minutes must be at least 1").max(180, "Estimated minutes cannot exceed 180"),
     }),
 });
 

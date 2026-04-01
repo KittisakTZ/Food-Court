@@ -71,16 +71,26 @@ export const getMyStoreOrders = async (params: GetStoreOrdersParams) => {
 
 type UpdateOrderStatusParams = {
     orderId: string;
-    action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE";
+    action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE" | "CANCEL_BY_STORE" | "FORCE_COOKING";
     issueReason?: string;
+    cancelReason?: string;
 }
 
-export const updateOrderStatus = async ({ orderId, action, issueReason }: UpdateOrderStatusParams) => {
+export const updateOrderStatus = async ({ orderId, action, issueReason, cancelReason }: UpdateOrderStatusParams) => {
     const { data: response } = await mainApi.patch<APIResponseType<Order>>(
         `/v1/stores/my-store/orders/${orderId}`,
-        { action, issueReason }
+        { action, issueReason, cancelReason }
     );
     return response.responseObject;
+};
+
+// ปรับเวลาคาดว่าจะเสร็จ
+export const adjustOrderTime = async ({ orderId, estimatedMinutes }: { orderId: string; estimatedMinutes: number }) => {
+    const { data: response } = await mainApi.patch<APIResponseType<null>>(
+        `/v1/stores/my-store/orders/${orderId}/adjust-time`,
+        { estimatedMinutes }
+    );
+    return response;
 };
 
 // (ใหม่) Type สำหรับ Parameter การย้ายตำแหน่ง

@@ -114,9 +114,9 @@ export const storeRouter = (() => {
                 res.status(StatusCodes.NOT_FOUND).json({ message: "You do not own a store yet." });
                 return; // ✅ FIX: ใช้ return; เพื่อออกจากฟังก์ชัน
             }
-            const { isOpen } = req.body;
+            const { isOpen, closeReason, reopenAt } = req.body;
             const userForService = { id: req.token.payload.uuid, role: req.token.payload.role };
-            const serviceResponse = await storeService.toggleStoreStatus(userStore.id, isOpen, userForService);
+            const serviceResponse = await storeService.toggleStoreStatus(userStore.id, isOpen, userForService, closeReason, reopenAt);
             handleServiceResponse(serviceResponse, res);
         }
     );

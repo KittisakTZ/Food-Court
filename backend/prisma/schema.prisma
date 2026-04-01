@@ -68,9 +68,11 @@ model Store {
   location    String?
   image       String?
   promptPayId String?
-  isApproved  Boolean  @default(false)
-  isOpen      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  isApproved   Boolean   @default(false)
+  isOpen       Boolean   @default(false)
+  closeReason  String?
+  reopenAt     DateTime?
+  createdAt    DateTime  @default(now())
   updatedAt   DateTime @updatedAt
   ownerId     String   @unique
   avgRating   Float    @default(0) // <-- เพิ่ม field นี้

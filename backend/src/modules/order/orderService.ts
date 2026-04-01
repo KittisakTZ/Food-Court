@@ -191,7 +191,7 @@ export const orderService = {
     },
 
     // 2. Seller จัดการ Order (Approve, Reject, Confirm Payment, etc.)
-    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE", user: UserPayload, issueReason?: string) => {
+    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE" | "CANCEL_BY_STORE" | "FORCE_COOKING", user: UserPayload, issueReason?: string, cancelReason?: string) => {
         const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
         if (!store) {
             return new ServiceResponse(ResponseStatus.Failed, "You do not own a store.", null, StatusCodes.FORBIDDEN);
@@ -324,6 +324,44 @@ export const orderService = {
                     issueReason: null,
                 } as any);
                 return new ServiceResponse(ResponseStatus.Success, "Order issue cleared.", null, StatusCodes.OK);
+
+            case 'CANCEL_BY_STORE': {
+                const terminalStatuses: OrderStatus[] = ['CANCELLED', 'COMPLETED', 'REJECTED'];
+                if (terminalStatuses.includes(order.status)) {
+                    return new ServiceResponse(ResponseStatus.Failed, `Cannot cancel an order with status '${order.status}'.`, null, StatusCodes.BAD_REQUEST);
+                }
+                if (!cancelReason || cancelReason.trim() === '') {
+                    return new ServiceResponse(ResponseStatus.Failed, "Cancel reason is required.", null, StatusCodes.BAD_REQUEST);
+                }
+                await orderRepository.updateOrder(orderId, {
+                    status: 'CANCELLED',
+                    issueReason: cancelReason.trim(),
+                } as any);
+                await recalcEstimatedReadyAt(store.id);
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'CANCELLED' });
+                emitOrderUpdate(orderId, { status: 'CANCELLED', cancelReason: cancelReason.trim() });
+                return new ServiceResponse(ResponseStatus.Success, "Order has been cancelled by the store.", null, StatusCodes.OK);
+            }
+
+            case 'FORCE_COOKING': {
+                const allowedStatuses: OrderStatus[] = ['AWAITING_PAYMENT', 'AWAITING_CONFIRMATION'];
+                if (!allowedStatuses.includes(order.status)) {
+                    return new ServiceResponse(ResponseStatus.Failed, `Can only force to cooking from AWAITING_PAYMENT or AWAITING_CONFIRMATION. Current status: ${order.status}`, null, StatusCodes.BAD_REQUEST);
+                }
+                const forceCookingAt = new Date();
+                await orderRepository.updateOrder(orderId, {
+                    status: 'COOKING',
+                    startCookingAt: forceCookingAt,
+                    paidAt: forceCookingAt, // ถือว่าชำระแล้ว
+                    paymentQrCode: null,
+                    paymentExpiresAt: null,
+                } as any);
+                await recalcEstimatedReadyAt(store.id);
+                const updatedForceCooking = await orderRepository.findOrderById(orderId);
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: forceCookingAt, estimatedReadyAt: updatedForceCooking?.estimatedReadyAt });
+                emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: forceCookingAt, estimatedReadyAt: updatedForceCooking?.estimatedReadyAt });
+                return new ServiceResponse(ResponseStatus.Success, "Order has been moved to cooking.", null, StatusCodes.OK);
+            }
 
             default:
                 return new ServiceResponse(ResponseStatus.Failed, "Invalid action.", null, StatusCodes.BAD_REQUEST);
@@ -465,6 +503,31 @@ export const orderService = {
                 null,
                 StatusCodes.INTERNAL_SERVER_ERROR
             );
+        }
+    },
+
+    // (ใหม่) Service สำหรับ Seller ปรับเวลาคาดว่าจะเสร็จ
+    adjustOrderTime: async (orderId: string, estimatedMinutes: number, user: { id: string }): Promise<ServiceResponse<null>> => {
+        try {
+            const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
+            if (!store) {
+                return new ServiceResponse(ResponseStatus.Failed, "You do not own a store.", null, StatusCodes.FORBIDDEN);
+            }
+            const order = await orderRepository.findOrderById(orderId);
+            if (!order || order.storeId !== store.id) {
+                return new ServiceResponse(ResponseStatus.Failed, "Order not found or does not belong to your store.", null, StatusCodes.NOT_FOUND);
+            }
+            if (order.status !== 'COOKING') {
+                return new ServiceResponse(ResponseStatus.Failed, "Can only adjust time for orders that are currently cooking.", null, StatusCodes.BAD_REQUEST);
+            }
+            const newEstimatedReadyAt = new Date(Date.now() + estimatedMinutes * 60 * 1000);
+            await orderRepository.updateOrder(orderId, { estimatedReadyAt: newEstimatedReadyAt });
+            emitKdsUpdate(store.id, "kds:order_update", { id: orderId, estimatedReadyAt: newEstimatedReadyAt });
+            emitOrderUpdate(orderId, { estimatedReadyAt: newEstimatedReadyAt });
+            return new ServiceResponse(ResponseStatus.Success, "Estimated time updated successfully.", null, StatusCodes.OK);
+        } catch (error) {
+            const errorMessage = "Error adjusting time: " + (error as Error).message;
+            return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     },
 

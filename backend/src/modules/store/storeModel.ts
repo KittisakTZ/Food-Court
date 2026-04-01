@@ -34,9 +34,8 @@ export const UpdateStoreSchema = z.object({
         name: z.string().min(1).max(100).optional(),
         description: z.string().optional().nullable(),
         location: z.string().optional().nullable(),
-        promptPayId: PromptPaySchema, // ✨ (เพิ่ม)
+        promptPayId: PromptPaySchema,
         image: z.string().optional().nullable(),
-        isOpen: z.boolean().optional(),
     }),
 });
 
@@ -47,9 +46,11 @@ export const StoreIdParamSchema = z.object({
     }),
 });
 
-// (ใหม่) Schema สำหรับการเปลี่ยนสถานะ เปิด/ปิด ร้าน
+// Schema สำหรับการเปลี่ยนสถานะ เปิด/ปิด ร้าน
 export const ToggleStoreStatusSchema = z.object({
     body: z.object({
         isOpen: z.boolean({ required_error: "isOpen status is required" }),
+        closeReason: z.string().max(200).optional().nullable(),
+        reopenAt: z.string().datetime({ offset: true }).optional().nullable(),
     }),
 });

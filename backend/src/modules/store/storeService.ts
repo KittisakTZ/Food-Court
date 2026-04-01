@@ -135,7 +135,7 @@ export const storeService = {
         return new ServiceResponse(ResponseStatus.Success, "Your store information retrieved successfully.", store, StatusCodes.OK);
     },
 
-    toggleStoreStatus: async (storeId: string, isOpen: boolean, user: { id: string, role: Role }) => {
+    toggleStoreStatus: async (storeId: string, isOpen: boolean, user: { id: string, role: Role }, closeReason?: string | null, reopenAt?: string | null) => {
         const store = await storeRepository.findById(storeId);
 
         if (!store) {
@@ -146,10 +146,19 @@ export const storeService = {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to change this store's status.", null, StatusCodes.FORBIDDEN);
         }
 
-        await storeRepository.update(storeId, { isOpen: isOpen });
-        const message = isOpen ? "Store is now open." : "Store is now closed.";
-
-        return new ServiceResponse(ResponseStatus.Success, message, null, StatusCodes.OK);
+        if (isOpen) {
+            // เปิดร้าน: ล้าง closeReason และ reopenAt
+            await storeRepository.update(storeId, { isOpen: true, closeReason: null, reopenAt: null } as any);
+            return new ServiceResponse(ResponseStatus.Success, "Store is now open.", null, StatusCodes.OK);
+        } else {
+            // ปิดร้าน: บันทึก closeReason และ reopenAt (ถ้ามี)
+            await storeRepository.update(storeId, {
+                isOpen: false,
+                closeReason: closeReason?.trim() || null,
+                reopenAt: reopenAt ? new Date(reopenAt) : null,
+            } as any);
+            return new ServiceResponse(ResponseStatus.Success, "Store is now closed.", null, StatusCodes.OK);
+        }
     },
 
     findAllAdminPaginated: async (
