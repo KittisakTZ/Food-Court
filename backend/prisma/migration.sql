@@ -249,3 +249,16 @@ ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "hasIssue" BOOLEAN NOT NULL DEFAULT
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "issueReason" TEXT;
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "startCookingAt" TIMESTAMP(3);
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "estimatedReadyAt" TIMESTAMP(3);
+
+-- =================================================================
+--  Edit Profile System
+-- =================================================================
+
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'NOT_SPECIFIED');
+
+-- Add profile fields to User table
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "firstName" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastName" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "gender" "Gender";

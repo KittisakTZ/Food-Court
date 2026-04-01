@@ -7,3 +7,4 @@ export const Get_ALL_ROLE = "/v1/role/get";
 export const REGISTER = "/v1/auth/register";
 
 export const ME = "/v1/auth/me";
+export const UPDATE_PROFILE = "/v1/auth/me";

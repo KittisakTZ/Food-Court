@@ -2,7 +2,7 @@
 import express, { Request, Response } from "express";
 import { handleServiceResponse, validateRequest } from "@common/utils/httpHandlers";
 import { authService } from "@modules/auth/authService";
-import { LoginSchema, RegisterSchema } from "@modules/auth/authModel";
+import { LoginSchema, RegisterSchema, UpdateProfileSchema } from "@modules/auth/authModel";
 import authenticateToken from "@common/middleware/authenticateToken";
 import { StatusCodes } from "http-status-codes";
 
@@ -31,18 +31,33 @@ export const authRouter = (() => {
         handleServiceResponse(serviceResponse, res);
     });
 
-    // (ใหม่) GET /v1/auth/me - ดึงข้อมูลโปรไฟล์ของฉัน
+    // GET /v1/auth/me - ดึงข้อมูลโปรไฟล์ของฉัน
     router.get(
         "/me",
-        authenticateToken, // ใช้ middleware เพื่อตรวจสอบ token
+        authenticateToken,
         async (req: Request, res: Response) => {
             if (!req.token) {
-                // ถูก: ส่ง Response แล้ว return; (void) เพื่อหยุดทำงาน
                 res.sendStatus(StatusCodes.UNAUTHORIZED);
                 return;
             }
             const userId = req.token.payload.uuid;
             const serviceResponse = await authService.me(userId);
+            handleServiceResponse(serviceResponse, res);
+        }
+    );
+
+    // (ใหม่) PUT /v1/auth/me - อัปเดตโปรไฟล์ของฉัน
+    router.put(
+        "/me",
+        authenticateToken,
+        validateRequest(UpdateProfileSchema),
+        async (req: Request, res: Response) => {
+            if (!req.token) {
+                res.sendStatus(StatusCodes.UNAUTHORIZED);
+                return;
+            }
+            const userId = req.token.payload.uuid;
+            const serviceResponse = await authService.updateProfile(userId, req.body);
             handleServiceResponse(serviceResponse, res);
         }
     );

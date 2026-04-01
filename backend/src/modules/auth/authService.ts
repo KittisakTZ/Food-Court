@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseStatus, ServiceResponse } from '@common/models/serviceResponse';
 import { authRepository } from '@modules/auth/authRepository';
-import { UserPayload } from '@modules/auth/authModel';
+import { UserPayload, UpdateProfilePayload } from '@modules/auth/authModel';
 import bcrypt from 'bcrypt';
 import { jwtGenerator } from '@common/utils/jwtGenerator';
 
@@ -144,7 +144,6 @@ export const authService = {
     // (ใหม่) Service สำหรับดึงข้อมูลผู้ใช้ที่ Login อยู่
     me: async (userId: string) => {
         try {
-            // เรามี Repository ที่ดึงข้อมูล user จาก ID อยู่แล้ว
             const user = await authRepository.findById(userId);
             if (!user) {
                 return new ServiceResponse(ResponseStatus.Failed, "User not found.", null, StatusCodes.NOT_FOUND);
@@ -152,6 +151,35 @@ export const authService = {
             return new ServiceResponse(ResponseStatus.Success, "User profile retrieved successfully.", user, StatusCodes.OK);
         } catch (ex) {
             const errorMessage = "Error retrieving user profile: " + (ex as Error).message;
+            return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+    },
+
+    // (ใหม่) Service สำหรับ Update Profile
+    updateProfile: async (userId: string, payload: UpdateProfilePayload) => {
+        try {
+            // ตรวจสอบว่า email ซ้ำกับคนอื่นหรือไม่
+            if (payload.email) {
+                const existingUser = await authRepository.findByEmail(payload.email);
+                if (existingUser && existingUser.id !== userId) {
+                    return new ServiceResponse(
+                        ResponseStatus.Failed,
+                        "อีเมลนี้ถูกใช้งานแล้ว",
+                        null,
+                        StatusCodes.CONFLICT
+                    );
+                }
+            }
+
+            const updatedUser = await authRepository.updateProfile(userId, payload);
+            return new ServiceResponse(
+                ResponseStatus.Success,
+                "อัปเดตโปรไฟล์สำเร็จ",
+                updatedUser,
+                StatusCodes.OK
+            );
+        } catch (ex) {
+            const errorMessage = "Error updating profile: " + (ex as Error).message;
             return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     },

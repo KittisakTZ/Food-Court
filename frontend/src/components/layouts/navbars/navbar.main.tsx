@@ -7,6 +7,7 @@ import { MdRestaurant, MdShoppingCart } from "react-icons/md";
 import { FiBell, FiTrendingUp } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { IoIosLogOut } from "react-icons/io";
+import { FiEdit2 } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { getLogout } from "@/services/auth.service";
 import { toastService } from "@/services/toast.service";
@@ -152,6 +153,18 @@ const NavbarMain = () => {
                     <p className="text-xs text-gray-500">{user?.email || "ไม่มีอีเมล"}</p>
                   </div>
                   <div className="border-t border-gray-200 my-2"></div>
+
+                  {/* Edit Profile Button */}
+                  <Link
+                    to="/edit-profile"
+                    onClick={() => setShowDropdown(false)}
+                    className="flex items-center gap-3 w-full px-4 py-2 hover:bg-orange-50 transition-colors text-left"
+                  >
+                    <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <FiEdit2 className="text-orange-600 w-4 h-4" />
+                    </div>
+                    <span className="text-sm text-gray-700">แก้ไขโปรไฟล์</span>
+                  </Link>
 
                   {/* Logout Button */}
                   <button

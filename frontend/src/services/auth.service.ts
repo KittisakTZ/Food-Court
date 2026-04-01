@@ -1,7 +1,7 @@
 // @/services/auth.service.ts
-import { LOGIN, REGISTER, AUTH_STATUS, LOGOUT, ME } from "@/apis/endpoint.api";
+import { LOGIN, REGISTER, AUTH_STATUS, LOGOUT, ME, UPDATE_PROFILE } from "@/apis/endpoint.api";
 import mainApi from "@/apis/main.api";
-import { PayloadLogin, PayloadRegister } from "@/types/requests/request.auth";
+import { PayloadLogin, PayloadRegister, PayloadUpdateProfile } from "@/types/requests/request.auth";
 import { APIResponseType } from "@/types/response/index";
 import { UserAuthResponse } from "@/types/response/response.auth";
 
@@ -38,8 +38,14 @@ export const getLogout = async () => {
     return response;
 };
 
-// (ใหม่) ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้ที่ Login อยู่
+// ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้ที่ Login อยู่
 export const getMe = async () => {
     const { data: response } = await mainApi.get<APIResponseType<UserAuthResponse>>(ME);
+    return response;
+};
+
+// (ใหม่) ฟังก์ชันสำหรับอัปเดตโปรไฟล์
+export const putUpdateProfile = async (data: PayloadUpdateProfile) => {
+    const { data: response } = await mainApi.put<APIResponseType<UserAuthResponse>>(UPDATE_PROFILE, data);
     return response;
 };

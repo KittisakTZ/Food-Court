@@ -12,3 +12,11 @@ export type PayloadRegister = {
     email?: string;
     role?: 'BUYER' | 'SELLER';
 };
+
+export type PayloadUpdateProfile = {
+    firstName?: string | null;
+    lastName?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    gender?: 'MALE' | 'FEMALE' | 'NOT_SPECIFIED' | null;
+};

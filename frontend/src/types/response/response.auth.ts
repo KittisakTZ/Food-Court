@@ -15,6 +15,10 @@ export type UserAuthResponse = {
     username: string;
     email: string | null;
     role: 'ADMIN' | 'SELLER' | 'BUYER';
+    firstName: string | null;
+    lastName: string | null;
+    phone: string | null;
+    gender: 'MALE' | 'FEMALE' | 'NOT_SPECIFIED' | null;
     createdAt: string;
     updatedAt: string;
 };

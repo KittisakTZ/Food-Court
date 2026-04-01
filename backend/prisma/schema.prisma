@@ -14,6 +14,12 @@ enum Role {
   BUYER
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  NOT_SPECIFIED
+}
+
 enum OrderStatus {
   PENDING // รอ Seller ตรวจสอบ
   REJECTED // Seller ปฏิเสธ
@@ -38,6 +44,10 @@ model User {
   password  String
   email     String?  @unique
   role      Role     @default(BUYER)
+  firstName String?
+  lastName  String?
+  phone     String?
+  gender    Gender?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   store     Store?

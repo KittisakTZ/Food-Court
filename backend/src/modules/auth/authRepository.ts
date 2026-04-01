@@ -1,7 +1,7 @@
 // @modules/auth/authRepository.ts
 import { User, Role } from "@prisma/client";
 import prisma from "@src/db";
-import { UserPayload } from "@modules/auth/authModel";
+import { UserPayload, UpdateProfilePayload } from "@modules/auth/authModel";
 import bcrypt from "bcrypt";
 
 // Fields ที่ต้องการ select เวลา query
@@ -10,8 +10,12 @@ const UserSelect = {
     username: true,
     email: true,
     role: true,
-    createdAt: true, // เพิ่ม field นี้
-    updatedAt: true, // เพิ่ม field นี้
+    firstName: true,
+    lastName: true,
+    phone: true,
+    gender: true,
+    createdAt: true,
+    updatedAt: true,
 };
 
 const UserSelectWithPassword = {
@@ -27,9 +31,30 @@ export const authRepository = {
         });
     },
 
+    findByEmail: async (email: string) => {
+        return prisma.user.findUnique({
+            where: { email },
+            select: { id: true, email: true },
+        });
+    },
+
     findById: async (id: string) => {
         return prisma.user.findUnique({
             where: { id: id },
+            select: UserSelect,
+        });
+    },
+
+    updateProfile: async (id: string, payload: UpdateProfilePayload) => {
+        return prisma.user.update({
+            where: { id },
+            data: {
+                firstName: payload.firstName,
+                lastName: payload.lastName,
+                phone: payload.phone,
+                email: payload.email,
+                gender: payload.gender,
+            },
             select: UserSelect,
         });
     },
