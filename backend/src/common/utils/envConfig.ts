@@ -9,6 +9,7 @@ export const env = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ["development", "test", "production"] }),
   HOST: host(),
   PORT: port(),
+  APP_URL: str({ default: "http://localhost:5080" }),
   CORS_ORIGIN: str(),
   COMMON_RATE_LIMIT_MAX_REQUESTS: num(),
   COMMON_RATE_LIMIT_WINDOW_MS: num(),
@@ -16,8 +17,6 @@ export const env = cleanEnv(process.env, {
   ACCESS_EXPIRATION_MINUTES: num(),
   REFRESH_EXPIRATION_DAYS: num(),
   REDIS_URI: str(),
-
-  // ✨ 2. เพิ่ม 2 บรรทัดนี้เข้าไป
   PAYMENT_QR_CODE_EXPIRATION_MINUTES: num({ default: 15 }),
   PROMPTPAY_API_BASE_URL: url({ default: "https://promptpay.io" }),
 });

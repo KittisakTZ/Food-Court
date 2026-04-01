@@ -7,6 +7,14 @@ import { chatRepository } from "./modules/chat/chatRepository";
 
 const logger = pino({ name: "socket.io" });
 
+const MAX_MESSAGE_LENGTH = 2000;
+
+interface SocketJwtPayload {
+    uuid: string;
+    username: string;
+    role: string;
+}
+
 export let io: SocketIOServer;
 
 // ── KDS Helper ──────────────────────────────────────────────────────────────
@@ -15,7 +23,6 @@ export const emitKdsUpdate = (storeId: string, event: string, data: unknown) => 
 };
 
 // ── Buyer Order Helper ───────────────────────────────────────────────────────
-// แจ้ง buyer ว่าสถานะ order ของตัวเองเปลี่ยนแปลง
 export const emitOrderUpdate = (orderId: string, data: unknown) => {
     if (io) io.to(`order:${orderId}`).emit("order:status_update", data);
 };
@@ -31,10 +38,7 @@ export const initializeSocket = (server: HttpServer) => {
 
     // 1. Authentication Middleware
     io.use((socket: Socket, next) => {
-        // ดึง Cookie จาก connection header แทน (เพราะ Frontend ส่งมาพร้อมกับ withCredentials: true)
         const cookieHeader = socket.request.headers.cookie || "";
-        
-        // แตก string ของ cookie ออกมาหา token (ใช้การจับคู่ที่ทนทานกว่า)
         const cookies: Record<string, string> = {};
         cookieHeader.split(';').forEach(cookie => {
             const [name, ...rest] = cookie.split('=');
@@ -43,70 +47,72 @@ export const initializeSocket = (server: HttpServer) => {
             }
         });
         const token = cookies.token;
-        
+
         if (!token) {
-            return next(new Error("Authentication error: No token provided in cookie"));
+            return next(new Error("Authentication error: No token provided"));
         }
 
         try {
-            const decoded = jwt.verify(token, env.JWT_SECRET) as any;
-            console.info(`[Socket Middleware] Token verified for user: ${decoded.uuid || decoded.id}`);
-            socket.data.user = decoded; // เก็บข้อมูล User (จาก JWT Payload) ไว้ที่ตัว socket
+            const decoded = jwt.verify(token, env.JWT_SECRET) as SocketJwtPayload;
+            socket.data.user = decoded;
             next();
         } catch (err) {
-            console.error(`[Socket Middleware] Auth Error: ${err}`);
+            logger.warn({ err }, "[Socket] Auth failed: invalid token");
             next(new Error("Authentication error: Invalid token"));
         }
     });
 
     // 2. Connection Handling
     io.on("connection", (socket: Socket) => {
-        const userId = socket.data.user.uuid || socket.data.user.id; // ดึงทั้ง uuid หรือ id
-        if (!userId) {
-            console.warn(`[Socket] Connected without userId! Data:`, socket.data.user);
-        }
-        logger.info(`✅ User connected: ${userId} (Socket ID: ${socket.id})`);
+        const user = socket.data.user as SocketJwtPayload;
+        const userId = user?.uuid;
 
-        // กรณีการ Join ห้องแชท
+        if (!userId) {
+            logger.warn("[Socket] Connected without userId — disconnecting");
+            socket.disconnect(true);
+            return;
+        }
+
+        logger.info(`User connected: ${userId} (Socket: ${socket.id})`);
+
         socket.on("join_room", (roomId: string) => {
+            if (typeof roomId !== "string" || !roomId.trim()) return;
             socket.join(roomId);
             logger.info(`User ${userId} joined room ${roomId}`);
         });
 
-        // KDS: Seller เข้าร่วมห้อง KDS ของร้านตัวเอง
         socket.on("join_kds", (storeId: string) => {
+            if (typeof storeId !== "string" || !storeId.trim()) return;
             socket.join(`kds:${storeId}`);
             logger.info(`User ${userId} joined KDS room kds:${storeId}`);
         });
 
-        // Buyer ติดตามสถานะ order ของตัวเอง
         socket.on("join_order", (orderId: string) => {
+            if (typeof orderId !== "string" || !orderId.trim()) return;
             socket.join(`order:${orderId}`);
             logger.info(`User ${userId} joined order room order:${orderId}`);
         });
 
-        // เมื่อมีการส่งข้อความ
-        socket.on("send_message", async (data: { roomId: string, content: string }) => {
-            console.info(`[Socket] Received send_message from ${userId} for room ${data.roomId}`);
-            try {
-                // บันทึกลง Database
-                const savedMessage = await chatRepository.createMessage(
-                    data.roomId,
-                    userId,
-                    data.content
-                );
-                console.info(`[Socket] Message saved to DB: ${savedMessage.id}. Broadcasting...`);
+        socket.on("send_message", async (data: { roomId: string; content: string }) => {
+            if (!data || typeof data.roomId !== "string" || typeof data.content !== "string") return;
 
-                // ส่งไปให้ทุกคนในห้องนั้นๆ (รวมถึงตัวเองเพื่อให้ได้รับการยืนยันว่าบันทึกสำเร็จ)
+            const content = data.content.trim();
+            if (!content || content.length > MAX_MESSAGE_LENGTH) {
+                socket.emit("message_error", { message: "Invalid message content" });
+                return;
+            }
+
+            try {
+                const savedMessage = await chatRepository.createMessage(data.roomId, userId, content);
                 io.to(data.roomId).emit("receive_message", savedMessage);
             } catch (error) {
-                console.error(`[Socket] Error saving message: ${error}`);
-                logger.error(`Error saving message: ${error}`);
+                logger.error({ error }, `Failed to save message from user ${userId}`);
+                socket.emit("message_error", { message: "Failed to send message" });
             }
         });
 
         socket.on("disconnect", () => {
-            logger.info(`❌ User disconnected: ${userId} (Socket ID: ${socket.id})`);
+            logger.info(`User disconnected: ${userId} (Socket: ${socket.id})`);
         });
     });
 

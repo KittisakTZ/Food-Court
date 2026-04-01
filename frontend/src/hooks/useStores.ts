@@ -57,7 +57,6 @@ export const useUpdateMyStore = () => {
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             // **Console Error อาจจะมาจากตรงนี้**
-            console.error("Mutation Error:", error.response?.data || error); 
             toastService.error(`ไม่สามารถอัปเดตร้านค้าได้: ${errorMessage}`);
         }
     });

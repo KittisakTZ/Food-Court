@@ -6,6 +6,7 @@ import { authRepository } from '@modules/auth/authRepository';
 import { UserPayload, UpdateProfilePayload } from '@modules/auth/authModel';
 import bcrypt from 'bcrypt';
 import { jwtGenerator } from '@common/utils/jwtGenerator';
+import { env } from '@common/utils/envConfig';
 
 export const authService = {
     register: async (payload: UserPayload) => {
@@ -69,7 +70,7 @@ export const authService = {
 
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: env.NODE_ENV === 'production',
                 maxAge: (10 * 60 * 60 * 1000) // 10 hours
             });
 
@@ -91,7 +92,7 @@ export const authService = {
         try {
             res.clearCookie('token', {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: env.NODE_ENV === 'production',
                 sameSite: 'strict'
             });
 

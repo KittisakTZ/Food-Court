@@ -32,15 +32,13 @@ const checkExpiredPayments = async () => {
         const orderIds = expiredOrders.map(o => o.id);
         logger.warn(`Found ${orderIds.length} expired orders. Cancelling them... IDs: ${orderIds.join(', ')}`);
 
-        // 2. อัปเดตสถานะ Orders ทั้งหมดที่หมดอายุเป็น CANCELLED
+        // 2. อัปเดตสถานะ Orders ทั้งหมดที่หมดอายุเป็น CANCELLED และล้าง QR code
         const { count } = await prisma.order.updateMany({
-            where: {
-                id: {
-                    in: orderIds,
-                },
-            },
+            where: { id: { in: orderIds } },
             data: {
                 status: OrderStatus.CANCELLED,
+                paymentQrCode: null,
+                paymentExpiresAt: null,
             },
         });
 

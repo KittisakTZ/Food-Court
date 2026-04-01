@@ -1,20 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 import { ServiceResponse, ResponseStatus } from '@common/models/serviceResponse';
 import { StatusCodes } from 'http-status-codes';
+import { pino } from 'pino';
 
-const errorHandler = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return (err: Error, req: Request, res: Response, next: NextFunction) => {
-        console.error('💥 UNHANDLED ERROR: ', err);
+const logger = pino({ name: 'error-handler' });
+
+const errorHandler = (): ErrorRequestHandler => {
+    return (err: Error, req: Request, res: Response, _next: NextFunction) => {
+        logger.error({ err, path: req.path }, 'Unhandled error');
 
         // จัดการ ZodError โดยเฉพาะ
         if (err instanceof ZodError) {
-            return res.status(StatusCodes.BAD_REQUEST).json({
+            res.status(StatusCodes.BAD_REQUEST).json({
                 status: ResponseStatus.Failed,
                 message: 'Invalid input data.',
                 errors: err.flatten().fieldErrors,
             });
+            return;
         }
 
         // จัดการ Error ทั่วไป
@@ -24,8 +27,7 @@ const errorHandler = () => {
             null,
             StatusCodes.INTERNAL_SERVER_ERROR
         );
-        
-        return res.status(serviceResponse.statusCode).json(serviceResponse);
+        res.status(serviceResponse.statusCode).json(serviceResponse);
     };
 };
 

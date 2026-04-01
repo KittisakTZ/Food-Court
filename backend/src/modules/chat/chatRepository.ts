@@ -36,8 +36,24 @@ export const chatRepository = {
     getMessagesByRoomId: async (roomId: string) => {
         return prisma.chatMessage.findMany({
             where: { roomId },
-            orderBy: { createdAt: 'asc' }
+            orderBy: { createdAt: 'asc' },
+            take: 200,
         });
+    },
+
+    // ตรวจสอบว่า user เป็นสมาชิกของห้องแชทนี้หรือไม่
+    isRoomMember: async (roomId: string, userId: string): Promise<boolean> => {
+        const room = await prisma.chatRoom.findFirst({
+            where: {
+                id: roomId,
+                OR: [
+                    { buyerId: userId },
+                    { store: { ownerId: userId } },
+                ],
+            },
+            select: { id: true },
+        });
+        return !!room;
     },
 
     // บันทึกข้อความแชทใหม่ลงฐานข้อมูล

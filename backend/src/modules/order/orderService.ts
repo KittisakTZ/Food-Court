@@ -551,7 +551,7 @@ export const orderService = {
 
             // 3. สร้าง URL ของไฟล์ที่อัปโหลด
             // ตัด trailing slash ออกก่อน เพื่อป้องกัน double slash เช่น "http://host//uploads/..."
-            const baseUrl = (process.env.APP_URL || '').replace(/\/$/, '');
+            const baseUrl = env.APP_URL.replace(/\/$/, '');
             const fileUrl = `${baseUrl}/uploads/${file.filename}`;
 
             // 4. อัปเดต Order

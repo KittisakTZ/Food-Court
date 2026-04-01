@@ -43,9 +43,18 @@ export const chatService = {
         }
     },
 
-    // 3. ดึงประวัติข้อความ
-    getRoomMessages: async (roomId: string) => {
+    // 3. ดึงประวัติข้อความ (ตรวจสอบสิทธิ์ก่อน)
+    getRoomMessages: async (roomId: string, userId: string) => {
         try {
+            const isMember = await chatRepository.isRoomMember(roomId, userId);
+            if (!isMember) {
+                return new ServiceResponse(
+                    ResponseStatus.Failed,
+                    "You do not have access to this chat room.",
+                    null,
+                    StatusCodes.FORBIDDEN
+                );
+            }
             const messages = await chatRepository.getMessagesByRoomId(roomId);
             return new ServiceResponse(
                 ResponseStatus.Success,

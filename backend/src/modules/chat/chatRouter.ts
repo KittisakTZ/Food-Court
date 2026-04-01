@@ -24,11 +24,11 @@ export const chatRouter = (() => {
         handleServiceResponse(serviceResponse, res);
     });
 
-    // 3. GET /v1/chats/:roomId/messages -> โหลดข้อความเก่าๆ 
+    // 3. GET /v1/chats/:roomId/messages -> โหลดข้อความเก่าๆ (ต้องเป็นสมาชิกห้องเท่านั้น)
     router.get("/:roomId/messages", async (req: Request, res: Response) => {
         const roomId = req.params.roomId;
-        // (Optional) อาจจะต้องตรวจสอบสิทธิ์ก่อนด้วยว่า req.user อยู่ในห้องนี้จริงไหม
-        const serviceResponse = await chatService.getRoomMessages(roomId);
+        const userId = req.token!.payload.uuid;
+        const serviceResponse = await chatService.getRoomMessages(roomId, userId);
         handleServiceResponse(serviceResponse, res);
     });
 

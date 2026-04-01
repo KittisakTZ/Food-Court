@@ -4,7 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { ServiceResponse, ResponseStatus } from "@common/models/serviceResponse";
 import { menuRepository } from "./menuRepository";
 import { MenuPayload } from "./menuModel";
-import { menuCategoryRepository } from "@modules/menu-category/menuCategoryRepository"; // Import เข้ามาเพื่อตรวจสอบ
+import { menuCategoryRepository } from "@modules/menu-category/menuCategoryRepository";
+import { env } from "@common/utils/envConfig";
 
 export const menuService = {
     create: async (payload: MenuPayload, storeId: string, file?: Express.Multer.File) => {
@@ -17,7 +18,7 @@ export const menuService = {
         // ถ้ามีการอัปโหลดไฟล์เข้ามา, ให้สร้าง URL ของรูปภาพ
         if (file) {
             // URL จะเป็น http://your-domain/uploads/filename.jpg
-            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
+            payload.image = `${env.APP_URL}/uploads/${file.filename}`;
         }
 
         const newMenu = await menuRepository.create(payload, storeId);
@@ -62,7 +63,7 @@ export const menuService = {
 
         if (file) {
             // (Optional) อาจจะเพิ่ม Logic ลบไฟล์รูปเก่าก่อนที่จะอัปเดต Path ใหม่
-            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
+            payload.image = `${env.APP_URL}/uploads/${file.filename}`;
         }
 
         const updatedMenu = await menuRepository.update(menuId, payload);

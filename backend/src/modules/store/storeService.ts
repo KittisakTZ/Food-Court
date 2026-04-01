@@ -5,6 +5,7 @@ import { ServiceResponse, ResponseStatus } from "@common/models/serviceResponse"
 import { storeRepository } from "./storeRepository";
 import { StorePayload } from "./storeModel";
 import { User, Role } from "@prisma/client";
+import { env } from "@common/utils/envConfig";
 
 export const storeService = {
     // 🔄 CHANGED: เพิ่ม parameter 'file' เข้ามา
@@ -26,7 +27,7 @@ export const storeService = {
         // ✅ ADDED: จัดการไฟล์รูปภาพที่อัปโหลดเข้ามา
         if (file) {
             // สร้าง URL เต็มของรูปภาพ
-            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
+            payload.image = `${env.APP_URL}/uploads/${file.filename}`;
         }
 
         await storeRepository.create(payload, user.id);
@@ -54,7 +55,7 @@ export const storeService = {
         // ✅ ADDED: จัดการไฟล์รูปภาพที่อัปโหลดเข้ามา (สำหรับการอัปเดต)
         if (file) {
             // TODO: อาจจะเพิ่ม logic ลบไฟล์รูปเก่าที่ server หากมี
-            payload.image = `${process.env.APP_URL}/uploads/${file.filename}`;
+            payload.image = `${env.APP_URL}/uploads/${file.filename}`;
         }
 
         const updatedStore = await storeRepository.update(storeId, payload);
