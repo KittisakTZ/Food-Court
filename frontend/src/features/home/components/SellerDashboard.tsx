@@ -10,6 +10,7 @@ import {
 import { DraggableOrderCard } from "./DraggableOrderCard";
 import { useMoveOrderPosition } from "@/hooks/useOrders";
 import { MdRestaurant, MdStorefront } from "react-icons/md";
+import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -482,10 +483,10 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               >
                 <div className="relative flex-shrink-0">
                   <img
-                    src={menu.image || ""}
+                    src={menu.image || NO_FOOD_IMAGE}
                     alt={menu.name}
                     className="w-16 h-16 rounded-xl object-cover bg-gray-100"
-                    onError={(e) => { e.currentTarget.src = ""; }}
+                    onError={onImgError(NO_FOOD_IMAGE)}
                   />
                   <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center border-2 border-white shadow-md">
                     {menu.quantity}

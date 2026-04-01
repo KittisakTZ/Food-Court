@@ -1,50 +1,36 @@
 // @/utils/imageUtils.ts
 
+export const NO_STORE_IMAGE = '/images/no-store.svg';
+export const NO_FOOD_IMAGE = '/images/no-food.svg';
+
 /**
  * แปลง image path จาก backend เป็น full URL
- * @param imagePath - path ของรูปภาพจาก backend (อาจเป็น null, relative path, หรือ full URL)
- * @param fallbackImage - รูปภาพสำรองถ้าไม่มีรูป
- * @returns full URL ของรูปภาพ
  */
 export const getImageUrl = (
     imagePath: string | null | undefined,
-    fallbackImage: string = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'
+    fallbackImage: string = NO_STORE_IMAGE
 ): string => {
-    // ถ้าไม่มีรูป ให้ใช้รูปสำรอง
-    if (!imagePath) {
-        return fallbackImage;
-    }
+    if (!imagePath) return fallbackImage;
 
-    // ถ้าเป็น full URL แล้ว (ขึ้นต้นด้วย http:// หรือ https://) ให้ return ตรงๆ
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
         return imagePath;
     }
 
-    // ถ้าเป็น relative path ให้เพิ่ม base URL
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5080';
-
-    // ลบ leading slash ถ้ามี เพื่อป้องกัน double slash
     const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
-
     return `${API_BASE_URL}/${cleanPath}`;
 };
 
-/**
- * แปลง menu image path เป็น full URL
- */
-export const getMenuImageUrl = (imagePath: string | null | undefined): string => {
-    return getImageUrl(
-        imagePath,
-        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'
-    );
-};
+export const getMenuImageUrl = (imagePath: string | null | undefined): string =>
+    getImageUrl(imagePath, NO_FOOD_IMAGE);
 
-/**
- * แปลง store image path เป็น full URL
- */
-export const getStoreImageUrl = (imagePath: string | null | undefined): string => {
-    return getImageUrl(
-        imagePath,
-        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'
-    );
-};
+export const getStoreImageUrl = (imagePath: string | null | undefined): string =>
+    getImageUrl(imagePath, NO_STORE_IMAGE);
+
+/** ใช้กับ onError ของ <img> เพื่อแสดง placeholder เมื่อโหลดภาพไม่ได้ */
+export const onImgError = (fallback: string) =>
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+        if (e.currentTarget.src !== fallback) {
+            e.currentTarget.src = fallback;
+        }
+    };

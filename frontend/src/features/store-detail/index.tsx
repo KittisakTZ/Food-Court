@@ -12,6 +12,7 @@ import { BiDish } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { useChatStore } from "@/zustand/useChatStore";
+import { NO_STORE_IMAGE, NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 
 interface StoreDetailFeatureProps {
   storeId: string;
@@ -134,12 +135,10 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
           {/* Store Cover Image - Compact */}
           <div className="relative overflow-hidden rounded-2xl shadow-lg mb-4 h-48 md:h-64 group">
             <img
-              src={store.image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200"}
+              src={store.image || NO_STORE_IMAGE}
               alt={store.name}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              onError={(e) => {
-                e.currentTarget.src = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200";
-              }}
+              onError={onImgError(NO_STORE_IMAGE)}
             />
             
             {/* Gradient Overlay */}
@@ -339,12 +338,10 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                       {/* Menu Image - Compact */}
                       <div className="relative overflow-hidden h-32">
                         <img
-                          src={menu.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"}
+                          src={menu.image || NO_FOOD_IMAGE}
                           alt={menu.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
-                          onError={(e) => {
-                            e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
-                          }}
+                          onError={onImgError(NO_FOOD_IMAGE)}
                         />
 
                         {/* Gradient Overlay */}

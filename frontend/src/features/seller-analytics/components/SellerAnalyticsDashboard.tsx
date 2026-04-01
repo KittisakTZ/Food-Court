@@ -22,6 +22,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { th } from "date-fns/locale";
 import { startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, startOfWeek, endOfWeek } from "date-fns";
+import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 
 interface DashboardData {
     stats: {
@@ -571,10 +572,10 @@ export const SellerAnalyticsDashboard = () => {
                                         #{index + 1}
                                     </div>
                                     <img
-                                        src={menu.image || "https://placehold.co/100x100?text=No+Image"}
+                                        src={menu.image || NO_FOOD_IMAGE}
                                         alt={menu.name}
                                         className="w-16 h-16 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
-                                        onError={(e) => { e.currentTarget.src = "https://placehold.co/100x100?text=No+Image"; }}
+                                        onError={onImgError(NO_FOOD_IMAGE)}
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0">

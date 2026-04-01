@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { FiCheck, FiX, FiPackage, FiClock, FiUser, FiAlertTriangle, FiEye } from "react-icons/fi";
 import { MdRestaurant } from "react-icons/md";
 import { ConfirmationDialog } from '@/components/customs/ConfirmationDialog';
+import { NO_FOOD_IMAGE, onImgError } from '@/utils/imageUtils';
 
 // Modal สำหรับรายงานปัญหาออเดอร์
 const IssueReportModal = ({ order, onClose }: { order: Order; onClose: () => void }) => {
@@ -149,7 +150,7 @@ const OrderDetailModal = ({ order, onClose }: { order: Order; onClose: () => voi
                         <div className="space-y-2">
                             {order.orderItems.map((item) => (
                                 <div key={item.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                    <img src={item.menu.image || ''} alt={item.menu.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" onError={(e) => { e.currentTarget.src = '' }} />
+                                    <img src={item.menu.image || NO_FOOD_IMAGE} alt={item.menu.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" onError={onImgError(NO_FOOD_IMAGE)} />
                                     <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-slate-800 text-sm truncate">{item.menu.name}</p>
                                         <p className="text-xs text-slate-500">฿{item.menu.price.toFixed(0)} × {item.quantity}</p>
@@ -507,12 +508,10 @@ export const DraggableOrderCard = ({ order, queueDisplayNumber, isFirst, isLast,
                                     <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
                                         {/* [รูปอาหาร] - Responsive */}
                                         <img
-                                            src={item.menu.image || ''}
+                                            src={item.menu.image || NO_FOOD_IMAGE}
                                             alt={item.menu.name}
                                             className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0 shadow-md ring-2 ring-orange-100"
-                                            onError={(e) => {
-                                                e.currentTarget.src = '';
-                                            }}
+                                            onError={onImgError(NO_FOOD_IMAGE)}
                                         />
 
                                         {/* [ชื่อเมนู + ราคา] */}

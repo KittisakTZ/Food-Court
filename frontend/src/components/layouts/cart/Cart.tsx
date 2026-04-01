@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { ConfirmationDialog } from "@/components/customs/ConfirmationDialog";
 import { useScreenSize } from "@/hooks/use-mobile";
+import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 
 export const Cart = () => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -159,12 +160,10 @@ export const Cart = () => {
                                         <div className="relative flex-shrink-0">
                                             <div className="w-14 h-14 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                                                 <img
-                                                    src={item.menu.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100"}
+                                                    src={item.menu.image || NO_FOOD_IMAGE}
                                                     alt={item.menu.name}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                                    onError={(e) => {
-                                                        e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100";
-                                                    }}
+                                                    onError={onImgError(NO_FOOD_IMAGE)}
                                                 />
                                             </div>
                                             {/* Quantity Badge */}

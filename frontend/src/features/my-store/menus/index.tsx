@@ -8,6 +8,7 @@ import { MenuForm } from "../components/MenuForm";
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiSave, FiX } from "react-icons/fi";
 import { MdRestaurant, MdCategory, MdClose } from "react-icons/md";
 import { ConfirmationDialog } from "@/components/customs/ConfirmationDialog";
+import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 
 const CategoryManager = ({ storeId }: { storeId: string }) => {
   const { data: categories, isLoading } = useMenuCategories(storeId);
@@ -339,9 +340,10 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                   {/* Image */}
                   <div className="relative overflow-hidden rounded-2xl flex-shrink-0 shadow-md">
                     <img
-                      src={menu.image || 'https://via.placeholder.com/100'}
+                      src={menu.image || NO_FOOD_IMAGE}
                       alt={menu.name}
                       className="w-28 h-28 object-cover"
+                      onError={onImgError(NO_FOOD_IMAGE)}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                   </div>

@@ -4,6 +4,7 @@ import { useStores } from "@/hooks/useStores";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiSearch, FiStar, FiClock, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { NO_STORE_IMAGE, onImgError } from "@/utils/imageUtils";
 import { MdStorefront } from "react-icons/md";
 import { IoFastFoodOutline } from "react-icons/io5";
 import { BiTrendingUp } from "react-icons/bi";
@@ -204,12 +205,10 @@ export const BuyerDashboard = () => {
                                         {/* Store Image - Compact */}
                                         <div className="relative overflow-hidden h-32">
                                             <img
-                                                src={store.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'}
+                                                src={store.image || NO_STORE_IMAGE}
                                                 alt={store.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
-                                                onError={(e) => {
-                                                    e.currentTarget.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400';
-                                                }}
+                                                onError={onImgError(NO_STORE_IMAGE)}
                                             />
 
                                             {/* Status Badge - Compact */}

@@ -9,6 +9,7 @@ import { toastService } from "@/services/toast.service";
 import { FiShoppingBag, FiClock, FiCheckCircle, FiChevronLeft, FiCalendar, FiZap, FiDollarSign } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
 import { BiDish, BiTime } from "react-icons/bi";
+import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 
 const CheckoutFeature = () => {
   const cart = useCartStore((state) => state.cart);
@@ -217,12 +218,10 @@ const CheckoutFeature = () => {
                       {/* Menu Image */}
                       <div className="w-20 h-20 rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow flex-shrink-0">
                         <img
-                          src={item.menu.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100"}
+                          src={item.menu.image || NO_FOOD_IMAGE}
                           alt={item.menu.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          onError={(e) => {
-                            e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100";
-                          }}
+                          onError={onImgError(NO_FOOD_IMAGE)}
                         />
                       </div>
 
