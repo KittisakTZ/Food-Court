@@ -7,18 +7,25 @@ import { toastService } from '@/services/toast.service';
 import { dialogService } from '@/services/dialog.service';
 import { useClearCart } from "./useCart";
 import { useLocation } from "react-router-dom";
+import { useAuthStore } from "@/zustand/useAuthStore";
 
 // ===== HOOK สำหรับ BUYER (โค้ดเดิม) =====
 type UseOrdersProps = {
     page?: number;
     pageSize?: number;
+    refetchInterval?: number;
 };
 
-export const useMyOrders = ({ page = 1, pageSize = 10 }: UseOrdersProps = {}) => {
+export const useMyOrders = ({ page = 1, pageSize = 10, refetchInterval }: UseOrdersProps = {}) => {
+    const { user } = useAuthStore();
     return useQuery({
-        queryKey: ['my-orders', { page, pageSize }],
+        // รวม user.id ใน queryKey เพื่อแยก cache ของแต่ละ user
+        // ป้องกัน cache ของ User A หลุดไปแสดงให้ User B เห็น
+        queryKey: ['my-orders', user?.id, { page, pageSize }],
         queryFn: () => getMyOrders({ page, pageSize }),
+        enabled: !!user,
         staleTime: 1000 * 60, // 1 minute
+        refetchInterval,
     });
 };
 
