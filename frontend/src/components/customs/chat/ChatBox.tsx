@@ -3,7 +3,7 @@ import { useSocket, ChatMessage } from '@/hooks/useSocket';
 import { chatApi } from '@/apis/chat.api';
 import { useAuthStore } from '@/zustand/useAuthStore';
 import { useChatStore } from '@/zustand/useChatStore';
-import { useMyOrders } from '@/hooks/useOrders';
+import { useMyOrders, useMyStoreOrders } from '@/hooks/useOrders';
 import { Order } from '@/types/response/order.response';
 import { MessageCircle, X, Send, ChevronLeft } from 'lucide-react';
 import { OrderChatCard, OrderDetailView, STATUS_CFG } from './OrderChatSummary';
@@ -41,6 +41,13 @@ export const ChatBox = () => {
         refetchInterval: isOpen && isBuyer ? 30000 : undefined,
     });
 
+    // ── ดึงออเดอร์ SELLER เพื่อแสดงรายละเอียดออเดอร์ของลูกค้าในแชท ──────
+    const { data: storeOrdersData } = useMyStoreOrders({
+        page: 1, pageSize: 50,
+        enabled: isSeller,
+        refetchInterval: isOpen && isSeller ? 30000 : undefined,
+    });
+
     // ออเดอร์ล่าสุดของร้านที่กำลังแชทอยู่
     // เงื่อนไข: ต้องเป็นออเดอร์ของ user ปัจจุบัน + ตรงร้าน + ผ่าน PENDING แล้ว (store อนุมัติแล้ว)
     const currentStoreOrder = useMemo<Order | null>(() => {
@@ -52,6 +59,18 @@ export const ChatBox = () => {
             o.status !== 'PENDING'       // store อนุมัติแล้ว (ไม่ใช่รอดำเนินการ)
         ) ?? null;
     }, [activeRoom, ordersData, isBuyer]);
+
+    // ออเดอร์ของลูกค้าที่ SELLER กำลังแชทด้วย
+    const sellerBuyerOrder = useMemo<Order | null>(() => {
+        if (!isSeller || !activeRoom || !storeOrdersData?.data?.length) return null;
+        const buyerUsername: string | undefined = activeRoom.buyer?.username;
+        if (!buyerUsername) return null;
+        const active = storeOrdersData.data.find(o =>
+            o.buyer?.username === buyerUsername &&
+            !['COMPLETED', 'CANCELLED', 'REJECTED'].includes(o.status)
+        );
+        return active ?? storeOrdersData.data.find(o => o.buyer?.username === buyerUsername) ?? null;
+    }, [activeRoom, storeOrdersData, isSeller]);
 
     // Map storeId → ออเดอร์ล่าสุด สำหรับ room list indicator เท่านั้น
     const orderByStoreId = useMemo(() => {
@@ -182,17 +201,27 @@ export const ChatBox = () => {
                     </div>
 
                     {/* ── View: Order Detail ─────────────────────────────── */}
-                    {showOrderDetail && currentStoreOrder && (
-                        <OrderDetailView order={currentStoreOrder} />
+                    {showOrderDetail && (isBuyer ? currentStoreOrder : sellerBuyerOrder) && (
+                        <OrderDetailView
+                            order={(isBuyer ? currentStoreOrder : sellerBuyerOrder)!}
+                            isStore={isSeller}
+                        />
                     )}
 
                     {/* ── View: Chat Room ────────────────────────────────── */}
                     {!showOrderDetail && activeRoom && (
                         <>
-                            {/* Order Card — BUYER เท่านั้น */}
+                            {/* Order Card — BUYER */}
                             {isBuyer && currentStoreOrder && (
                                 <OrderChatCard
                                     order={currentStoreOrder}
+                                    onViewDetail={() => setShowOrderDetail(true)}
+                                />
+                            )}
+                            {/* Order Card — SELLER */}
+                            {isSeller && sellerBuyerOrder && (
+                                <OrderChatCard
+                                    order={sellerBuyerOrder}
                                     onViewDetail={() => setShowOrderDetail(true)}
                                 />
                             )}

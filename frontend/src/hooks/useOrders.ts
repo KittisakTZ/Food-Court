@@ -42,17 +42,20 @@ interface StoreOrdersFilter {
     page?: number;
     pageSize?: number;
     status?: OrderStatusString[];
+    enabled?: boolean;
+    refetchInterval?: number;
 }
 
 // **2. แก้ไข Hook ให้รับ Parameter ที่ถูกต้อง**
-export const useMyStoreOrders = (filters: StoreOrdersFilter) => {
+export const useMyStoreOrders = ({ enabled = true, refetchInterval = 1000 * 30, ...filters }: StoreOrdersFilter = {}) => {
     return useQuery({
         // **3. นำ Filter ทั้งหมดมาเป็นส่วนหนึ่งของ Query Key**
         queryKey: [STORE_ORDERS_QUERY_KEY, filters],
         // **4. ส่ง Filter ทั้งหมดต่อไปยัง Service**
         queryFn: () => getMyStoreOrders(filters),
+        enabled,
         staleTime: 1000 * 30, // 30 seconds
-        refetchInterval: 1000 * 30,
+        refetchInterval,
     });
 };
 

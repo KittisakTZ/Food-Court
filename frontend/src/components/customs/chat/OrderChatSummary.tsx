@@ -101,8 +101,8 @@ export const OrderChatCard = ({ order, onViewDetail }: CardProps) => {
         >
             {/* Store image */}
             <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-slate-200 shadow-sm">
-                {order.store.image ? (
-                    <img src={order.store.image} alt={order.store.name} className="w-full h-full object-cover" />
+                {order.store?.image ? (
+                    <img src={order.store.image} alt={order.store?.name} className="w-full h-full object-cover" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
                         <MdRestaurant size={20} className="text-slate-400" />
@@ -147,9 +147,9 @@ export const OrderChatCard = ({ order, onViewDetail }: CardProps) => {
 // ══════════════════════════════════════════════════════════════════════════════
 // OrderDetailView — full detail panel (replaces chat body)
 // ══════════════════════════════════════════════════════════════════════════════
-interface DetailProps { order: Order; }
+interface DetailProps { order: Order; isStore?: boolean; }
 
-export const OrderDetailView = ({ order }: DetailProps) => {
+export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
     const cfg = STATUS_CFG[order.status];
     const isActive = ACTIVE.includes(order.status);
     const isReady = order.status === 'READY_FOR_PICKUP';
@@ -165,8 +165,8 @@ export const OrderDetailView = ({ order }: DetailProps) => {
 
             {/* ── Store Banner ─────────────────────────────────────────── */}
             <div className="relative h-28 bg-gradient-to-br from-slate-300 to-slate-400 flex-shrink-0 overflow-hidden">
-                {order.store.image ? (
-                    <img src={order.store.image} alt={order.store.name} className="w-full h-full object-cover" />
+                {order.store?.image ? (
+                    <img src={order.store.image} alt={order.store?.name} className="w-full h-full object-cover" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
                         <MdRestaurant size={48} className="text-white/40" />
@@ -177,7 +177,7 @@ export const OrderDetailView = ({ order }: DetailProps) => {
                 {/* Store info overlay */}
                 <div className="absolute bottom-0 left-0 right-0 px-4 py-3 flex items-end justify-between">
                     <div>
-                        <p className="text-white font-black text-base drop-shadow leading-tight">{order.store.name}</p>
+                        <p className="text-white font-black text-base drop-shadow leading-tight">{order.store?.name}</p>
                         <div className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${cfg.badgeBg} ${cfg.color}`}>
                             <div className={`w-1.5 h-1.5 rounded-full ${cfg.dot} ${isActive ? 'animate-pulse' : ''}`} />
                             {cfg.text}
@@ -341,7 +341,7 @@ export const OrderDetailView = ({ order }: DetailProps) => {
 
             {/* ── CTA ──────────────────────────────────────────────────── */}
             <div className="px-3 pt-1 pb-4">
-                <Link to={`/my-orders/${order.id}`}>
+                <Link to={isStore ? `/my-store/orders/${order.id}` : `/my-orders/${order.id}`}>
                     <button className="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-bold py-3 rounded-2xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
                         {isBad ? 'สั่งซ้ำ / ดูรายละเอียดทั้งหมด' : 'ดูรายละเอียดทั้งหมด'}
                         <ExternalLink size={15} />
