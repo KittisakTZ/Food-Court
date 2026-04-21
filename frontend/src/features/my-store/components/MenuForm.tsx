@@ -5,12 +5,13 @@ import { useCreateMenu, useUpdateMenu } from "@/hooks/useMenus";
 import { useState, useEffect } from "react";
 import { Menu } from "@/types/response/menu.response";
 import { MdRestaurant, MdCategory, MdCheckCircle, MdClose } from "react-icons/md";
-import { FiFileText, FiImage, FiUploadCloud, FiX } from "react-icons/fi";
+import { FiFileText, FiImage, FiUploadCloud, FiX, FiClock } from "react-icons/fi";
 
 type MenuFormInputs = {
   name: string;
   description: string;
   price: number;
+  cookingTime: number;
   categoryId: string;
   image: FileList;
 };
@@ -38,6 +39,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
       setValue("name", initialData.name);
       setValue("description", initialData.description || "");
       setValue("price", initialData.price);
+      setValue("cookingTime", initialData.cookingTime ?? 5);
       setValue("categoryId", initialData.categoryId || "");
       setPreviewImage(initialData.image || null);
     } else {
@@ -51,6 +53,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
     formData.append("name", data.name);
     formData.append("description", data.description);
     formData.append("price", String(data.price));
+    formData.append("cookingTime", String(data.cookingTime));
     formData.append("categoryId", data.categoryId);
     if (data.image && data.image.length > 0) {
       formData.append("image", data.image[0]);
@@ -150,6 +153,39 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
             <p className="text-red-500 text-sm mt-2 flex items-center gap-1 font-medium">
               <FiX className="w-4 h-4" />
               {errors.price.message}
+            </p>
+          )}
+        </div>
+
+        {/* เวลาทำอาหาร */}
+        <div>
+          <label htmlFor="cookingTime" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+            <FiClock className="w-5 h-5 text-orange-600" />
+            เวลาทำต่อ 1 จาน (นาที) <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold text-sm">นาที</span>
+            <input
+              id="cookingTime"
+              type="number"
+              step="1"
+              min="1"
+              max="120"
+              placeholder="5"
+              {...register("cookingTime", {
+                required: "กรุณากรอกเวลาทำอาหาร",
+                valueAsNumber: true,
+                min: { value: 1, message: "ต้องมากกว่า 0 นาที" },
+                max: { value: 120, message: "ไม่เกิน 120 นาที" },
+              })}
+              className="w-full pl-16 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base font-medium shadow-sm"
+            />
+          </div>
+          <p className="text-xs text-gray-400 mt-1.5">ระบบจะรวมเวลาทุกเมนูในออร์เดอร์เพื่อคำนวณนับถอยหลัง</p>
+          {errors.cookingTime && (
+            <p className="text-red-500 text-sm mt-2 flex items-center gap-1 font-medium">
+              <FiX className="w-4 h-4" />
+              {errors.cookingTime.message}
             </p>
           )}
         </div>

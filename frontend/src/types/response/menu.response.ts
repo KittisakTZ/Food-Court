@@ -6,6 +6,7 @@ export interface Menu {
     name: string;
     description: string | null;
     price: number;
+    cookingTime: number;
     image: string | null;
     isAvailable: boolean;
     categoryId: string | null;

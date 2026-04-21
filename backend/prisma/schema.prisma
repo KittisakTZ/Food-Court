@@ -105,6 +105,7 @@ model Menu {
   name        String
   description String?
   price       Float
+  cookingTime Int           @default(5)
   image       String?
   isAvailable Boolean       @default(true)
   createdAt   DateTime      @default(now())

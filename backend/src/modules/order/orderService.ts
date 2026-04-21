@@ -9,24 +9,35 @@ import { paymentGateway } from "@common/utils/paymentGateway"; // Import QR Code
 import { env } from "@common/utils/envConfig";
 import { emitKdsUpdate, emitOrderUpdate } from "@src/socket";
 
-// เวลาทำอาหารเฉลี่ยต่อ 1 คิว (นาที)
-const COOKING_MINUTES_PER_ORDER = 15;
-
-// คำนวณ estimatedReadyAt สำหรับทุก COOKING orders ในร้าน ตาม position
+// คำนวณ estimatedReadyAt สำหรับทุก COOKING orders ในร้าน ตาม position และ cookingTime ของแต่ละเมนู
 async function recalcEstimatedReadyAt(storeId: string, tx?: any): Promise<void> {
     const db = tx ?? prisma;
     const cookingOrders = await db.order.findMany({
         where: { storeId, status: { in: ['COOKING', 'AWAITING_PAYMENT', 'AWAITING_CONFIRMATION'] } },
         orderBy: { position: 'asc' },
-        select: { id: true },
+        select: {
+            id: true,
+            orderItems: {
+                select: {
+                    quantity: true,
+                    menu: { select: { cookingTime: true } },
+                },
+            },
+        },
     });
     const now = new Date();
+    let cumulativeMs = 0;
+    // คำนวณเวลาสะสมตามลำดับคิว แล้วค่อย update พร้อมกัน
+    const updates = cookingOrders.map((o: any) => {
+        const orderMinutes = o.orderItems.reduce((sum: number, item: any) => {
+            return sum + item.quantity * (item.menu?.cookingTime ?? 5);
+        }, 0);
+        cumulativeMs += Math.max(orderMinutes, 1) * 60 * 1000;
+        return { id: o.id, estimatedReadyAt: new Date(now.getTime() + cumulativeMs) };
+    });
     await Promise.all(
-        cookingOrders.map((o: { id: string }, idx: number) =>
-            db.order.update({
-                where: { id: o.id },
-                data: { estimatedReadyAt: new Date(now.getTime() + (idx + 1) * COOKING_MINUTES_PER_ORDER * 60 * 1000) },
-            })
+        updates.map(({ id, estimatedReadyAt }: { id: string; estimatedReadyAt: Date }) =>
+            db.order.update({ where: { id }, data: { estimatedReadyAt } })
         )
     );
 }
@@ -227,8 +238,12 @@ export const orderService = {
                         status: 'AWAITING_PAYMENT',
                         paymentQrCode: qrCode,
                         paymentExpiresAt: paymentExpiresAt,
-                        confirmedAt: new Date(), // บันทึกเวลาที่ร้านกดยืนยัน
+                        confirmedAt: new Date(),
                     });
+                    await recalcEstimatedReadyAt(store.id);
+                    const updatedAfterApprove = await orderRepository.findOrderById(orderId);
+                    emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'AWAITING_PAYMENT', estimatedReadyAt: updatedAfterApprove?.estimatedReadyAt });
+                    emitOrderUpdate(orderId, { status: 'AWAITING_PAYMENT', estimatedReadyAt: updatedAfterApprove?.estimatedReadyAt });
                     return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting payment.", null, StatusCodes.OK);
 
                 } else if (order.paymentMethod === 'CASH_ON_PICKUP') {

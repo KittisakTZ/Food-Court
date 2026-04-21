@@ -63,6 +63,7 @@ CREATE TABLE "Menu" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "price" DOUBLE PRECISION NOT NULL,
+    "cookingTime" INTEGER NOT NULL DEFAULT 5,
     "image" TEXT,
     "isAvailable" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
