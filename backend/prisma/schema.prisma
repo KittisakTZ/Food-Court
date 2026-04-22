@@ -38,6 +38,14 @@ enum PaymentMethod {
   CASH_ON_PICKUP // จ่ายเงินสดหน้าร้าน
 }
 
+enum MenuType {
+  MAIN
+  DRINK
+  DESSERT
+  SNACK
+  OTHER
+}
+
 model User {
   id        String   @id @default(cuid())
   username  String   @unique
@@ -89,15 +97,16 @@ model Store {
 }
 
 model MenuCategory {
-  id   String @id @default(cuid())
-  name String
+  id       String   @id @default(cuid())
+  name     String
+  menuType MenuType @default(OTHER)
 
   storeId String
   store   Store  @relation(fields: [storeId], references: [id])
 
   menus Menu[]
 
-  @@unique([name, storeId]) // ✨ เพิ่มบรรทัดนี้
+  @@unique([name, storeId])
 }
 
 model Menu {

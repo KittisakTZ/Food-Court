@@ -8,7 +8,14 @@ import { MenuForm } from "../components/MenuForm";
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiSave, FiX } from "react-icons/fi";
 import { MdRestaurant, MdCategory, MdClose } from "react-icons/md";
 import { ConfirmationDialog } from "@/components/customs/ConfirmationDialog";
+import { type MenuType, MENU_TYPE_LABEL, MENU_TYPE_EMOJI, MENU_TYPE_DEFAULT_COOKING_TIME } from "@/services/menuCategory.service";
 import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
+
+const MENU_TYPE_OPTIONS = (Object.keys(MENU_TYPE_LABEL) as MenuType[]).map(type => ({
+  value: type,
+  label: `${MENU_TYPE_EMOJI[type]} ${MENU_TYPE_LABEL[type]}`,
+  hint: `เวลาทำ ~${MENU_TYPE_DEFAULT_COOKING_TIME[type]} นาที`,
+}));
 
 const CategoryManager = ({ storeId }: { storeId: string }) => {
   const { data: categories, isLoading } = useMenuCategories(storeId);
@@ -17,8 +24,10 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
   const { mutate: deleteCat, isPending: isDeleting } = useDeleteCategory();
 
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryType, setNewCategoryType] = useState<MenuType>("OTHER");
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState("");
+  const [editingCategoryType, setEditingCategoryType] = useState<MenuType>("OTHER");
   const [isExpanded, setIsExpanded] = useState(false);
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean;
@@ -34,8 +43,9 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
 
   const handleCreate = () => {
     if (newCategoryName.trim()) {
-      createCat({ storeId, name: newCategoryName });
+      createCat({ storeId, name: newCategoryName, menuType: newCategoryType });
       setNewCategoryName("");
+      setNewCategoryType("OTHER");
     }
   };
 
@@ -48,19 +58,21 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
     });
   };
 
-  const handleEdit = (category: { id: string; name: string }) => {
+  const handleEdit = (category: { id: string; name: string; menuType: MenuType }) => {
     setEditingCategoryId(category.id);
     setEditingCategoryName(category.name);
+    setEditingCategoryType(category.menuType);
   };
 
   const handleCancelEdit = () => {
     setEditingCategoryId(null);
     setEditingCategoryName("");
+    setEditingCategoryType("OTHER");
   };
 
   const handleUpdate = () => {
     if (editingCategoryId && editingCategoryName.trim()) {
-      updateCat({ storeId, categoryId: editingCategoryId, name: editingCategoryName });
+      updateCat({ storeId, categoryId: editingCategoryId, name: editingCategoryName, menuType: editingCategoryType });
       handleCancelEdit();
     }
   };
@@ -111,28 +123,41 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
       </div>
 
       <div className="p-6 bg-gradient-to-b from-orange-50 to-white">
-        <div className="flex gap-3 mb-5">
-          <div className="flex-1 relative">
+        {/* Create new category */}
+        <div className="flex flex-col gap-2 mb-5">
+          <div className="flex gap-2">
+            <select
+              value={newCategoryType}
+              onChange={(e) => setNewCategoryType(e.target.value as MenuType)}
+              className="px-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-sm bg-white shadow-sm"
+            >
+              {MENU_TYPE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
             <input
               type="text"
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
-              placeholder="เพิ่มหมวดหมู่ใหม่..."
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-sm bg-white shadow-sm"
+              placeholder="ชื่อหมวดหมู่..."
+              className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-sm bg-white shadow-sm"
             />
+            <button
+              onClick={handleCreate}
+              disabled={isCreating || !newCategoryName.trim()}
+              className="px-4 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-yellow-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md"
+            >
+              <FiPlus className="w-5 h-5" />
+              <span>{isCreating ? '...' : 'เพิ่ม'}</span>
+            </button>
           </div>
-          <button
-            onClick={handleCreate}
-            disabled={isCreating || !newCategoryName.trim()}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-yellow-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
-          >
-            <FiPlus className="w-5 h-5" />
-            <span>{isCreating ? 'กำลังเพิ่ม...' : 'เพิ่ม'}</span>
-          </button>
+          <p className="text-xs text-gray-400 pl-1">
+            เวลาทำเริ่มต้น: {MENU_TYPE_EMOJI[newCategoryType]} {MENU_TYPE_LABEL[newCategoryType]} = <span className="font-semibold text-orange-500">{MENU_TYPE_DEFAULT_COOKING_TIME[newCategoryType]} นาที</span>
+          </p>
         </div>
 
-        <div className={`space-y-3 ${isExpanded ? 'max-h-96' : 'max-h-52'} overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent`}>
+        <div className={`space-y-2 ${isExpanded ? 'max-h-96' : 'max-h-52'} overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent`}>
           {categories?.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border-2 border-dashed border-gray-200">
               <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -145,53 +170,58 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
             categories?.map(cat => (
               <div
                 key={cat.id}
-                className="group p-4 bg-white rounded-xl hover:bg-orange-50 flex items-center gap-3 border-2 border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md"
+                className="group p-3 bg-white rounded-xl hover:bg-orange-50 flex items-center gap-3 border-2 border-gray-100 hover:border-orange-200 shadow-sm"
               >
                 {editingCategoryId === cat.id ? (
-                  <>
-                    <input
-                      type="text"
-                      value={editingCategoryName}
-                      onChange={(e) => setEditingCategoryName(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleUpdate()}
-                      className="flex-grow px-3 py-2 border-2 border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-sm font-medium"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleUpdate}
-                      disabled={isUpdating}
-                      className="p-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 shadow-sm"
-                    >
-                      <FiSave className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="p-2.5 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 shadow-sm"
-                    >
-                      <FiX className="w-4 h-4" />
-                    </button>
-                  </>
+                  <div className="flex-1 flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <select
+                        value={editingCategoryType}
+                        onChange={(e) => setEditingCategoryType(e.target.value as MenuType)}
+                        className="px-2 py-2 border-2 border-orange-200 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-orange-400"
+                      >
+                        {MENU_TYPE_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        value={editingCategoryName}
+                        onChange={(e) => setEditingCategoryName(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleUpdate()}
+                        className="flex-1 px-3 py-2 border-2 border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none text-sm font-medium"
+                        autoFocus
+                      />
+                      <button onClick={handleUpdate} disabled={isUpdating} className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300">
+                        <FiSave className="w-4 h-4" />
+                      </button>
+                      <button onClick={handleCancelEdit} className="p-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300">
+                        <FiX className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <>
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MdCategory className="w-5 h-5 text-orange-600" />
+                    <span className="text-xl flex-shrink-0">{MENU_TYPE_EMOJI[cat.menuType]}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-800 text-sm truncate">{cat.name}</p>
+                      <p className="text-xs text-gray-400">{MENU_TYPE_LABEL[cat.menuType]} · {MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]} นาที</p>
                     </div>
-                    <span className="font-bold text-gray-800 text-base flex-grow">{cat.name}</span>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => handleEdit(cat)}
-                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 shadow-sm"
+                        onClick={() => handleEdit({ ...cat, menuType: cat.menuType as MenuType })}
+                        className="p-1.5 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
                         title="แก้ไข"
                       >
-                        <FiEdit2 className="w-4 h-4" />
+                        <FiEdit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDelete(cat.id, cat.name)}
                         disabled={isDeleting}
-                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 disabled:bg-gray-200 disabled:text-gray-400 shadow-sm"
+                        className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 disabled:bg-gray-200 disabled:text-gray-400"
                         title="ลบ"
                       >
-                        <FiTrash2 className="w-4 h-4" />
+                        <FiTrash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </>

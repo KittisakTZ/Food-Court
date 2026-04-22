@@ -1,4 +1,5 @@
 // @/types/response/menu.response.ts
+import { MenuType } from "@/services/menuCategory.service";
 
 // Type นี้ควรจะตรงกับข้อมูล Menu ที่ Backend ส่งกลับมา
 export interface Menu {
@@ -11,9 +12,9 @@ export interface Menu {
     isAvailable: boolean;
     categoryId: string | null;
     storeId: string;
-    // ข้อมูล category ที่เรา include มา
     category: {
         id: string;
         name: string;
+        menuType: MenuType;
     } | null;
 }

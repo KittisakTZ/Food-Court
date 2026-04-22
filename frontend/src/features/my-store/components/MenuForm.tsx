@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Menu } from "@/types/response/menu.response";
 import { MdRestaurant, MdCategory, MdCheckCircle, MdClose } from "react-icons/md";
 import { FiFileText, FiImage, FiUploadCloud, FiX, FiClock } from "react-icons/fi";
+import { MENU_TYPE_DEFAULT_COOKING_TIME, MENU_TYPE_EMOJI, MENU_TYPE_LABEL } from "@/services/menuCategory.service";
 
 type MenuFormInputs = {
   name: string;
@@ -24,7 +25,7 @@ interface MenuFormProps {
 
 export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) => {
   const isEditMode = !!initialData;
-  const { register, handleSubmit, reset, setValue, formState: { errors } } =
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } =
     useForm<MenuFormInputs>();
   const { data: categories } = useMenuCategories(storeId);
   const { mutate: create, isPending: isCreating } = useCreateMenu();
@@ -32,6 +33,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const isPending = isCreating || isUpdating;
+  const selectedCategoryId = watch("categoryId");
 
   // โหลดข้อมูลเมื่ออยู่ในโหมดแก้ไข
   useEffect(() => {
@@ -47,6 +49,15 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
       setPreviewImage(null);
     }
   }, [initialData, isEditMode, setValue, reset]);
+
+  // Auto-fill cookingTime เมื่อเลือก category (เฉพาะโหมดสร้างใหม่)
+  useEffect(() => {
+    if (isEditMode) return;
+    const cat = categories?.find(c => c.id === selectedCategoryId);
+    if (cat?.menuType) {
+      setValue("cookingTime", MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]);
+    }
+  }, [selectedCategoryId, categories, isEditMode, setValue]);
 
   const onSubmit: SubmitHandler<MenuFormInputs> = (data) => {
     const formData = new FormData();
@@ -207,10 +218,20 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
             <option value="">-- เลือกหมวดหมู่ --</option>
             {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>
-                {cat.name}
+                {MENU_TYPE_EMOJI[cat.menuType]} {cat.name} ({MENU_TYPE_LABEL[cat.menuType]})
               </option>
             ))}
           </select>
+          {selectedCategoryId && !isEditMode && (() => {
+            const cat = categories?.find(c => c.id === selectedCategoryId);
+            if (!cat) return null;
+            return (
+              <p className="text-xs text-orange-500 mt-1.5 flex items-center gap-1 font-medium">
+                <FiClock className="w-3.5 h-3.5" />
+                เวลาทำแนะนำสำหรับ{MENU_TYPE_LABEL[cat.menuType]}: <span className="font-bold">{MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]} นาที</span>
+              </p>
+            );
+          })()}
           {errors.categoryId && (
             <p className="text-red-500 text-sm mt-2 flex items-center gap-1 font-medium">
               <FiX className="w-4 h-4" />

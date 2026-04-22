@@ -11,6 +11,9 @@
 CREATE TYPE "PaymentMethod" AS ENUM ('PROMPTPAY', 'CASH_ON_PICKUP');
 
 -- CreateEnum
+CREATE TYPE "MenuType" AS ENUM ('MAIN', 'DRINK', 'DESSERT', 'SNACK', 'OTHER');
+
+-- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'SELLER', 'BUYER');
 
 -- CreateEnum
@@ -52,6 +55,7 @@ CREATE TABLE "Store" (
 CREATE TABLE "MenuCategory" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "menuType" "MenuType" NOT NULL DEFAULT 'OTHER',
     "storeId" TEXT NOT NULL,
 
     CONSTRAINT "MenuCategory_pkey" PRIMARY KEY ("id")
