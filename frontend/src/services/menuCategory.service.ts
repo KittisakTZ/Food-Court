@@ -22,7 +22,7 @@ export const MENU_TYPE_DEFAULT_COOKING_TIME: Record<MenuType, number> = {
 
 export const MENU_TYPE_EMOJI: Record<MenuType, string> = {
     MAIN:    "🍛",
-    DRINK:   "🧋",
+    DRINK:   "🥤",
     DESSERT: "🍮",
     SNACK:   "🍟",
     OTHER:   "🍽",
