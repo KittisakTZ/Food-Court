@@ -7,7 +7,7 @@ import { useUpdateOrderStatus, useAdjustOrderTime } from "@/hooks/useOrders";
 import { MdRestaurant } from "react-icons/md";
 import {
     FiClock, FiPackage, FiWifi, FiWifiOff, FiX, FiEdit2,
-    FiCheck, FiAlertCircle, FiDollarSign, FiZap
+    FiCheck, FiAlertCircle, FiDollarSign, FiZap, FiAlertTriangle
 } from "react-icons/fi";
 import { IoFastFoodOutline } from "react-icons/io5";
 
@@ -87,40 +87,71 @@ const CancelModal = ({
     onConfirm: (reason: string) => void;
     isPending: boolean;
 }) => {
-    const [reason, setReason] = useState("");
+    const [selectedReason, setSelectedReason] = useState("");
+    const [customReason, setCustomReason] = useState("");
+
+    const presetReasons = ["วัตถุดิบไม่พอ", "สินค้าหมด", "ร้านปิด", "เมนูหยุดให้บริการชั่วคราว", "ไม่สามารถรับออเดอร์ได้"];
+    const finalReason = selectedReason === "__custom__" ? customReason.trim() : selectedReason;
 
     return (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center">
-                        <FiAlertCircle className="w-5 h-5 text-red-500" />
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-red-500 to-rose-500 px-5 py-4 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <FiAlertTriangle className="w-5 h-5 text-white" />
                     </div>
-                    <div>
-                        <h3 className="text-base font-bold text-gray-900">ยกเลิกออเดอร์ #{queueNumber}</h3>
-                        <p className="text-xs text-gray-400">ลูกค้าจะได้รับการแจ้งเตือน</p>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold text-white">ยกเลิกออเดอร์ #{queueNumber}</h3>
+                        <p className="text-red-100 text-xs">เลือกเหตุผลเพื่อแจ้งให้ลูกค้าทราบ</p>
                     </div>
+                    <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+                        <FiX className="w-5 h-5" />
+                    </button>
                 </div>
-                <textarea
-                    className="w-full border border-gray-200 rounded-2xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-300 bg-gray-50"
-                    rows={3}
-                    placeholder="เช่น วัตถุดิบหมด, เครื่องครัวขัดข้อง..."
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                />
-                <div className="flex gap-2 mt-4">
+
+                {/* Reasons */}
+                <div className="p-5 space-y-2">
+                    {presetReasons.map(reason => (
+                        <label key={reason} className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${selectedReason === reason ? "border-red-400 bg-red-50" : "border-gray-100 bg-gray-50 hover:border-gray-200"}`}>
+                            <input type="radio" name="cancelReason" value={reason} checked={selectedReason === reason} onChange={() => setSelectedReason(reason)} className="accent-red-500 flex-shrink-0" />
+                            <span className="text-sm text-gray-800">{reason}</span>
+                        </label>
+                    ))}
+                    <label className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${selectedReason === "__custom__" ? "border-red-400 bg-red-50" : "border-gray-100 bg-gray-50 hover:border-gray-200"}`}>
+                        <input type="radio" name="cancelReason" value="__custom__" checked={selectedReason === "__custom__"} onChange={() => setSelectedReason("__custom__")} className="accent-red-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-800">อื่นๆ (ระบุเอง)</span>
+                    </label>
+                    {selectedReason === "__custom__" && (
+                        <input
+                            type="text"
+                            value={customReason}
+                            onChange={e => setCustomReason(e.target.value)}
+                            placeholder="ระบุเหตุผล..."
+                            className="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 bg-gray-50"
+                            autoFocus
+                        />
+                    )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 px-5 pb-5">
                     <button
                         onClick={onClose}
                         className="flex-1 py-2.5 rounded-2xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
                     >
-                        ยกเลิก
+                        ปิด
                     </button>
                     <button
-                        onClick={() => reason.trim() && onConfirm(reason.trim())}
-                        disabled={!reason.trim() || isPending}
-                        className="flex-1 py-2.5 rounded-2xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        onClick={() => finalReason && onConfirm(finalReason)}
+                        disabled={!finalReason || isPending}
+                        className="flex-1 py-2.5 rounded-2xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5"
                     >
-                        {isPending ? "กำลังยกเลิก..." : "ยืนยันยกเลิก"}
+                        {isPending ? (
+                            <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> กำลังยกเลิก...</>
+                        ) : (
+                            <><FiX className="w-4 h-4" /> ยืนยันยกเลิก</>
+                        )}
                     </button>
                 </div>
             </div>

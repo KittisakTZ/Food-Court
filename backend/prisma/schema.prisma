@@ -14,12 +14,6 @@ enum Role {
   BUYER
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  NOT_SPECIFIED
-}
-
 enum OrderStatus {
   PENDING // รอ Seller ตรวจสอบ
   REJECTED // Seller ปฏิเสธ
@@ -43,6 +37,12 @@ enum MenuType {
   DRINK
   DESSERT
   SNACK
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
   OTHER
 }
 

@@ -1,162 +1,186 @@
-// @/pages/login/index.tsx
+// @/features/login/index.tsx
 import { useEffect, useState } from "react";
 import { postLogin, getMe } from "@/services/auth.service";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { toastService } from "@/services/toast.service";
-import { MdRestaurant, MdLogin } from "react-icons/md";
-import { FiUser, FiLock } from "react-icons/fi";
+import { MdRestaurant } from "react-icons/md";
+import { FiAtSign, FiLock, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
+
+// Role hint badge ด้านล่างสำหรับแสดงว่า login ได้ทุก role
+const RoleBadge = ({ icon, label, color }: { icon: string; label: string; color: string }) => (
+  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
+    {icon} {label}
+  </span>
+);
 
 export default function LoginFeature() {
-  const [username, setUsername] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { setUser, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
+    if (isAuthenticated) navigate("/");
   }, [isAuthenticated, navigate]);
 
-  const handleLogin = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!username || !password) {
-      return toastService.error("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
-    }
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!identifier.trim() || !password) return toastService.error("กรุณากรอกข้อมูลให้ครบ");
 
     setIsSubmitting(true);
     try {
-      const loginResponse = await postLogin({ username, password });
-      if (loginResponse.statusCode === 200) {
-        const userResponse = await getMe();
-        if (userResponse.responseObject) {
-          setUser(userResponse.responseObject);
+      const res = await postLogin({ identifier: identifier.trim(), password });
+      if (res.statusCode === 200) {
+        const me = await getMe();
+        if (me.responseObject) {
+          setUser(me.responseObject);
           toastService.success("เข้าสู่ระบบสำเร็จ!");
           navigate("/");
-        } else {
-          throw new Error("ไม่สามารถดึงข้อมูลผู้ใช้ได้");
-        }
+        } else throw new Error();
       } else {
-        toastService.error(loginResponse.message || "เกิดข้อผิดพลาด");
+        toastService.error(res.message || "เกิดข้อผิดพลาด");
       }
-    } catch (error: unknown) {
-      if (typeof error === "object" && error !== null) {
-        console.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ:", error);
-        toastService.error(
-          (error as { response?: { data?: { message: string } } }).response
-            ?.data?.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ"
-        );
-      }
+    } catch (err: unknown) {
+      toastService.error(
+        (err as { response?: { data?: { message: string } } })?.response?.data?.message
+          || "ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-400 via-yellow-400 to-orange-500 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-2xl mb-4">
-            <MdRestaurant className="w-10 h-10 text-orange-500" />
+    <div className="min-h-screen flex">
+
+      {/* ── Left decorative panel (desktop only) ── */}
+      <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] flex-col justify-between bg-gradient-to-b from-orange-500 to-amber-500 p-10 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+            <MdRestaurant className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">ระบบจองอาหาร</h1>
-          <p className="text-orange-100 text-lg">มหาวิทยาลัย</p>
+          <span className="text-white font-black text-lg tracking-tight">Food Court</span>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white rounded-3xl shadow-2xl border border-orange-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-orange-500 to-yellow-500 p-6 text-center">
-            <h2 className="text-3xl font-bold text-white flex items-center justify-center gap-2">
-              <MdLogin className="w-8 h-8" />
-              เข้าสู่ระบบ
-            </h2>
+        <div>
+          <h2 className="text-4xl font-black text-white leading-snug mb-4">
+            สั่งอาหาร<br />ง่าย · เร็ว · ทั่วถึง
+          </h2>
+          <p className="text-orange-100 text-sm leading-relaxed mb-8">
+            ระบบจองอาหารออนไลน์สำหรับมหาวิทยาลัย<br />
+            รองรับลูกค้าและร้านค้าทุกประเภท
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <RoleBadge icon="🛍️" label="ลูกค้า" color="bg-white/20 text-white" />
+            <RoleBadge icon="🏪" label="ร้านค้า" color="bg-white/20 text-white" />
+          </div>
+        </div>
+
+        <p className="text-orange-200/60 text-xs">© 2025 Food Court University</p>
+      </div>
+
+      {/* ── Right form panel ── */}
+      <div className="flex-1 flex items-center justify-center bg-slate-50 p-6">
+        <div className="w-full max-w-[360px]">
+
+          {/* Mobile logo */}
+          <div className="flex lg:hidden items-center justify-center gap-2 mb-8">
+            <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shadow">
+              <MdRestaurant className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-slate-800 font-black text-xl">Food Court</span>
           </div>
 
-          <form onSubmit={handleLogin} className="p-8 space-y-6">
-            {/* Username Input */}
+          {/* Heading */}
+          <div className="mb-7">
+            <h1 className="text-2xl font-black text-slate-800">เข้าสู่ระบบ</h1>
+            <p className="text-sm text-slate-400 mt-1">เข้าสู่ระบบด้วยชื่อผู้ใช้หรืออีเมล</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-4">
+
+            {/* Identifier */}
             <div>
-              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
-                ชื่อผู้ใช้
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
+                ชื่อผู้ใช้หรืออีเมล
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiUser className="w-5 h-5 text-gray-400" />
-                </div>
+                <FiAtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
-                  id="username"
-                  name="username"
-                  placeholder="กรอกชื่อผู้ใช้"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition-all"
+                  placeholder="username หรือ email@example.com"
+                  value={identifier}
+                  onChange={e => setIdentifier(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:border-orange-400 focus:ring-3 focus:ring-orange-100 transition-all disabled:opacity-50"
                   disabled={isSubmitting}
+                  autoComplete="username"
+                  autoFocus
                 />
               </div>
             </div>
 
-            {/* Password Input */}
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
                 รหัสผ่าน
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiLock className="w-5 h-5 text-gray-400" />
-                </div>
+                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="กรอกรหัสผ่าน"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition-all"
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full pl-9 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:border-orange-400 focus:ring-3 focus:ring-orange-100 transition-all disabled:opacity-50"
                   disabled={isSubmitting}
+                  autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-4 px-6 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-yellow-600 disabled:from-gray-300 disabled:to-gray-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none flex items-center justify-center gap-2"
+              className="w-full mt-2 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  กำลังเข้าสู่ระบบ...
-                </>
+                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> กำลังเข้าสู่ระบบ...</>
               ) : (
-                <>
-                  <MdLogin className="w-6 h-6" />
-                  เข้าสู่ระบบ
-                </>
+                <>เข้าสู่ระบบ <FiArrowRight className="w-4 h-4" /></>
               )}
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="px-8 pb-8">
-            <div className="text-center pt-6 border-t border-gray-200">
-              <p className="text-gray-600">
-                ยังไม่มีบัญชี?{" "}
-                <Link to="/register" className="font-semibold text-orange-600 hover:text-orange-700 hover:underline transition-colors">
-                  สมัครสมาชิก
-                </Link>
-              </p>
-            </div>
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-xs text-slate-400">หรือ</span>
+            <div className="flex-1 h-px bg-slate-200" />
           </div>
-        </div>
 
-        {/* Info Card */}
-        <div className="mt-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center">
-          <p className="text-white text-sm">
-            🍔 สั่งอาหารง่ายๆ ได้ทุกที่ทุกเวลา 🍕
+          {/* Register link */}
+          <Link
+            to="/register"
+            className="flex items-center justify-center gap-2 w-full py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-all"
+          >
+            สมัครสมาชิกใหม่
+          </Link>
+
+          <p className="text-center text-xs text-slate-400 mt-5">
+            สำหรับนักศึกษาและร้านค้าในมหาวิทยาลัย
           </p>
         </div>
       </div>

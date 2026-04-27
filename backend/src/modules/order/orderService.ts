@@ -267,9 +267,12 @@ export const orderService = {
                 if (order.status !== 'PENDING') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot reject an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
-                await orderRepository.updateOrder(orderId, { status: 'REJECTED' });
+                await orderRepository.updateOrder(orderId, {
+                    status: 'REJECTED',
+                    ...(cancelReason?.trim() ? { issueReason: cancelReason.trim() } : {}),
+                } as any);
                 emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'REJECTED' });
-                emitOrderUpdate(orderId, { status: 'REJECTED' });
+                emitOrderUpdate(orderId, { status: 'REJECTED', cancelReason: cancelReason?.trim() });
                 return new ServiceResponse(ResponseStatus.Success, "Order has been rejected.", null, StatusCodes.OK);
 
             case 'CONFIRM_PAYMENT':

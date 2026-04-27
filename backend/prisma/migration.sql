@@ -249,24 +249,22 @@ ALTER TABLE "chat_rooms" ADD CONSTRAINT "chat_rooms_storeId_fkey" FOREIGN KEY ("
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "chat_rooms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "chat_messages" ADD CONSTRAINT "chat_messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- Add Gender enum and profile fields to User table
+DO $$ BEGIN
+  CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "firstName" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastName" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "gender" "Gender";
+
 -- Add missing columns to existing Order table (if already created without them)
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "hasIssue" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "issueReason" TEXT;
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "startCookingAt" TIMESTAMP(3);
 ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "estimatedReadyAt" TIMESTAMP(3);
-
--- =================================================================
---  Edit Profile System
--- =================================================================
-
--- CreateEnum
-CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'NOT_SPECIFIED');
-
--- Add profile fields to User table
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "firstName" TEXT;
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastName" TEXT;
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;
-ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "gender" "Gender";
 
 -- =================================================================
 --  Store Temporary Close System

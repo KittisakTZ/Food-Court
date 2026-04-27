@@ -2,7 +2,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Order } from '@/types/response/order.response';
-import { useUpdateOrderStatus, useReportOrderIssue } from '@/hooks/useOrders';
+import { useUpdateOrderStatus } from '@/hooks/useOrders';
 import { FaGripVertical, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { useMoveOrderPosition } from '@/hooks/useOrders';
 import { useState, useEffect } from 'react';
@@ -45,44 +45,49 @@ const SellerCountdown = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => 
     );
 };
 
-// ── IssueReportModal ──────────────────────────────────────────────────────────
-const IssueReportModal = ({ order, onClose }: { order: Order; onClose: () => void }) => {
-    const { mutate: reportIssue, isPending } = useReportOrderIssue();
-    const [selectedReason, setSelectedReason] = useState<string>(order.issueReason || '');
+// ── CancelOrderModal ──────────────────────────────────────────────────────────
+const CancelOrderModal = ({ order, onClose }: { order: Order; onClose: () => void }) => {
+    const { mutate: updateStatus, isPending } = useUpdateOrderStatus();
+    const [selectedReason, setSelectedReason] = useState('');
     const [customReason, setCustomReason] = useState('');
 
     const presetReasons = ['วัตถุดิบไม่พอ', 'สินค้าหมด', 'ร้านปิด', 'เมนูหยุดให้บริการชั่วคราว', 'ไม่สามารถรับออเดอร์ได้'];
+    const action = order.status === 'PENDING' ? 'REJECT' : 'CANCEL_BY_STORE';
+    const finalReason = selectedReason === '__custom__' ? customReason.trim() : selectedReason;
 
-    const handleSubmit = () => {
-        const reason = selectedReason === '__custom__' ? customReason.trim() : selectedReason;
-        if (!reason) return;
-        reportIssue({ orderId: order.id, action: 'REPORT_ISSUE', issueReason: reason }, { onSuccess: () => onClose() });
+    const handleConfirm = () => {
+        if (!finalReason) return;
+        updateStatus({ orderId: order.id, action, cancelReason: finalReason }, { onSuccess: () => onClose() });
     };
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-                <div className="bg-gradient-to-r from-red-500 to-orange-500 p-5 rounded-t-2xl text-white">
+                <div className="bg-gradient-to-r from-red-500 to-rose-500 p-5 rounded-t-2xl text-white">
                     <div className="flex items-center gap-3">
-                        <FiAlertTriangle className="w-7 h-7 flex-shrink-0" />
-                        <div>
-                            <h3 className="text-lg font-bold">แจ้งปัญหาออเดอร์</h3>
-                            <p className="text-red-100 text-sm">ลูกค้า: {order.buyer?.username} · คิว #{order.queueNumber}</p>
+                        <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <FiAlertTriangle className="w-5 h-5" />
                         </div>
-                        <button onClick={onClose} className="ml-auto text-white/80 hover:text-white"><FiX className="w-6 h-6" /></button>
+                        <div>
+                            <h3 className="text-lg font-bold">ยกเลิกออเดอร์ #{order.queueNumber}</h3>
+                            <p className="text-red-100 text-sm">ลูกค้า: {order.buyer?.username} · ลูกค้าจะได้รับแจ้ง</p>
+                        </div>
+                        <button onClick={onClose} className="ml-auto text-white/80 hover:text-white transition-colors">
+                            <FiX className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
                 <div className="p-5 space-y-4">
-                    <p className="text-sm text-slate-600">เลือกเหตุผลที่ทำให้ออเดอร์นี้มีปัญหา:</p>
+                    <p className="text-sm text-slate-600 font-medium">เลือกเหตุผลในการยกเลิก:</p>
                     <div className="space-y-2">
                         {presetReasons.map(reason => (
                             <label key={reason} className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedReason === reason ? 'border-red-400 bg-red-50' : 'border-slate-200 hover:border-slate-300'}`}>
-                                <input type="radio" name="issueReason" value={reason} checked={selectedReason === reason} onChange={() => setSelectedReason(reason)} className="accent-red-500" />
+                                <input type="radio" name="cancelReason" value={reason} checked={selectedReason === reason} onChange={() => setSelectedReason(reason)} className="accent-red-500" />
                                 <span className="text-sm font-medium text-slate-800">{reason}</span>
                             </label>
                         ))}
                         <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedReason === '__custom__' ? 'border-red-400 bg-red-50' : 'border-slate-200 hover:border-slate-300'}`}>
-                            <input type="radio" name="issueReason" value="__custom__" checked={selectedReason === '__custom__'} onChange={() => setSelectedReason('__custom__')} className="accent-red-500" />
+                            <input type="radio" name="cancelReason" value="__custom__" checked={selectedReason === '__custom__'} onChange={() => setSelectedReason('__custom__')} className="accent-red-500" />
                             <span className="text-sm font-medium text-slate-800">อื่นๆ (ระบุเอง)</span>
                         </label>
                         {selectedReason === '__custom__' && (
@@ -90,10 +95,10 @@ const IssueReportModal = ({ order, onClose }: { order: Order; onClose: () => voi
                         )}
                     </div>
                     <div className="flex gap-3 pt-2">
-                        <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all">ยกเลิก</button>
-                        <button onClick={handleSubmit} disabled={isPending || !selectedReason || (selectedReason === '__custom__' && !customReason.trim())} className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                            {isPending ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> : <FiAlertTriangle className="w-4 h-4" />}
-                            แจ้งปัญหา
+                        <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all">ปิด</button>
+                        <button onClick={handleConfirm} disabled={isPending || !finalReason} className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                            {isPending ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> : <FiX className="w-4 h-4" />}
+                            ยืนยันยกเลิก
                         </button>
                     </div>
                 </div>
@@ -171,14 +176,12 @@ const OrderDetailModal = ({ order, onClose }: { order: Order; onClose: () => voi
 // ── OrderActions ──────────────────────────────────────────────────────────────
 const OrderActions = ({ order }: { order: Order }) => {
     const { mutate: updateStatus, isPending } = useUpdateOrderStatus();
-    const { mutate: reportIssue, isPending: isReportingIssue } = useReportOrderIssue();
-    const [showIssueModal, setShowIssueModal] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const [dialogState, setDialogState] = useState<{ isOpen: boolean; title: string; description: string; onConfirm: (() => void) | null }>({ isOpen: false, title: '', description: '', onConfirm: null });
 
-    const openDialog = (action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP") => {
+    const openDialog = (action: "APPROVE" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP") => {
         const msgs: Record<typeof action, string> = {
             APPROVE: 'อนุมัติออเดอร์นี้และเริ่มดำเนินการ',
-            REJECT: 'ปฏิเสธและยกเลิกออเดอร์นี้',
             CONFIRM_PAYMENT: 'ยืนยันว่าได้รับเงินแล้ว และเริ่มทำอาหาร',
             PREPARE_COMPLETE: 'ยืนยันว่าอาหารพร้อมให้ลูกค้ารับแล้ว',
             CUSTOMER_PICKED_UP: 'ยืนยันว่าลูกค้ารับอาหารแล้ว',
@@ -190,7 +193,7 @@ const OrderActions = ({ order }: { order: Order }) => {
 
     return (
         <>
-            {showIssueModal && <IssueReportModal order={order} onClose={() => setShowIssueModal(false)} />}
+            {showCancelModal && <CancelOrderModal order={order} onClose={() => setShowCancelModal(false)} />}
             <ConfirmationDialog isOpen={dialogState.isOpen} onClose={closeDialog} onConfirm={dialogState.onConfirm!} title={dialogState.title} description={dialogState.description} />
 
             <div className="space-y-2">
@@ -208,27 +211,15 @@ const OrderActions = ({ order }: { order: Order }) => {
                             }
                             อนุมัติออเดอร์
                         </button>
-                        {/* Secondary: Reject */}
+                        {/* Cancel with issue reason */}
                         <button
-                            onClick={() => openDialog('REJECT')}
+                            onClick={() => setShowCancelModal(true)}
                             disabled={isPending}
                             className="w-full py-2.5 rounded-xl border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <FiX className="w-4 h-4" />
                             ปฏิเสธออเดอร์
                         </button>
-                        {/* Issue button */}
-                        {order.hasIssue ? (
-                            <button onClick={() => reportIssue({ orderId: order.id, action: 'CLEAR_ISSUE' })} disabled={isReportingIssue} className="w-full py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50">
-                                <FiCheck className="w-3.5 h-3.5" />
-                                ล้างปัญหาออเดอร์
-                            </button>
-                        ) : (
-                            <button onClick={() => setShowIssueModal(true)} disabled={isPending} className="w-full py-2 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 hover:border-red-300 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50">
-                                <FiAlertTriangle className="w-3.5 h-3.5" />
-                                แจ้งปัญหาออเดอร์
-                            </button>
-                        )}
                     </>
                 )}
 

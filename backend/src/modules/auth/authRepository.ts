@@ -38,6 +38,14 @@ export const authRepository = {
         });
     },
 
+    findByIdentifier: async (identifier: string) => {
+        const isEmail = identifier.includes('@');
+        return prisma.user.findUnique({
+            where: isEmail ? { email: identifier } : { username: identifier },
+            select: UserSelectWithPassword,
+        });
+    },
+
     findById: async (id: string) => {
         return prisma.user.findUnique({
             where: { id: id },
