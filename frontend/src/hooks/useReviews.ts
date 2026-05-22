@@ -7,6 +7,7 @@ type CreateReviewPayload = {
     storeId: string;
     rating: number;
     comment?: string;
+    isAnonymous?: boolean;
 };
 
 export const useCreateReview = () => {
@@ -14,7 +15,7 @@ export const useCreateReview = () => {
 
     return useMutation({
         mutationFn: (payload: CreateReviewPayload) =>
-            reviewService.createReview(payload.storeId, { rating: payload.rating, comment: payload.comment }),
+            reviewService.createReview(payload.storeId, { rating: payload.rating, comment: payload.comment, isAnonymous: payload.isAnonymous }),
         onSuccess: (response) => {
             if (response.success) {
                 toastService.success("รีวิวของคุณถูกส่งเรียบร้อยแล้ว");

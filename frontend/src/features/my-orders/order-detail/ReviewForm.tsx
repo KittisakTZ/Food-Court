@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useCreateReview } from "@/hooks/useReviews";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { FiStar, FiLoader } from "react-icons/fi";
+import { FiStar, FiLoader, FiUser, FiEyeOff } from "react-icons/fi";
 import { useQueryClient } from "@tanstack/react-query";
 import { toastService } from "@/services/toast.service";
 
@@ -40,6 +40,7 @@ const StarRating = ({ rating, setRating }: { rating: number; setRating: (rating:
 const ReviewForm = ({ storeId, orderId, onCancel }: ReviewFormProps) => {
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
+    const [isAnonymous, setIsAnonymous] = useState(false);
     const queryClient = useQueryClient();
     const { mutate: createReview, isPending } = useCreateReview();
 
@@ -50,11 +51,10 @@ const ReviewForm = ({ storeId, orderId, onCancel }: ReviewFormProps) => {
             return;
         }
         createReview(
-            { storeId, rating, comment },
+            { storeId, rating, comment, isAnonymous },
             {
                 onSuccess: (res) => {
                     if (res.success) {
-                        // Invalidate the specific order query
                         queryClient.invalidateQueries({ queryKey: ["order", orderId] });
                     }
                 },
@@ -81,6 +81,44 @@ const ReviewForm = ({ storeId, orderId, onCancel }: ReviewFormProps) => {
                     className="min-h-[100px]"
                 />
             </div>
+
+            {/* Anonymous toggle */}
+            <button
+                type="button"
+                onClick={() => setIsAnonymous(v => !v)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
+                    isAnonymous
+                        ? "border-orange-400 bg-orange-50"
+                        : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                }`}
+            >
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                    isAnonymous ? "bg-orange-100" : "bg-gray-200"
+                }`}>
+                    {isAnonymous
+                        ? <FiEyeOff className="w-4 h-4 text-orange-500" />
+                        : <FiUser className="w-4 h-4 text-gray-500" />
+                    }
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-semibold ${isAnonymous ? "text-orange-700" : "text-gray-700"}`}>
+                        {isAnonymous ? "ไม่ระบุชื่อ (นิรนาม)" : "แสดงชื่อผู้ใช้"}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                        {isAnonymous ? "ร้านค้าจะไม่เห็นชื่อของคุณ" : "ร้านค้าจะเห็นชื่อผู้ใช้ของคุณ"}
+                    </p>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                    isAnonymous ? "border-orange-500 bg-orange-500" : "border-gray-300 bg-white"
+                }`}>
+                    {isAnonymous && (
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                    )}
+                </div>
+            </button>
+
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel} disabled={isPending}>
                     ยกเลิก

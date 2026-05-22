@@ -5,13 +5,14 @@ export interface Review {
     rating: number;
     comment: string | null;
     isVisible: boolean;
+    isAnonymous: boolean;
     storeId: string;
     userId: string;
     createdAt: string;
-    user?: { // User might not always be included
+    user?: {
         id: string;
         username: string;
-    };
+    } | null;
     order?: {
         id: string;
     };

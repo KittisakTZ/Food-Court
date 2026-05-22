@@ -273,3 +273,6 @@ ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "estimatedReadyAt" TIMESTAMP(3);
 -- Add close reason and reopen time to Store table
 ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "closeReason" TEXT;
 ALTER TABLE "Store" ADD COLUMN IF NOT EXISTS "reopenAt" TIMESTAMP(3);
+
+-- Add anonymous review option
+ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "isAnonymous" BOOLEAN NOT NULL DEFAULT false;

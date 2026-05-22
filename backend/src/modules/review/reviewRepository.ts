@@ -60,16 +60,20 @@ export const reviewRepository = {
     // ดึงรีวิวของร้านพร้อม pagination
     findByStoreId: async (storeId: string, page: number, pageSize: number) => {
         const skip = (page - 1) * pageSize;
-        return prisma.review.findMany({
+        const reviews = await prisma.review.findMany({
             where: { storeId: storeId, isVisible: true },
             skip: skip,
             take: pageSize,
             orderBy: { createdAt: 'desc' },
-            include: { 
+            include: {
                 user: { select: { id: true, username: true } },
                 order: { select: { id: true } }
             }
         });
+        return reviews.map(review => ({
+            ...review,
+            user: review.isAnonymous ? null : review.user,
+        }));
     },
 
     //นับจำนวนรีวิวทั้งหมดของร้าน

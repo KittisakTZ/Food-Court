@@ -188,15 +188,16 @@ model OrderItem {
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  rating    Int
-  comment   String?
-  isVisible Boolean  @default(false)
-  storeId   String
-  store     Store    @relation(fields: [storeId], references: [id])
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  rating      Int
+  comment     String?
+  isVisible   Boolean  @default(false)
+  isAnonymous Boolean  @default(false)
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
 
   orderId String? @unique
   order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull, onUpdate: Cascade)

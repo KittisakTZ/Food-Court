@@ -24,9 +24,13 @@ const ROLE_OPTIONS = [
   },
 ];
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function RegisterFeature() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -37,12 +41,31 @@ export default function RegisterFeature() {
 
   const passwordMatch = confirmPassword === "" || password === confirmPassword;
 
+  const validateEmail = (val: string) => {
+    if (val && !EMAIL_REGEX.test(val)) return "รูปแบบอีเมลไม่ถูกต้อง เช่น name@email.com";
+    return "";
+  };
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    if (emailTouched) setEmailError(validateEmail(val));
+  };
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true);
+    setEmailError(validateEmail(email));
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password) return toastService.error("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
     if (username.trim().length < 4) return toastService.error("ชื่อผู้ใช้ต้องมีอย่างน้อย 4 ตัวอักษร");
     if (password.length < 4) return toastService.error("รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร");
     if (confirmPassword && password !== confirmPassword) return toastService.error("รหัสผ่านไม่ตรงกัน");
+    if (email) {
+      const err = validateEmail(email);
+      if (err) { setEmailTouched(true); setEmailError(err); return toastService.error(err); }
+    }
 
     setIsSubmitting(true);
     try {
@@ -188,15 +211,32 @@ export default function RegisterFeature() {
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
-                  type="email"
+                  type="text"
                   placeholder="example@email.com"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:border-orange-400 focus:ring-3 focus:ring-orange-100 transition-all disabled:opacity-50"
+                  onChange={e => handleEmailChange(e.target.value)}
+                  onBlur={handleEmailBlur}
+                  className={`w-full pl-9 pr-3 py-2.5 bg-white border rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:ring-3 transition-all disabled:opacity-50 ${
+                    emailTouched && emailError
+                      ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                      : emailTouched && email && !emailError
+                        ? "border-emerald-300 focus:border-emerald-400 focus:ring-emerald-100"
+                        : "border-slate-200 focus:border-orange-400 focus:ring-orange-100"
+                  }`}
                   disabled={isSubmitting}
                   autoComplete="email"
                 />
               </div>
+              {emailTouched && emailError && (
+                <p className="flex items-center gap-1.5 mt-1 text-xs font-medium text-red-500">
+                  <FiMail className="w-3.5 h-3.5 shrink-0" /> {emailError}
+                </p>
+              )}
+              {emailTouched && email && !emailError && (
+                <p className="flex items-center gap-1.5 mt-1 text-xs font-medium text-emerald-600">
+                  <FiCheck className="w-3.5 h-3.5 shrink-0" /> รูปแบบอีเมลถูกต้อง
+                </p>
+              )}
             </div>
 
             {/* Password */}
