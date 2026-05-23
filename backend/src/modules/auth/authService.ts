@@ -71,6 +71,7 @@ export const authService = {
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: env.NODE_ENV === 'production',
+                sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
                 maxAge: (10 * 60 * 60 * 1000) // 10 hours
             });
 
@@ -93,7 +94,7 @@ export const authService = {
             res.clearCookie('token', {
                 httpOnly: true,
                 secure: env.NODE_ENV === 'production',
-                sameSite: 'strict'
+                sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax'
             });
 
             return new ServiceResponse(
