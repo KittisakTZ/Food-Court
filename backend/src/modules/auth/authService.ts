@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseStatus, ServiceResponse } from '@common/models/serviceResponse';
 import { authRepository } from '@modules/auth/authRepository';
-import { UserPayload, UpdateProfilePayload } from '@modules/auth/authModel';
+import { UserPayload, UpdateProfilePayload, LoginPayload } from '@modules/auth/authModel';
 import bcrypt from 'bcrypt';
 import { jwtGenerator } from '@common/utils/jwtGenerator';
 import { env } from '@common/utils/envConfig';
@@ -40,19 +40,19 @@ export const authService = {
         }
     },
 
-    login: async (payload: UserPayload, res: Response) => {
+    login: async (payload: LoginPayload, res: Response) => {
         try {
-            const user = await authRepository.findByUsername(payload.username);
+            const user = await authRepository.findByIdentifier(payload.identifier);
             if (!user) {
                 return new ServiceResponse(
-                    ResponseStatus.Failed, "The username or password is incorrect.", null, StatusCodes.BAD_REQUEST
+                    ResponseStatus.Failed, "ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง", null, StatusCodes.BAD_REQUEST
                 );
             }
 
             const isValidPassword = await bcrypt.compare(payload.password, user.password);
             if (!isValidPassword) {
                 return new ServiceResponse(
-                    ResponseStatus.Failed, "The username or password is incorrect.", null, StatusCodes.BAD_REQUEST
+                    ResponseStatus.Failed, "ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง", null, StatusCodes.BAD_REQUEST
                 );
             }
 

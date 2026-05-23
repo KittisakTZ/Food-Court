@@ -5,9 +5,10 @@ import { MenuCategoryPayload } from "./menuCategoryModel";
 
 export const menuCategoryRepository = {
     create: async (payload: MenuCategoryPayload, storeId: string) => {
-        return prisma.menuCategory.create({
+        return (prisma.menuCategory.create as any)({
             data: {
                 name: payload.name,
+                menuType: payload.menuType,
                 storeId: storeId,
             },
         });
@@ -38,11 +39,12 @@ export const menuCategoryRepository = {
         })
     },
 
-    update: async (categoryId: string, payload: MenuCategoryPayload) => {
-        return prisma.menuCategory.update({
+    update: async (categoryId: string, payload: Partial<MenuCategoryPayload>) => {
+        return (prisma.menuCategory.update as any)({
             where: { id: categoryId },
             data: {
-                name: payload.name,
+                ...(payload.name !== undefined && { name: payload.name }),
+                ...(payload.menuType !== undefined && { menuType: payload.menuType }),
             },
         });
     },

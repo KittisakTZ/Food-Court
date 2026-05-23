@@ -5,7 +5,7 @@ import { ProgressBar, Step } from "react-step-progress-bar";
 import "react-step-progress-bar/styles.css";
 import {
     FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign,
-    FiChevronLeft, FiCreditCard, FiUser, FiStar, FiRefreshCw, FiMapPin,
+    FiChevronLeft, FiCreditCard, FiUser, FiStar, FiRefreshCw, FiMapPin, FiAlertTriangle,
 } from "react-icons/fi";
 import { MdRestaurant, MdStorefront } from "react-icons/md";
 import { useState, useEffect, useRef } from "react";
@@ -342,6 +342,21 @@ const OrderDetailPage = () => {
                 <div className="bg-white rounded-2xl mb-4 border border-slate-100 shadow-sm">
                     <OrderProgressBar status={order.status} />
                 </div>
+
+                {/* ── Rejection / Cancellation Reason Banner ── */}
+                {["CANCELLED", "REJECTED"].includes(order.status) && order.issueReason && (
+                    <div className="mb-4 bg-red-50 border border-red-200 rounded-2xl overflow-hidden">
+                        <div className="bg-gradient-to-r from-red-500 to-rose-500 px-5 py-3 flex items-center gap-2">
+                            <FiAlertTriangle className="w-4 h-4 text-white flex-shrink-0" />
+                            <p className="text-white font-bold text-sm">
+                                {order.status === 'REJECTED' ? 'เหตุผลที่ปฏิเสธออเดอร์' : 'เหตุผลที่ยกเลิกออเดอร์'}
+                            </p>
+                        </div>
+                        <div className="px-5 py-4 flex items-center gap-3">
+                            <p className="text-red-700 font-medium">{order.issueReason}</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Countdown Timer ── */}
                 {["COOKING", "AWAITING_PAYMENT", "AWAITING_CONFIRMATION"].includes(order.status) && order.estimatedReadyAt && !isSellerView && (

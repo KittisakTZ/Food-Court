@@ -14,12 +14,6 @@ enum Role {
   BUYER
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  NOT_SPECIFIED
-}
-
 enum OrderStatus {
   PENDING // รอ Seller ตรวจสอบ
   REJECTED // Seller ปฏิเสธ
@@ -36,6 +30,20 @@ enum OrderStatus {
 enum PaymentMethod {
   PROMPTPAY
   CASH_ON_PICKUP // จ่ายเงินสดหน้าร้าน
+}
+
+enum MenuType {
+  MAIN
+  DRINK
+  DESSERT
+  SNACK
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
 model User {
@@ -89,15 +97,16 @@ model Store {
 }
 
 model MenuCategory {
-  id   String @id @default(cuid())
-  name String
+  id       String   @id @default(cuid())
+  name     String
+  menuType MenuType @default(OTHER)
 
   storeId String
   store   Store  @relation(fields: [storeId], references: [id])
 
   menus Menu[]
 
-  @@unique([name, storeId]) // ✨ เพิ่มบรรทัดนี้
+  @@unique([name, storeId])
 }
 
 model Menu {
@@ -105,6 +114,7 @@ model Menu {
   name        String
   description String?
   price       Float
+  cookingTime Int           @default(5)
   image       String?
   isAvailable Boolean       @default(true)
   createdAt   DateTime      @default(now())
@@ -178,15 +188,16 @@ model OrderItem {
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  rating    Int
-  comment   String?
-  isVisible Boolean  @default(false)
-  storeId   String
-  store     Store    @relation(fields: [storeId], references: [id])
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  rating      Int
+  comment     String?
+  isVisible   Boolean  @default(false)
+  isAnonymous Boolean  @default(false)
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
 
   orderId String? @unique
   order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull, onUpdate: Cascade)

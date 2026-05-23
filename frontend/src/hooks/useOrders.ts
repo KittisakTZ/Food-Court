@@ -7,18 +7,25 @@ import { toastService } from '@/services/toast.service';
 import { dialogService } from '@/services/dialog.service';
 import { useClearCart } from "./useCart";
 import { useLocation } from "react-router-dom";
+import { useAuthStore } from "@/zustand/useAuthStore";
 
 // ===== HOOK สำหรับ BUYER (โค้ดเดิม) =====
 type UseOrdersProps = {
     page?: number;
     pageSize?: number;
+    refetchInterval?: number;
 };
 
-export const useMyOrders = ({ page = 1, pageSize = 10 }: UseOrdersProps = {}) => {
+export const useMyOrders = ({ page = 1, pageSize = 10, refetchInterval }: UseOrdersProps = {}) => {
+    const { user } = useAuthStore();
     return useQuery({
-        queryKey: ['my-orders', { page, pageSize }],
+        // รวม user.id ใน queryKey เพื่อแยก cache ของแต่ละ user
+        // ป้องกัน cache ของ User A หลุดไปแสดงให้ User B เห็น
+        queryKey: ['my-orders', user?.id, { page, pageSize }],
         queryFn: () => getMyOrders({ page, pageSize }),
+        enabled: !!user,
         staleTime: 1000 * 60, // 1 minute
+        refetchInterval,
     });
 };
 
@@ -35,17 +42,20 @@ interface StoreOrdersFilter {
     page?: number;
     pageSize?: number;
     status?: OrderStatusString[];
+    enabled?: boolean;
+    refetchInterval?: number;
 }
 
 // **2. แก้ไข Hook ให้รับ Parameter ที่ถูกต้อง**
-export const useMyStoreOrders = (filters: StoreOrdersFilter) => {
+export const useMyStoreOrders = ({ enabled = true, refetchInterval = 1000 * 30, ...filters }: StoreOrdersFilter = {}) => {
     return useQuery({
         // **3. นำ Filter ทั้งหมดมาเป็นส่วนหนึ่งของ Query Key**
         queryKey: [STORE_ORDERS_QUERY_KEY, filters],
         // **4. ส่ง Filter ทั้งหมดต่อไปยัง Service**
         queryFn: () => getMyStoreOrders(filters),
+        enabled,
         staleTime: 1000 * 30, // 30 seconds
-        refetchInterval: 1000 * 30,
+        refetchInterval,
     });
 };
 

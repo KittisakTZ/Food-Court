@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMyStore } from "@/hooks/useStores";
 import { useGetReviewsForStore } from "@/hooks/useReviews";
-import { FiStar, FiMessageSquare, FiUser, FiCalendar, FiChevronLeft, FiChevronRight, FiExternalLink } from "react-icons/fi";
+import { FiStar, FiMessageSquare, FiUser, FiCalendar, FiChevronLeft, FiChevronRight, FiExternalLink, FiEyeOff } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
@@ -75,9 +75,18 @@ const StoreReviewsPage = () => {
                                 ) : (
                                     <div></div> // Placeholder to keep alignment
                                 )}
-                                <div className="text-right text-sm text-gray-600 flex items-center justify-end gap-2">
-                                    <FiUser className="w-4 h-4" />
-                                    <span>โดย: {review.user?.username || 'ไม่ระบุชื่อ'}</span>
+                                <div className="text-right text-sm flex items-center justify-end gap-1.5">
+                                    {review.isAnonymous ? (
+                                        <>
+                                            <FiEyeOff className="w-4 h-4 text-gray-400" />
+                                            <span className="text-gray-400 italic">ผู้ใช้นิรนาม</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FiUser className="w-4 h-4 text-gray-500" />
+                                            <span className="text-gray-600">โดย: {review.user?.username || 'ไม่ระบุชื่อ'}</span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

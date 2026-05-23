@@ -11,6 +11,12 @@ export type UserPayload = {
     role?: Role;
 };
 
+// Payload สำหรับ Login (รองรับ username หรือ email)
+export type LoginPayload = {
+    identifier: string;
+    password: string;
+};
+
 // Payload สำหรับ Update Profile
 export type UpdateProfilePayload = {
     firstName?: string | null;
@@ -20,11 +26,11 @@ export type UpdateProfilePayload = {
     gender?: Gender | null;
 };
 
-// Schema สำหรับการ Login
+// Schema สำหรับการ Login (รองรับ username หรือ email)
 export const LoginSchema = z.object({
     body: z.object({
-        username: z.string().min(4, "Username must be at least 4 characters long"),
-        password: z.string().min(4, "Password must be at least 4 characters long"),
+        identifier: z.string().min(1, "กรุณากรอกชื่อผู้ใช้หรืออีเมล"),
+        password: z.string().min(4, "รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร"),
     }),
 });
 

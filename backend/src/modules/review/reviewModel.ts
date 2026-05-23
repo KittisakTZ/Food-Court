@@ -6,6 +6,7 @@ import { z } from "zod";
 export type ReviewPayload = {
     rating: number;
     comment?: string | null;
+    isAnonymous?: boolean;
 };
 
 // Schema สำหรับการสร้างรีวิว
@@ -16,6 +17,7 @@ export const CreateReviewSchema = z.object({
     body: z.object({
         rating: z.number().int().min(1, "Rating must be between 1 and 5").max(5, "Rating must be between 1 and 5"),
         comment: z.string().max(500, "Comment must be 500 characters or less").optional(),
+        isAnonymous: z.boolean().optional().default(false),
     }),
 });
 

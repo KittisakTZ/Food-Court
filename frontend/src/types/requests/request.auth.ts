@@ -1,7 +1,7 @@
 // @/types/requests/request.auth.ts
 
 export type PayloadLogin = {
-    username: string;
+    identifier: string;
     password: string;
 };
 

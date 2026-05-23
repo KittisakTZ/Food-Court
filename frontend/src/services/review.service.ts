@@ -6,6 +6,7 @@ import { Review } from "@/types/response/review.response";
 type CreateReviewPayload = {
     rating: number;
     comment?: string;
+    isAnonymous?: boolean;
 };
 
 const createReview = async (storeId: string, payload: CreateReviewPayload) => {

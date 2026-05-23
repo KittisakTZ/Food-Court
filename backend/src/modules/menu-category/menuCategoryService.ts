@@ -23,21 +23,23 @@ export const menuCategoryService = {
         return new ServiceResponse(ResponseStatus.Success, "Categories retrieved successfully.", categories, StatusCodes.OK);
     },
 
-    update: async (categoryId: string, payload: MenuCategoryPayload, storeId: string) => {
+    update: async (categoryId: string, payload: Partial<MenuCategoryPayload>, storeId: string) => {
         const category = await menuCategoryRepository.findById(categoryId);
         if (!category) {
             return new ServiceResponse(ResponseStatus.Failed, "Category not found.", null, StatusCodes.NOT_FOUND);
         }
-        
+
         // **การตรวจสอบสิทธิ์:** หมวดหมู่นี้เป็นของร้านค้าที่ถูกต้องหรือไม่
         if (category.storeId !== storeId) {
             return new ServiceResponse(ResponseStatus.Failed, "You are not authorized to update this category.", null, StatusCodes.FORBIDDEN);
         }
 
         // ตรวจสอบชื่อซ้ำ (เผื่อเปลี่ยนชื่อไปซ้ำกับอันอื่น)
-        const existingCategory = await menuCategoryRepository.findByNameAndStore(payload.name, storeId);
-        if (existingCategory && existingCategory.id !== categoryId) {
-            return new ServiceResponse(ResponseStatus.Failed, "Category name already exists in this store.", null, StatusCodes.CONFLICT);
+        if (payload.name) {
+            const existingCategory = await menuCategoryRepository.findByNameAndStore(payload.name, storeId);
+            if (existingCategory && existingCategory.id !== categoryId) {
+                return new ServiceResponse(ResponseStatus.Failed, "Category name already exists in this store.", null, StatusCodes.CONFLICT);
+            }
         }
 
         const updatedCategory = await menuCategoryRepository.update(categoryId, payload);

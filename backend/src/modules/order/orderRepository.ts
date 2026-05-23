@@ -102,7 +102,7 @@ export const orderRepository = {
             // ถ้าไม่มี filter (ดูประวัติ) ให้เรียงตามเวลา
             // ถ้ามี filter (ดูคิว) ให้เรียงตาม position
             orderBy: filterStatus ? { position: 'asc' } : { createdAt: 'desc' },
-            include: { buyer: { select: { username: true } }, orderItems: { include: { menu: true } } }
+            include: { store: true, buyer: { select: { username: true } }, orderItems: { include: { menu: true } } }
         });
     },
 

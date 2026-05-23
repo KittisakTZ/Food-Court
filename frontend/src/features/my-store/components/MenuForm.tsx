@@ -5,12 +5,14 @@ import { useCreateMenu, useUpdateMenu } from "@/hooks/useMenus";
 import { useState, useEffect } from "react";
 import { Menu } from "@/types/response/menu.response";
 import { MdRestaurant, MdCategory, MdCheckCircle, MdClose } from "react-icons/md";
-import { FiFileText, FiImage, FiUploadCloud, FiX } from "react-icons/fi";
+import { FiFileText, FiImage, FiUploadCloud, FiX, FiClock } from "react-icons/fi";
+import { MENU_TYPE_DEFAULT_COOKING_TIME, MENU_TYPE_EMOJI, MENU_TYPE_LABEL } from "@/services/menuCategory.service";
 
 type MenuFormInputs = {
   name: string;
   description: string;
   price: number;
+  cookingTime: number;
   categoryId: string;
   image: FileList;
 };
@@ -23,7 +25,7 @@ interface MenuFormProps {
 
 export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) => {
   const isEditMode = !!initialData;
-  const { register, handleSubmit, reset, setValue, formState: { errors } } =
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } =
     useForm<MenuFormInputs>();
   const { data: categories } = useMenuCategories(storeId);
   const { mutate: create, isPending: isCreating } = useCreateMenu();
@@ -31,6 +33,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const isPending = isCreating || isUpdating;
+  const selectedCategoryId = watch("categoryId");
 
   // โหลดข้อมูลเมื่ออยู่ในโหมดแก้ไข
   useEffect(() => {
@@ -38,6 +41,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
       setValue("name", initialData.name);
       setValue("description", initialData.description || "");
       setValue("price", initialData.price);
+      setValue("cookingTime", initialData.cookingTime ?? 5);
       setValue("categoryId", initialData.categoryId || "");
       setPreviewImage(initialData.image || null);
     } else {
@@ -46,11 +50,21 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
     }
   }, [initialData, isEditMode, setValue, reset]);
 
+  // Auto-fill cookingTime เมื่อเลือก category (เฉพาะโหมดสร้างใหม่)
+  useEffect(() => {
+    if (isEditMode) return;
+    const cat = categories?.find(c => c.id === selectedCategoryId);
+    if (cat?.menuType) {
+      setValue("cookingTime", MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]);
+    }
+  }, [selectedCategoryId, categories, isEditMode, setValue]);
+
   const onSubmit: SubmitHandler<MenuFormInputs> = (data) => {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("description", data.description);
     formData.append("price", String(data.price));
+    formData.append("cookingTime", String(data.cookingTime));
     formData.append("categoryId", data.categoryId);
     if (data.image && data.image.length > 0) {
       formData.append("image", data.image[0]);
@@ -154,6 +168,39 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
           )}
         </div>
 
+        {/* เวลาทำอาหาร */}
+        <div>
+          <label htmlFor="cookingTime" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+            <FiClock className="w-5 h-5 text-orange-600" />
+            เวลาทำต่อ 1 จาน (นาที) <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold text-sm">นาที</span>
+            <input
+              id="cookingTime"
+              type="number"
+              step="1"
+              min="1"
+              max="120"
+              placeholder="5"
+              {...register("cookingTime", {
+                required: "กรุณากรอกเวลาทำอาหาร",
+                valueAsNumber: true,
+                min: { value: 1, message: "ต้องมากกว่า 0 นาที" },
+                max: { value: 120, message: "ไม่เกิน 120 นาที" },
+              })}
+              className="w-full pl-16 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base font-medium shadow-sm"
+            />
+          </div>
+          <p className="text-xs text-gray-400 mt-1.5">ระบบจะรวมเวลาทุกเมนูในออร์เดอร์เพื่อคำนวณนับถอยหลัง</p>
+          {errors.cookingTime && (
+            <p className="text-red-500 text-sm mt-2 flex items-center gap-1 font-medium">
+              <FiX className="w-4 h-4" />
+              {errors.cookingTime.message}
+            </p>
+          )}
+        </div>
+
         {/* หมวดหมู่ */}
         <div>
           <label htmlFor="categoryId" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
@@ -171,10 +218,20 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
             <option value="">-- เลือกหมวดหมู่ --</option>
             {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>
-                {cat.name}
+                {MENU_TYPE_EMOJI[cat.menuType]} {cat.name} ({MENU_TYPE_LABEL[cat.menuType]})
               </option>
             ))}
           </select>
+          {selectedCategoryId && !isEditMode && (() => {
+            const cat = categories?.find(c => c.id === selectedCategoryId);
+            if (!cat) return null;
+            return (
+              <p className="text-xs text-orange-500 mt-1.5 flex items-center gap-1 font-medium">
+                <FiClock className="w-3.5 h-3.5" />
+                เวลาทำแนะนำสำหรับ{MENU_TYPE_LABEL[cat.menuType]}: <span className="font-bold">{MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]} นาที</span>
+              </p>
+            );
+          })()}
           {errors.categoryId && (
             <p className="text-red-500 text-sm mt-2 flex items-center gap-1 font-medium">
               <FiX className="w-4 h-4" />

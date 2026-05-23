@@ -7,6 +7,7 @@ export type MenuPayload = {
     name: string;
     description?: string | null;
     price: number;
+    cookingTime?: number;
     image?: string | null;
     isAvailable?: boolean;
     categoryId: string; // **สำคัญ:** เมนูต้องสังกัดหมวดหมู่
@@ -17,8 +18,9 @@ export const CreateMenuSchema = z.object({
     body: z.object({
         name: z.string().min(1, "Menu name is required").max(100),
         description: z.string().max(500).optional().nullable(),
-        price: z.coerce.number().positive("Price must be a positive number"), // ใช้ coerce
-        isAvailable: z.coerce.boolean().optional().default(true), // ใช้ coerce
+        price: z.coerce.number().positive("Price must be a positive number"),
+        cookingTime: z.coerce.number().int().min(1).max(120).optional().default(5),
+        isAvailable: z.coerce.boolean().optional().default(true),
         categoryId: z.string().cuid("A valid category ID is required"),
     }),
 });
@@ -31,9 +33,10 @@ export const UpdateMenuSchema = z.object({
     body: z.object({
         name: z.string().min(1).max(100).optional(),
         description: z.string().max(500).optional().nullable(),
-        price: z.coerce.number().positive().optional(), // ใช้ coerce
-        isAvailable: z.coerce.boolean().optional(),   // ใช้ coerce
-        categoryId: z.string().cuid().optional(), // อาจจะอนุญาตให้ย้ายหมวดหมู่ได้
+        price: z.coerce.number().positive().optional(),
+        cookingTime: z.coerce.number().int().min(1).max(120).optional(),
+        isAvailable: z.coerce.boolean().optional(),
+        categoryId: z.string().cuid().optional(),
     }),
 });
 

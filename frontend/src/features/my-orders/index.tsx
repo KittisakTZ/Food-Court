@@ -253,12 +253,16 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
         </div>
       </div>
 
-      {/* ── Issue Banner ── */}
-      {order.hasIssue && order.issueReason && (
+      {/* ── Issue / Rejection / Cancellation Reason Banner ── */}
+      {order.issueReason && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-3 flex items-start gap-3">
           <FiAlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-red-700 uppercase tracking-wide">ร้านค้าแจ้งปัญหา</p>
+            <p className="text-sm font-bold text-red-700 uppercase tracking-wide">
+              {order.status === 'REJECTED' ? 'เหตุผลที่ปฏิเสธออเดอร์' :
+               order.status === 'CANCELLED' ? 'เหตุผลที่ยกเลิกออเดอร์' :
+               'ร้านค้าแจ้งปัญหา'}
+            </p>
             <p className="text-base text-red-700 mt-0.5">{order.issueReason}</p>
           </div>
         </div>
