@@ -15,7 +15,7 @@ const ACTIVE_STATUSES: Order['status'][] = [
 export const ChatBox = () => {
     const { user } = useAuthStore();
     const {
-        isOpen, setIsOpen, targetStoreId, closeChat,
+        isOpen, setIsOpen, targetStoreId, targetOrderId, closeChat,
         unreadCount, incrementUnread, resetUnread,
     } = useChatStore();
 
@@ -52,17 +52,25 @@ export const ChatBox = () => {
     // เงื่อนไข: ต้องเป็นออเดอร์ของ user ปัจจุบัน + ตรงร้าน + ผ่าน PENDING แล้ว (store อนุมัติแล้ว)
     const currentStoreOrder = useMemo<Order | null>(() => {
         if (!isBuyer || !activeRoom || !ordersData?.data?.length) return null;
+        if (targetOrderId) {
+            const found = ordersData.data.find(o => o.id === targetOrderId);
+            if (found) return found;
+        }
         const storeId: string | undefined = activeRoom.storeId ?? activeRoom.store?.id;
         if (!storeId) return null;
         return ordersData.data.find(o =>
             o.store?.id === storeId &&   // ตรงร้านที่กำลังแชท
             o.status !== 'PENDING'       // store อนุมัติแล้ว (ไม่ใช่รอดำเนินการ)
         ) ?? null;
-    }, [activeRoom, ordersData, isBuyer]);
+    }, [activeRoom, ordersData, isBuyer, targetOrderId]);
 
     // ออเดอร์ของลูกค้าที่ SELLER กำลังแชทด้วย
     const sellerBuyerOrder = useMemo<Order | null>(() => {
         if (!isSeller || !activeRoom || !storeOrdersData?.data?.length) return null;
+        if (targetOrderId) {
+            const found = storeOrdersData.data.find(o => o.id === targetOrderId);
+            if (found) return found;
+        }
         const buyerUsername: string | undefined = activeRoom.buyer?.username;
         if (!buyerUsername) return null;
         const active = storeOrdersData.data.find(o =>
@@ -70,7 +78,7 @@ export const ChatBox = () => {
             !['COMPLETED', 'CANCELLED', 'REJECTED'].includes(o.status)
         );
         return active ?? storeOrdersData.data.find(o => o.buyer?.username === buyerUsername) ?? null;
-    }, [activeRoom, storeOrdersData, isSeller]);
+    }, [activeRoom, storeOrdersData, isSeller, targetOrderId]);
 
     // Map storeId → ออเดอร์ล่าสุด สำหรับ room list indicator เท่านั้น
     const orderByStoreId = useMemo(() => {

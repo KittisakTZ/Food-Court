@@ -450,7 +450,7 @@ const OrderDetailPage = () => {
                                 )}
                                 {!isSellerView && (
                                     <button
-                                        onClick={(e) => { e.preventDefault(); openChatWith(order.store.id); }}
+                                        onClick={(e) => { e.preventDefault(); openChatWith(order.store.id, order.id); }}
                                         className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-md transition-colors border border-orange-400"
                                     >
                                         <MessageCircle className="w-3.5 h-3.5 text-white" />
