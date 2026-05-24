@@ -278,8 +278,9 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
                 id="image"
                 type="file"
                 accept="image/png, image/jpeg"
-                {...register("image")}
-                onChange={handleImageChange}
+                {...register("image", {
+                  onChange: handleImageChange
+                })}
                 className="hidden"
               />
             </label>
