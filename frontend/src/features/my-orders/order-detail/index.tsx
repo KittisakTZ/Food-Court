@@ -13,6 +13,8 @@ import ReviewForm from "./ReviewForm";
 import { Button } from "@/components/ui/button";
 import { useAddItemToCart } from "@/hooks/useCart";
 import { toastService } from "@/services/toast.service";
+import { MessageCircle } from "lucide-react";
+import { useChatStore } from "@/zustand/useChatStore";
 import { io } from "socket.io-client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -292,6 +294,7 @@ const OrderDetailPage = () => {
     const [isReviewing, setIsReviewing] = useState(false);
     const [isPayModalOpen, setIsPayModalOpen] = useState(false);
     const location = useLocation();
+    const { openChatWith } = useChatStore();
     const isSellerView = location.pathname.includes("/my-store/");
     const { mutate: addToCart, isPending: isAddingToCart } = useAddItemToCart();
     const queryClient = useQueryClient();
@@ -438,12 +441,23 @@ const OrderDetailPage = () => {
                         <div>
                             <p className="text-white/70 text-xs font-medium mb-1">จากร้าน</p>
                             <h1 className="text-white text-2xl md:text-3xl font-black drop-shadow">{order.store.name}</h1>
-                            {order.store.location && (
-                                <div className="flex items-center gap-1 text-white/70 text-xs mt-1">
-                                    <FiMapPin className="w-3 h-3" />
-                                    <span>{order.store.location}</span>
-                                </div>
-                            )}
+                            <div className="flex items-center gap-3 flex-wrap mt-1">
+                                {order.store.location && (
+                                    <div className="flex items-center gap-1 text-white/70 text-xs">
+                                        <FiMapPin className="w-3 h-3 text-white/70" />
+                                        <span>{order.store.location}</span>
+                                    </div>
+                                )}
+                                {!isSellerView && (
+                                    <button
+                                        onClick={(e) => { e.preventDefault(); openChatWith(order.store.id); }}
+                                        className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-md transition-colors border border-orange-400"
+                                    >
+                                        <MessageCircle className="w-3.5 h-3.5 text-white" />
+                                        คุยกับร้านค้า
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         <div className="text-right">
                             <p className="text-white/70 text-xs">ยอดรวม</p>
