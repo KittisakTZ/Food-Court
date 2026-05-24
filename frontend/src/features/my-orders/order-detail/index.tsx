@@ -1,11 +1,11 @@
 import { Link, useParams, useLocation } from "react-router-dom";
-import { useOrder } from "@/hooks/useOrders";
+import { useOrder, useUploadSlip } from "@/hooks/useOrders";
 import { Order } from "@/types/response/order.response";
 import { ProgressBar, Step } from "react-step-progress-bar";
 import "react-step-progress-bar/styles.css";
 import {
     FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign,
-    FiChevronLeft, FiCreditCard, FiUser, FiStar, FiRefreshCw, FiMapPin, FiAlertTriangle,
+    FiChevronLeft, FiCreditCard, FiUser, FiStar, FiRefreshCw, FiMapPin, FiAlertTriangle, FiUpload,
 } from "react-icons/fi";
 import { MdRestaurant, MdStorefront } from "react-icons/md";
 import { useState, useEffect, useRef } from "react";
@@ -169,11 +169,128 @@ const OrderTimeline = ({ order }: { order: Order }) => {
     );
 };
 
+// ── Payment Modal ──────────────────────────────────────────────────────────────
+const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => void }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { mutate: uploadSlip, isPending: isUploading } = useUploadSlip();
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    if (!order) return null;
+
+    const normalizeUrl = (url: string | null) => url ? url.replace(/([^:])\/\/+/g, "$1/") : null;
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { toastService.error("ไฟล์ใหญ่เกินไป! สูงสุด 5MB"); return; }
+        setPreviewUrl(URL.createObjectURL(file));
+        setSelectedFile(file);
+    };
+
+    const handleUpload = () => {
+        if (!selectedFile) return;
+        uploadSlip({ orderId: order.id, slipFile: selectedFile }, {
+            onSuccess: () => { if (previewUrl) URL.revokeObjectURL(previewUrl); onClose(); },
+        });
+    };
+
+    const handleCancelPreview = () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null); setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 animate-in fade-in duration-300">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[92vh] overflow-hidden flex flex-col text-slate-800">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 text-white relative flex-shrink-0">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white p-2 hover:bg-white/20 rounded-xl transition-colors">
+                        <FiXCircle className="w-6 h-6" />
+                    </button>
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                            <FiDollarSign className="w-7 h-7 text-white" />
+                        </div>
+                        <div className="text-left">
+                            <h2 className="text-xl font-bold text-white">ชำระเงิน</h2>
+                            <p className="text-blue-100 text-sm">#{order.id.substring(0, 8)}... · {order.store.name}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-5 space-y-5 overflow-y-auto flex-1">
+                    <div className="text-center py-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
+                        <p className="text-slate-500 text-sm mb-1">ยอดชำระทั้งหมด</p>
+                        <p className="text-5xl font-black text-blue-600">฿{order.totalAmount.toFixed(2)}</p>
+                    </div>
+
+                    <div className="flex justify-center">
+                        {normalizeUrl(order.paymentQrCode) ? (
+                            <div className="bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm">
+                                <img src={normalizeUrl(order.paymentQrCode)!} alt="QR Code" className="w-56 h-56 rounded-xl" />
+                            </div>
+                        ) : (
+                            <div className="w-56 h-56 bg-red-50 rounded-2xl flex items-center justify-center border-2 border-red-200">
+                                <p className="text-red-600 font-semibold text-sm text-center px-4">ไม่สามารถโหลด QR Code</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-900 space-y-1 text-left">
+                        <p className="font-bold mb-2">วิธีชำระเงิน</p>
+                        <p>1. สแกน QR Code ด้วยแอปธนาคาร</p>
+                        <p>2. ชำระเงินตามยอดที่แสดง</p>
+                        <p>3. แนบสลิปการโอนเงินด้านล่าง</p>
+                        {order.paymentExpiresAt && (
+                            <p className="text-amber-700 font-semibold mt-2">
+                                QR หมดอายุ {new Date(order.paymentExpiresAt).toLocaleTimeString("th-TH")}
+                            </p>
+                        )}
+                    </div>
+
+                    {previewUrl && (
+                        <div className="bg-slate-50 rounded-2xl p-4 border-2 border-blue-200">
+                            <div className="flex justify-between items-center mb-3">
+                                <p className="font-semibold text-slate-700">ภาพตัวอย่างสลิป</p>
+                                <button onClick={handleCancelPreview} className="text-red-500 text-sm font-semibold hover:text-red-600">ยกเลิก</button>
+                            </div>
+                            <img src={previewUrl} alt="Preview" className="w-full rounded-xl max-h-72 object-contain bg-white" />
+                        </div>
+                    )}
+
+                    {order.paymentSlip && !previewUrl && (
+                        <button onClick={() => window.open(normalizeUrl(order.paymentSlip)!, "_blank")}
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
+                            <FiCheckCircle className="w-5 h-5" /> ดูสลิปที่อัปโหลดแล้ว
+                        </button>
+                    )}
+
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/png,image/jpeg,image/jpg,image/jfif" className="hidden" disabled={isUploading} />
+
+                    {previewUrl ? (
+                        <button onClick={handleUpload} disabled={isUploading}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                            {isUploading ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> กำลังอัปโหลด...</> : <><FiCheckCircle className="w-5 h-5" /> ยืนยันการอัปโหลด</>}
+                        </button>
+                    ) : (
+                        <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || !!order.paymentSlip}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {order.paymentSlip ? <><FiCheckCircle className="w-5 h-5" /> อัปโหลดเรียบร้อยแล้ว</> : <><FiUpload className="w-5 h-5" /> แนบสลิปการโอนเงิน</>}
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // ── Main Page ──────────────────────────────────────────────────────────────────
 const OrderDetailPage = () => {
     const { orderId } = useParams<{ orderId: string }>();
     const { data: order, isLoading, isError } = useOrder(orderId);
     const [isReviewing, setIsReviewing] = useState(false);
+    const [isPayModalOpen, setIsPayModalOpen] = useState(false);
     const location = useLocation();
     const isSellerView = location.pathname.includes("/my-store/");
     const { mutate: addToCart, isPending: isAddingToCart } = useAddItemToCart();
@@ -289,8 +406,10 @@ const OrderDetailPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        <>
+            <PaymentModal order={isPayModalOpen ? order : null} onClose={() => setIsPayModalOpen(false)} />
+            <div className="min-h-screen bg-slate-50">
+                <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8">
 
                 {/* ── Back + Status ── */}
                 <div className="flex items-center justify-between mb-6">
@@ -423,6 +542,14 @@ const OrderDetailPage = () => {
                             </div>
                         </div>
 
+                        {/* Pay Now Button (Left Column) */}
+                        {!isSellerView && order.status === "AWAITING_PAYMENT" && (
+                            <button onClick={() => setIsPayModalOpen(true)}
+                                className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-base">
+                                <FiDollarSign className="w-5 h-5 text-white" /> ชำระเงินทันที
+                            </button>
+                        )}
+
                         {/* Reorder */}
                         {!isSellerView && ["COMPLETED", "CANCELLED", "REJECTED"].includes(order.status) && (
                             <button onClick={handleReorder} disabled={isAddingToCart}
@@ -459,6 +586,14 @@ const OrderDetailPage = () => {
                                 </div>
                             </div>
 
+                            {/* Pay Now Button (Right Column Summary Card) */}
+                            {!isSellerView && order.status === "AWAITING_PAYMENT" && (
+                                <button onClick={() => setIsPayModalOpen(true)}
+                                    className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm">
+                                    <FiDollarSign className="w-4 h-4 text-white" /> ชำระเงินทันที
+                                </button>
+                            )}
+
                             {/* Payment Slip */}
                             {order.paymentSlip && (
                                 <div className="mt-4 pt-4 border-t border-slate-100">
@@ -485,6 +620,7 @@ const OrderDetailPage = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
