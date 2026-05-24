@@ -25,6 +25,9 @@ export const ChatBox = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputText, setInputText] = useState('');
     const [showOrderDetail, setShowOrderDetail] = useState(false);
+    const [isOrdersExpanded, setIsOrdersExpanded] = useState(false);
+    const [orderPage, setOrderPage] = useState(1);
+    const orderPageSize = 20;
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const isOpenRef = useRef(isOpen);
@@ -35,15 +38,21 @@ export const ChatBox = () => {
     const isBuyer = user?.role === 'BUYER';
     const isSeller = user?.role === 'SELLER';
 
+    // Reset pagination when activeRoom changes
+    useEffect(() => {
+        setOrderPage(1);
+        setIsOrdersExpanded(false);
+    }, [activeRoom]);
+
     // ── ดึงออเดอร์ BUYER เพื่อแสดง card และ indicator ──────────────────────
     const { data: ordersData } = useMyOrders({
-        page: 1, pageSize: 50,
+        page: 1, pageSize: 100,
         refetchInterval: isOpen && isBuyer ? 30000 : undefined,
     });
 
     // ── ดึงออเดอร์ SELLER เพื่อแสดงรายละเอียดออเดอร์ของลูกค้าในแชท ──────
     const { data: storeOrdersData } = useMyStoreOrders({
-        page: 1, pageSize: 50,
+        page: 1, pageSize: 100,
         enabled: isSeller,
         refetchInterval: isOpen && isSeller ? 30000 : undefined,
     });
@@ -103,6 +112,29 @@ export const ChatBox = () => {
         }
         return map;
     }, [ordersData, isBuyer]);
+
+    // รายการออเดอร์ทั้งหมดที่เกี่ยวข้องกับห้องแชทนี้
+    const chatOrders = useMemo<Order[]>(() => {
+        if (isBuyer) {
+            const storeId: string | undefined = activeRoom?.storeId ?? activeRoom?.store?.id;
+            if (!storeId || !ordersData?.data?.length) return [];
+            return ordersData.data
+                .filter(o => o.store?.id === storeId)
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        } else {
+            const buyerUsername: string | undefined = activeRoom?.buyer?.username;
+            if (!buyerUsername || !storeOrdersData?.data?.length) return [];
+            return storeOrdersData.data
+                .filter(o => o.buyer?.username === buyerUsername)
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+    }, [activeRoom, ordersData, storeOrdersData, isBuyer]);
+
+    const totalOrderPages = Math.ceil(chatOrders.length / orderPageSize) || 1;
+    const paginatedChatOrders = useMemo(() => {
+        const start = (orderPage - 1) * orderPageSize;
+        return chatOrders.slice(start, start + orderPageSize);
+    }, [chatOrders, orderPage]);
 
     // นับ active orders สำหรับ floating badge
     const activeOrderCount = isBuyer
@@ -232,19 +264,79 @@ export const ChatBox = () => {
                     {/* ── View: Chat Room ────────────────────────────────── */}
                     {!showOrderDetail && activeRoom && (
                         <>
-                            {/* Order Card — BUYER */}
-                            {isBuyer && currentStoreOrder && (
-                                <OrderChatCard
-                                    order={currentStoreOrder}
-                                    onViewDetail={() => setShowOrderDetail(true)}
-                                />
+                            {/* Collapsible Order List Header */}
+                            {chatOrders.length > 0 && (
+                                <div className="bg-slate-100 border-b border-slate-200 px-3 py-1.5 flex justify-between items-center text-xs font-bold text-slate-600 select-none flex-shrink-0">
+                                    <span>ออเดอร์ที่เกี่ยวข้อง ({chatOrders.length})</span>
+                                    <button 
+                                        onClick={() => setIsOrdersExpanded(prev => !prev)}
+                                        className="text-orange-500 hover:text-orange-600 font-bold transition-colors"
+                                    >
+                                        {isOrdersExpanded ? "ซ่อนทั้งหมด" : `ดูทั้งหมด (หน้า ${orderPage}/${totalOrderPages})`}
+                                    </button>
+                                </div>
                             )}
-                            {/* Order Card — SELLER */}
-                            {isSeller && sellerBuyerOrder && (
-                                <OrderChatCard
-                                    order={sellerBuyerOrder}
-                                    onViewDetail={() => setShowOrderDetail(true)}
-                                />
+
+                            {/* Expanded Order List with Pagination */}
+                            {isOrdersExpanded && chatOrders.length > 0 && (
+                                <div className="bg-slate-50 border-b border-slate-200 max-h-48 overflow-y-auto flex-shrink-0 flex flex-col">
+                                    <div className="divide-y divide-slate-100">
+                                        {paginatedChatOrders.map(o => (
+                                            <OrderChatCard
+                                                key={o.id}
+                                                order={o}
+                                                onViewDetail={() => {
+                                                    useChatStore.setState({ targetOrderId: o.id });
+                                                    setShowOrderDetail(true);
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                    {/* Pagination Controls */}
+                                    {totalOrderPages > 1 && (
+                                        <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100 text-[11px] font-semibold text-slate-500 border-t border-slate-200 flex-shrink-0">
+                                            <button 
+                                                disabled={orderPage === 1}
+                                                onClick={() => setOrderPage(p => Math.max(p - 1, 1))}
+                                                className="text-orange-500 disabled:text-slate-400 hover:underline transition-colors"
+                                            >
+                                                ย้อนกลับ
+                                            </button>
+                                            <span>หน้า {orderPage} / {totalOrderPages}</span>
+                                            <button 
+                                                disabled={orderPage === totalOrderPages}
+                                                onClick={() => setOrderPage(p => Math.min(p + 1, totalOrderPages))}
+                                                className="text-orange-500 disabled:text-slate-400 hover:underline transition-colors"
+                                            >
+                                                ถัดไป
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Collapsed view (shows only the active/latest order) */}
+                            {!isOrdersExpanded && (
+                                <>
+                                    {isBuyer && currentStoreOrder && (
+                                        <OrderChatCard
+                                            order={currentStoreOrder}
+                                            onViewDetail={() => {
+                                                useChatStore.setState({ targetOrderId: currentStoreOrder.id });
+                                                setShowOrderDetail(true);
+                                            }}
+                                        />
+                                    )}
+                                    {isSeller && sellerBuyerOrder && (
+                                        <OrderChatCard
+                                            order={sellerBuyerOrder}
+                                            onViewDetail={() => {
+                                                useChatStore.setState({ targetOrderId: sellerBuyerOrder.id });
+                                                setShowOrderDetail(true);
+                                            }}
+                                        />
+                                    )}
+                                </>
                             )}
 
                             {/* Messages */}
