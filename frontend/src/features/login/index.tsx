@@ -34,6 +34,9 @@ export default function LoginFeature() {
     try {
       const res = await postLogin({ identifier: identifier.trim(), password });
       if (res.statusCode === 200) {
+        if (res.responseObject?.token) {
+          localStorage.setItem("token", res.responseObject.token);
+        }
         const me = await getMe();
         if (me.responseObject) {
           setUser(me.responseObject);

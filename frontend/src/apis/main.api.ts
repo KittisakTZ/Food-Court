@@ -15,12 +15,12 @@ const mainApi = axios.create({
 mainApi.interceptors.request.use(
   function (config) {
     // Do something before request is sent
-    // const getToken = localStorage.getItem("token");
-    // if (getToken) {
-    //   const token = getToken.replace(/['"]+/g, "");
-    //   config.headers["Authorization"] = `Bearer ${token}`;
-    //   config.headers["ngrok-skip-browser-warning"] = "69420";
-    // }
+    const getToken = localStorage.getItem("token");
+    if (getToken) {
+      const token = getToken.replace(/['"]+/g, "");
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    config.headers["ngrok-skip-browser-warning"] = "69420";
     return config;
   },
   function (error) {

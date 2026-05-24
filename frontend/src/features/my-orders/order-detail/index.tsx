@@ -183,7 +183,14 @@ const OrderDetailPage = () => {
     useEffect(() => {
         if (!orderId || isSellerView) return;
         const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace("/v1", "") || "http://localhost:5080";
-        socketRef.current = io(baseUrl, { withCredentials: true, transports: ["websocket", "polling"] });
+        const token = localStorage.getItem("token") || "";
+        socketRef.current = io(baseUrl, {
+            withCredentials: true,
+            transports: ["websocket", "polling"],
+            auth: {
+                token: token.replace(/['"]+/g, "")
+            }
+        });
         socketRef.current.on("connect", () => socketRef.current?.emit("join_order", orderId));
         socketRef.current.on("order:status_update", () =>
             queryClient.invalidateQueries({ queryKey: ["order", orderId] })

@@ -16,8 +16,8 @@ export const postRegister = async (data: PayloadRegister) => {
 };
 
 export const postLogin = async (data: PayloadLogin) => {
-    // สำหรับ Login, data ที่ได้กลับมาจะเป็น null
-    const { data: response } = await mainApi.post<APIResponseType<null>>(
+    // สำหรับ Login, data ที่ได้กลับมาจะมี token
+    const { data: response } = await mainApi.post<APIResponseType<{ token: string }>>(
         LOGIN, // Endpoint: /v1/auth/login
         data
     );

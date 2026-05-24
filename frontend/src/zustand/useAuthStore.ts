@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
 
             clearAuth: () => {
                 useCartStore.getState().setCart(null);
+                localStorage.removeItem("token");
                 set({ user: null, isAuthenticated: false, isLoading: false });
             },
 

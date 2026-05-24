@@ -16,10 +16,14 @@ export const useSocket = () => {
 
     useEffect(() => {
         const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace("/v1", "") || "http://localhost:5080";
+        const token = localStorage.getItem("token") || "";
 
         socketRef.current = io(baseUrl, {
             withCredentials: true,
             transports: ["websocket", "polling"],
+            auth: {
+                token: token.replace(/['"]+/g, "")
+            }
         });
 
         socketRef.current.on("connect", () => setIsConnected(true));

@@ -78,7 +78,7 @@ export const authService = {
             return new ServiceResponse(
                 ResponseStatus.Success,
                 "User authenticated successfully.",
-                null,
+                { token },
                 StatusCodes.OK
             );
         } catch (ex) {
@@ -116,7 +116,13 @@ export const authService = {
 
     authStatus: (req: Request) => {
         try {
-            const token = req.cookies.token;
+            let token = req.cookies.token;
+            if (!token) {
+                const authHeader = req.headers.authorization;
+                if (authHeader && authHeader.startsWith("Bearer ")) {
+                    token = authHeader.substring(7);
+                }
+            }
             if (token) {
                 return new ServiceResponse(
                     ResponseStatus.Success,

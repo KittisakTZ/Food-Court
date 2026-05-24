@@ -46,7 +46,10 @@ export const initializeSocket = (server: HttpServer) => {
                 cookies[name.trim()] = rest.join('=').trim();
             }
         });
-        const token = cookies.token;
+        let token = cookies.token;
+        if (!token) {
+            token = (socket.handshake.auth?.token || socket.handshake.query?.token) as string;
+        }
 
         if (!token) {
             return next(new Error("Authentication error: No token provided"));
