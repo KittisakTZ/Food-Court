@@ -58,10 +58,13 @@ export const ChatBox = () => {
         }
         const storeId: string | undefined = activeRoom.storeId ?? activeRoom.store?.id;
         if (!storeId) return null;
-        return ordersData.data.find(o =>
-            o.store?.id === storeId &&   // ตรงร้านที่กำลังแชท
-            o.status !== 'PENDING'       // store อนุมัติแล้ว (ไม่ใช่รอดำเนินการ)
-        ) ?? null;
+        const matchingOrders = ordersData.data.filter(o =>
+            o.store?.id === storeId &&
+            o.status !== 'PENDING'
+        );
+        if (matchingOrders.length === 0) return null;
+        matchingOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return matchingOrders[0];
     }, [activeRoom, ordersData, isBuyer, targetOrderId]);
 
     // ออเดอร์ของลูกค้าที่ SELLER กำลังแชทด้วย
@@ -73,20 +76,30 @@ export const ChatBox = () => {
         }
         const buyerUsername: string | undefined = activeRoom.buyer?.username;
         if (!buyerUsername) return null;
-        const active = storeOrdersData.data.find(o =>
+
+        const matchingActive = storeOrdersData.data.filter(o =>
             o.buyer?.username === buyerUsername &&
             !['COMPLETED', 'CANCELLED', 'REJECTED'].includes(o.status)
         );
-        return active ?? storeOrdersData.data.find(o => o.buyer?.username === buyerUsername) ?? null;
+        if (matchingActive.length > 0) {
+            matchingActive.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return matchingActive[0];
+        }
+
+        const allMatching = storeOrdersData.data.filter(o => o.buyer?.username === buyerUsername);
+        if (allMatching.length === 0) return null;
+        allMatching.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return allMatching[0];
     }, [activeRoom, storeOrdersData, isSeller, targetOrderId]);
 
     // Map storeId → ออเดอร์ล่าสุด สำหรับ room list indicator เท่านั้น
     const orderByStoreId = useMemo(() => {
         if (!isBuyer || !ordersData?.data) return new Map<string, Order>();
         const map = new Map<string, Order>();
-        for (const o of ordersData.data) {
+        const sortedOrders = [...ordersData.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        for (const o of sortedOrders) {
             const sid = o.store?.id;
-            if (sid && !map.has(sid)) map.set(sid, o);   // skip ถ้า store.id undefined
+            if (sid && !map.has(sid)) map.set(sid, o);
         }
         return map;
     }, [ordersData, isBuyer]);
