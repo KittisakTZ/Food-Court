@@ -8,6 +8,7 @@ import { chatRepository } from "./modules/chat/chatRepository";
 const logger = pino({ name: "socket.io" });
 
 const MAX_MESSAGE_LENGTH = 2000;
+const activeRoomOrders = new Map<string, string>();
 
 interface SocketJwtPayload {
     uuid: string;
@@ -82,6 +83,17 @@ export const initializeSocket = (server: HttpServer) => {
             if (typeof roomId !== "string" || !roomId.trim()) return;
             socket.join(roomId);
             logger.info(`User ${userId} joined room ${roomId}`);
+
+            const activeOrderId = activeRoomOrders.get(roomId);
+            if (activeOrderId) {
+                socket.emit("order_selected", { roomId, orderId: activeOrderId });
+            }
+        });
+
+        socket.on("select_order", (data: { roomId: string; orderId: string }) => {
+            if (!data || typeof data.roomId !== "string" || typeof data.orderId !== "string") return;
+            activeRoomOrders.set(data.roomId, data.orderId);
+            io.to(data.roomId).emit("order_selected", { roomId: data.roomId, orderId: data.orderId });
         });
 
         socket.on("join_kds", (storeId: string) => {

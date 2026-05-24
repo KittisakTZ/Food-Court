@@ -194,6 +194,25 @@ export const ChatBox = () => {
         return () => { socket.off('receive_message', handle); };
     }, [socket]);
 
+    useEffect(() => {
+        if (!socket) return;
+        const handleOrderSelected = (data: { roomId: string; orderId: string }) => {
+            if (activeRoom && data.roomId === activeRoom.id) {
+                useChatStore.setState({ targetOrderId: data.orderId });
+            }
+        };
+        socket.on('order_selected', handleOrderSelected);
+        return () => {
+            socket.off('order_selected', handleOrderSelected);
+        };
+    }, [socket, activeRoom]);
+
+    useEffect(() => {
+        if (socket && activeRoom && targetOrderId) {
+            socket.emit('select_order', { roomId: activeRoom.id, orderId: targetOrderId });
+        }
+    }, [activeRoom, socket]);
+
     useEffect(() => { if (isOpen) resetUnread(); }, [isOpen]);
 
     const handleSend = () => {
@@ -289,10 +308,16 @@ export const ChatBox = () => {
                                                 onSelect={() => {
                                                     useChatStore.setState({ targetOrderId: o.id });
                                                     setIsOrdersExpanded(false);
+                                                    if (socket && activeRoom) {
+                                                        socket.emit('select_order', { roomId: activeRoom.id, orderId: o.id });
+                                                    }
                                                 }}
                                                 onViewDetail={() => {
                                                     useChatStore.setState({ targetOrderId: o.id });
                                                     setShowOrderDetail(true);
+                                                    if (socket && activeRoom) {
+                                                        socket.emit('select_order', { roomId: activeRoom.id, orderId: o.id });
+                                                    }
                                                 }}
                                             />
                                         ))}
@@ -330,6 +355,9 @@ export const ChatBox = () => {
                                             onViewDetail={() => {
                                                 useChatStore.setState({ targetOrderId: currentStoreOrder.id });
                                                 setShowOrderDetail(true);
+                                                if (socket && activeRoom) {
+                                                    socket.emit('select_order', { roomId: activeRoom.id, orderId: currentStoreOrder.id });
+                                                }
                                             }}
                                         />
                                     )}
@@ -340,6 +368,9 @@ export const ChatBox = () => {
                                             onViewDetail={() => {
                                                 useChatStore.setState({ targetOrderId: sellerBuyerOrder.id });
                                                 setShowOrderDetail(true);
+                                                if (socket && activeRoom) {
+                                                    socket.emit('select_order', { roomId: activeRoom.id, orderId: sellerBuyerOrder.id });
+                                                }
                                             }}
                                         />
                                     )}
