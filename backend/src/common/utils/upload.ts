@@ -6,7 +6,9 @@ import path from 'path';
 import fs from 'fs';
 
 // กำหนด Path ของโฟลเดอร์ที่จะเก็บไฟล์
-const uploadDir = path.join(__dirname, '../../uploads');
+const uploadDir = __dirname.includes('build')
+    ? path.join(__dirname, '../../../../src/uploads')
+    : path.join(__dirname, '../../../src/uploads');
 
 // ตรวจสอบและสร้างโฟลเดอร์ uploads ถ้ายังไม่มี
 if (!fs.existsSync(uploadDir)) {
