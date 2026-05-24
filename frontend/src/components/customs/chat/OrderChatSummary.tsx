@@ -84,20 +84,34 @@ const ProgressBar = ({ status }: { status: Order['status'] }) => {
 // ══════════════════════════════════════════════════════════════════════════════
 // OrderChatCard — compact clickable card shown at top of chat room
 // ══════════════════════════════════════════════════════════════════════════════
-interface CardProps { order: Order; onViewDetail: () => void; }
+interface CardProps { 
+    order: Order; 
+    onSelect?: () => void; 
+    onViewDetail: () => void; 
+    isSelected?: boolean;
+}
 
-export const OrderChatCard = ({ order, onViewDetail }: CardProps) => {
+export const OrderChatCard = ({ order, onSelect, onViewDetail, isSelected }: CardProps) => {
     const cfg = STATUS_CFG[order.status];
     const isActive = ACTIVE.includes(order.status);
     const showCountdown = ['COOKING', 'AWAITING_PAYMENT', 'AWAITING_CONFIRMATION'].includes(order.status) && !!order.estimatedReadyAt;
     const isReady = order.status === 'READY_FOR_PICKUP';
     const isRejected = ['REJECTED', 'CANCELLED'].includes(order.status);
 
+    const handleClick = () => {
+        if (onSelect) {
+            onSelect();
+        } else {
+            onViewDetail();
+        }
+    };
+
     return (
-        <button
-            onClick={onViewDetail}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 border-b ${cfg.border} ${cfg.bg}
-                hover:brightness-95 active:brightness-90 transition-all flex-shrink-0 text-left`}
+        <div
+            onClick={handleClick}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 border-b cursor-pointer ${cfg.border} ${cfg.bg}
+                hover:brightness-95 active:brightness-90 transition-all flex-shrink-0 text-left
+                ${isSelected ? 'ring-2 ring-orange-500 border-orange-500 z-10' : ''}`}
         >
             {/* Store image */}
             <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-slate-200 shadow-sm">
@@ -111,13 +125,18 @@ export const OrderChatCard = ({ order, onViewDetail }: CardProps) => {
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
+            <div className="flex-grow min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
                     <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot} ${isActive ? 'animate-pulse' : ''}`} />
                     <span className="text-xs font-black text-slate-700">Q{order.queueNumber}</span>
                     <span className={`text-xs font-bold ${cfg.color}`}>{cfg.text}</span>
                     {order.hasIssue && (
                         <AlertTriangle size={12} className="text-red-500 animate-pulse flex-shrink-0" />
+                    )}
+                    {isSelected && (
+                        <span className="text-[9px] bg-orange-500 text-white font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">
+                            เลือกอยู่
+                        </span>
                     )}
                 </div>
 
@@ -132,15 +151,25 @@ export const OrderChatCard = ({ order, onViewDetail }: CardProps) => {
                     ) : isReady ? (
                         <span className="text-xs font-bold text-emerald-600 animate-pulse">มารับอาหารได้เลย!</span>
                     ) : isRejected ? (
-                        <span className="text-xs text-red-500 font-medium">ดูรายละเอียดและสั่งซ้ำ →</span>
+                        <span className="text-xs text-red-500 font-medium">คำสั่งซื้อล้มเหลว</span>
                     ) : (
-                        <span className="text-xs text-slate-400">ดูรายละเอียด →</span>
+                        <span className="text-xs text-slate-400">สั่งสำเร็จ</span>
                     )}
                 </div>
             </div>
 
-            <ChevronRight size={15} className="text-slate-400 flex-shrink-0" />
-        </button>
+            {/* View Details specific button */}
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onViewDetail();
+                }}
+                className="p-2 hover:bg-black/5 rounded-lg text-slate-500 hover:text-slate-700 transition-colors flex-shrink-0 flex items-center justify-center"
+                title="ดูรายละเอียด"
+            >
+                <ExternalLink size={15} />
+            </button>
+        </div>
     );
 };
 

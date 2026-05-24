@@ -285,6 +285,11 @@ export const ChatBox = () => {
                                             <OrderChatCard
                                                 key={o.id}
                                                 order={o}
+                                                isSelected={(isBuyer ? currentStoreOrder?.id : sellerBuyerOrder?.id) === o.id}
+                                                onSelect={() => {
+                                                    useChatStore.setState({ targetOrderId: o.id });
+                                                    setIsOrdersExpanded(false);
+                                                }}
                                                 onViewDetail={() => {
                                                     useChatStore.setState({ targetOrderId: o.id });
                                                     setShowOrderDetail(true);
@@ -321,6 +326,7 @@ export const ChatBox = () => {
                                     {isBuyer && currentStoreOrder && (
                                         <OrderChatCard
                                             order={currentStoreOrder}
+                                            isSelected={true}
                                             onViewDetail={() => {
                                                 useChatStore.setState({ targetOrderId: currentStoreOrder.id });
                                                 setShowOrderDetail(true);
@@ -330,6 +336,7 @@ export const ChatBox = () => {
                                     {isSeller && sellerBuyerOrder && (
                                         <OrderChatCard
                                             order={sellerBuyerOrder}
+                                            isSelected={true}
                                             onViewDetail={() => {
                                                 useChatStore.setState({ targetOrderId: sellerBuyerOrder.id });
                                                 setShowOrderDetail(true);
