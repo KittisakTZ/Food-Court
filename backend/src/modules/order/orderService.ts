@@ -271,17 +271,15 @@ export const orderService = {
                     return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting payment.", null, StatusCodes.OK);
 
                 } else if (order.paymentMethod === 'CASH_ON_PICKUP') {
-                    const cookingAt = new Date();
                     await orderRepository.updateOrder(orderId, {
-                        status: 'COOKING',
-                        confirmedAt: cookingAt,
-                        startCookingAt: cookingAt,
-                    } as any);
+                        status: 'AWAITING_PAYMENT',
+                        confirmedAt: new Date(),
+                    });
                     await recalcEstimatedReadyAt(store.id);
                     const updatedOrder = await orderRepository.findOrderById(orderId);
-                    emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: cookingAt, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
-                    emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: cookingAt, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
-                    return new ServiceResponse(ResponseStatus.Success, "Order approved and moved to cooking.", null, StatusCodes.OK);
+                    emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'AWAITING_PAYMENT', estimatedReadyAt: updatedOrder?.estimatedReadyAt });
+                    emitOrderUpdate(orderId, { status: 'AWAITING_PAYMENT', estimatedReadyAt: updatedOrder?.estimatedReadyAt });
+                    return new ServiceResponse(ResponseStatus.Success, "Order approved. Awaiting cash payment.", null, StatusCodes.OK);
                 }
                 // กรณีไม่มี paymentMethod (เผื่อข้อมูลเก่า)
                 return new ServiceResponse(ResponseStatus.Failed, "Invalid payment method for this order.", null, StatusCodes.BAD_REQUEST);
@@ -321,7 +319,7 @@ export const orderService = {
                 return new ServiceResponse(ResponseStatus.Success, "Payment confirmed. Order is now cooking.", null, StatusCodes.OK);
 
             case 'CONFIRM_CASH_PAYMENT': {
-                if (order.status !== 'READY_FOR_PICKUP') {
+                if (order.status !== 'AWAITING_PAYMENT') {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot confirm cash payment for an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
                 if (order.paymentMethod !== 'CASH_ON_PICKUP') {
@@ -329,14 +327,15 @@ export const orderService = {
                 }
                 const cashPaidNow = new Date();
                 await orderRepository.updateOrder(orderId, {
-                    status: 'COMPLETED',
+                    status: 'COOKING',
                     paidAt: cashPaidNow,
-                    completedAt: cashPaidNow,
+                    startCookingAt: cashPaidNow,
                 } as any);
                 await recalcEstimatedReadyAt(store.id);
-                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COMPLETED' });
-                emitOrderUpdate(orderId, { status: 'COMPLETED' });
-                return new ServiceResponse(ResponseStatus.Success, "Cash payment confirmed. Order completed.", null, StatusCodes.OK);
+                const updatedOrder = await orderRepository.findOrderById(orderId);
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: cashPaidNow, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
+                emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: cashPaidNow, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
+                return new ServiceResponse(ResponseStatus.Success, "Cash payment confirmed. Order is now cooking.", null, StatusCodes.OK);
             }
 
             case 'PREPARE_COMPLETE':

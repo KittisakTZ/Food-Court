@@ -556,12 +556,20 @@ const OrderDetailPage = () => {
                             </div>
                         </div>
 
-                        {/* Pay Now Button (Left Column) */}
+                        {/* Pay Now Button / Cash Notice (Left Column) */}
                         {!isSellerView && order.status === "AWAITING_PAYMENT" && (
-                            <button onClick={() => setIsPayModalOpen(true)}
-                                className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-base">
-                                <FiDollarSign className="w-5 h-5 text-white" /> Pay Now
-                            </button>
+                            order.paymentMethod === "PROMPTPAY" ? (
+                                <button onClick={() => setIsPayModalOpen(true)}
+                                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-base">
+                                    <FiDollarSign className="w-5 h-5 text-white" /> Pay Now
+                                </button>
+                            ) : (
+                                <div className="w-full p-4 bg-orange-50 border border-orange-200 rounded-2xl text-center">
+                                    <FiDollarSign className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                                    <p className="font-bold text-orange-800 text-base">ชำระเงินสดที่หน้าร้าน</p>
+                                    <p className="text-sm text-orange-600 mt-1">กรุณาชำระเงินสดที่เคาน์เตอร์ของร้านค้าเพื่อยืนยันรายการอาหาร</p>
+                                </div>
+                            )
                         )}
 
                         {/* Reorder */}
@@ -601,7 +609,7 @@ const OrderDetailPage = () => {
                             </div>
 
                             {/* Pay Now Button (Right Column Summary Card) */}
-                            {!isSellerView && order.status === "AWAITING_PAYMENT" && (
+                            {!isSellerView && order.status === "AWAITING_PAYMENT" && order.paymentMethod === "PROMPTPAY" && (
                                 <button onClick={() => setIsPayModalOpen(true)}
                                     className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm">
                                     <FiDollarSign className="w-4 h-4 text-white" /> Pay Now

@@ -179,12 +179,13 @@ const OrderActions = ({ order }: { order: Order }) => {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [dialogState, setDialogState] = useState<{ isOpen: boolean; title: string; description: string; onConfirm: (() => void) | null }>({ isOpen: false, title: '', description: '', onConfirm: null });
 
-    const openDialog = (action: "APPROVE" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP") => {
+    const openDialog = (action: "APPROVE" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "CONFIRM_CASH_PAYMENT") => {
         const msgs: Record<typeof action, string> = {
             APPROVE: 'Approve this order and begin processing',
             CONFIRM_PAYMENT: 'Confirm payment received and begin cooking',
             PREPARE_COMPLETE: 'Confirm food is ready for pickup',
             CUSTOMER_PICKED_UP: 'Confirm customer has picked up the food',
+            CONFIRM_CASH_PAYMENT: 'Confirm cash payment received and begin cooking',
         };
         setDialogState({ isOpen: true, title: 'Confirm Action', description: msgs[action], onConfirm: () => updateStatus({ orderId: order.id, action }) });
     };
@@ -224,15 +225,26 @@ const OrderActions = ({ order }: { order: Order }) => {
                 )}
 
                 {order.status === 'AWAITING_PAYMENT' && (
-                    <div className="flex items-center gap-3 p-3.5 bg-blue-50 border border-blue-200 rounded-xl">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FiDollarSign className="w-4 h-4 text-blue-600" />
+                    order.paymentMethod === 'CASH_ON_PICKUP' ? (
+                        <button
+                            onClick={() => openDialog('CONFIRM_CASH_PAYMENT')}
+                            disabled={isPending}
+                            className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-bold text-base transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                        >
+                            {isPending ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <FiDollarSign className="w-5 h-5" />}
+                            รับเงินแล้ว (Confirm Cash)
+                        </button>
+                    ) : (
+                        <div className="flex items-center gap-3 p-3.5 bg-blue-50 border border-blue-200 rounded-xl">
+                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <FiDollarSign className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-blue-800">Awaiting Payment</p>
+                                <p className="text-xs text-blue-500">Customer is making payment</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-bold text-blue-800">Awaiting Payment</p>
-                            <p className="text-xs text-blue-500">Customer is making payment</p>
-                        </div>
-                    </div>
+                    )
                 )}
 
                 {order.status === 'AWAITING_CONFIRMATION' && (

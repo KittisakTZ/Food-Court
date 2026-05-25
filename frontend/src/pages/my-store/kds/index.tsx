@@ -440,13 +440,23 @@ export default function KDSPage() {
                 variant: "danger",
             });
         } else if (order.status === "AWAITING_PAYMENT") {
-            actions.push({
-                label: "Skip Payment",
-                icon: <FiZap className="w-4 h-4" />,
-                onClick: () => handleAction(order.id, "FORCE_COOKING"),
-                variant: "info",
-                isPending: updateStatus.isPending,
-            });
+            if (order.paymentMethod === "CASH_ON_PICKUP") {
+                actions.push({
+                    label: "Confirm Payment",
+                    icon: <FiDollarSign className="w-4 h-4" />,
+                    onClick: () => handleAction(order.id, "CONFIRM_CASH_PAYMENT"),
+                    variant: "primary",
+                    isPending: updateStatus.isPending,
+                });
+            } else {
+                actions.push({
+                    label: "Skip Payment",
+                    icon: <FiZap className="w-4 h-4" />,
+                    onClick: () => handleAction(order.id, "FORCE_COOKING"),
+                    variant: "info",
+                    isPending: updateStatus.isPending,
+                });
+            }
             actions.push({
                 label: "Cancel",
                 icon: <FiX className="w-4 h-4" />,
@@ -503,7 +513,7 @@ export default function KDSPage() {
 
     const getReadyActions = (order: KdsOrder): CardAction[] => {
         const actions: CardAction[] = [];
-        if (order.paymentMethod === "CASH_ON_PICKUP") {
+        if (order.paymentMethod === "CASH_ON_PICKUP" && !order.paidAt) {
             actions.push({
                 label: "Confirm Payment",
                 icon: <FiDollarSign className="w-4 h-4" />,
