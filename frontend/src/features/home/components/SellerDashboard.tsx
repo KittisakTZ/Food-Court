@@ -38,7 +38,7 @@ type ViewMode = "kanban" | "list";
 
 const STATUS_CONFIG = {
   PENDING: {
-    label: "รอดำเนินการ",
+    label: "Pending",
     icon: <FiClock className="w-4 h-4" />,
     color: "yellow",
     bgColor: "bg-yellow-100",
@@ -46,7 +46,7 @@ const STATUS_CONFIG = {
     borderColor: "border-yellow-300",
   },
   AWAITING_PAYMENT: {
-    label: "รอชำระเงิน",
+    label: "Awaiting Payment",
     icon: <FiDollarSign className="w-4 h-4" />,
     color: "blue",
     bgColor: "bg-blue-100",
@@ -54,7 +54,7 @@ const STATUS_CONFIG = {
     borderColor: "border-blue-300",
   },
   AWAITING_CONFIRMATION: {
-    label: "รอตรวจสอบสลิป",
+    label: "Awaiting Confirmation",
     icon: <FiCheck className="w-4 h-4" />,
     color: "purple",
     bgColor: "bg-purple-100",
@@ -62,7 +62,7 @@ const STATUS_CONFIG = {
     borderColor: "border-purple-300",
   },
   COOKING: {
-    label: "กำลังทำอาหาร",
+    label: "Cooking",
     icon: <MdRestaurant className="w-4 h-4" />,
     color: "orange",
     bgColor: "bg-orange-100",
@@ -70,7 +70,7 @@ const STATUS_CONFIG = {
     borderColor: "border-orange-300",
   },
   READY_FOR_PICKUP: {
-    label: "พร้อมรับ",
+    label: "Ready for Pickup",
     icon: <FiPackage className="w-4 h-4" />,
     color: "green",
     bgColor: "bg-green-100",
@@ -87,7 +87,7 @@ export const SellerDashboard = () => {
       <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-lg font-semibold text-gray-700">กำลังโหลด...</p>
+          <p className="text-lg font-semibold text-gray-700">Loading...</p>
         </div>
       </div>
     );
@@ -99,17 +99,17 @@ export const SellerDashboard = () => {
         <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-12">
           <MdStorefront className="w-24 h-24 text-gray-300 mx-auto mb-6" />
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            ยินดีต้อนรับ ผู้ขาย!
+            Welcome, Seller!
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            คุณยังไม่ได้สร้างร้านค้า เริ่มต้นสร้างร้านเพื่อขายอาหารกันเลย!
+            You haven't created a store yet. Start creating one to sell food!
           </p>
           <Link
             to="/my-store/create"
             className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-lg rounded-full hover:from-orange-600 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             <MdStorefront className="w-6 h-6" />
-            สร้างร้านค้าของคุณ
+            Create Your Store
           </Link>
         </div>
       </div>
@@ -163,7 +163,7 @@ const KanbanColumn = ({
           </div>
           <div className="flex-1">
             <h3 className="font-bold text-lg">{title}</h3>
-            <p className="text-sm text-white/80">{orders.length} รายการ</p>
+            <p className="text-sm text-white/80">{orders.length} orders</p>
           </div>
         </div>
       </div>
@@ -171,7 +171,7 @@ const KanbanColumn = ({
       <div className="flex-1 overflow-y-auto space-y-3 pr-2 min-h-[400px]">
         {orders.length === 0 ? (
           <div className="flex items-center justify-center h-40 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-            <p className="text-gray-400 text-sm">ไม่มีออเดอร์</p>
+            <p className="text-gray-400 text-sm">No orders</p>
           </div>
         ) : (
           <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -325,7 +325,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <FiPackage className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-orange-500 animate-pulse" />
           </div>
           <p className="text-lg font-semibold text-gray-700">
-            กำลังโหลดออเดอร์...
+            Loading orders...
           </p>
         </div>
       </div>
@@ -340,14 +340,14 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <FiPackage className="w-10 h-10 text-red-600" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-3">
-            เกิดข้อผิดพลาด
+            Error
           </h2>
-          <p className="text-gray-600 mb-6">ไม่สามารถโหลดออเดอร์ได้</p>
+          <p className="text-gray-600 mb-6">Unable to load orders</p>
           <button
             onClick={handleRefresh}
             className="px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg font-semibold"
           >
-            ลองอีกครั้ง
+            Try Again
           </button>
         </div>
       </div>
@@ -373,9 +373,9 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               <IoFastFoodOutline className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold mb-1">คิวออเดอร์</h1>
+              <h1 className="text-4xl font-bold mb-1">Queue</h1>
               <p className="text-orange-100 text-lg">
-                ร้าน <span className="font-semibold">{storeName}</span>
+                Store: <span className="font-semibold">{storeName}</span>
               </p>
             </div>
           </div>
@@ -384,7 +384,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               onClick={handleRefresh}
               disabled={isFetching}
               className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all disabled:opacity-50"
-              title="รีเฟรช"
+              title="Refresh"
             >
               <FiRefreshCw className={`w-5 h-5 ${isFetching ? "animate-spin" : ""}`} />
             </button>
@@ -397,7 +397,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                   }`}
               >
                 <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
-                บอร์ด
+                Board
               </button>
               <button
                 onClick={() => setViewMode("list")}
@@ -407,7 +407,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                   }`}
               >
                 <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                รายการ
+                List
               </button>
             </div>
           </div>
@@ -421,7 +421,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
           >
             <FiClock className="w-6 h-6 mx-auto mb-2" />
             <p className="text-2xl font-bold">{statsFromCurrentPage.pending}</p>
-            <p className="text-sm text-orange-100">รอดำเนินการ</p>
+            <p className="text-sm text-orange-100">Pending</p>
           </button>
           <button
             onClick={() => handleStatusChange("AWAITING_PAYMENT")}
@@ -431,7 +431,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <p className="text-2xl font-bold">
               {statsFromCurrentPage.awaitingPayment}
             </p>
-            <p className="text-sm text-orange-100">รอชำระเงิน</p>
+            <p className="text-sm text-orange-100">Awaiting Payment</p>
           </button>
           <button
             onClick={() => handleStatusChange("AWAITING_CONFIRMATION")}
@@ -439,7 +439,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
           >
             <FiCheck className="w-6 h-6 mx-auto mb-2" />
             <p className="text-2xl font-bold">{statsFromCurrentPage.awaitingConfirmation}</p>
-            <p className="text-sm text-orange-100">รอตรวจสอบ</p>
+            <p className="text-sm text-orange-100">Awaiting Confirmation</p>
           </button>
           <button
             onClick={() => handleStatusChange("COOKING")}
@@ -447,7 +447,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
           >
             <MdRestaurant className="w-6 h-6 mx-auto mb-2" />
             <p className="text-2xl font-bold">{statsFromCurrentPage.cooking}</p>
-            <p className="text-sm text-orange-100">กำลังทำ</p>
+            <p className="text-sm text-orange-100">Cooking</p>
           </button>
           <button
             onClick={() => handleStatusChange("READY_FOR_PICKUP")}
@@ -457,7 +457,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <p className="text-2xl font-bold">
               {statsFromCurrentPage.readyForPickup}
             </p>
-            <p className="text-sm text-orange-100">พร้อมรับ</p>
+            <p className="text-sm text-orange-100">Ready for Pickup</p>
           </button>
         </div>
       </div>
@@ -467,8 +467,8 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
         <div className="mb-6 bg-white rounded-2xl shadow-lg p-5 border border-orange-100">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <MdRestaurant className="text-orange-500" />
-            สรุปรายการอาหารที่ต้องทำ
-            <span className="text-sm font-normal text-gray-500 ml-2">(คลิกเพื่อกรองดูเฉพาะเมนูนี้)</span>
+            Food Items Summary
+            <span className="text-sm font-normal text-gray-500 ml-2">(click to filter by this menu)</span>
           </h3>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {menuStats.map((menu) => (
@@ -494,7 +494,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                 </div>
                 <div className="text-left flex-1 min-w-0">
                   <p className="font-bold text-gray-800 truncate text-base leading-tight">{menu.name}</p>
-                  <p className="text-sm text-gray-500 mt-1">รวม <span className="font-semibold text-orange-600">{menu.quantity}</span> ที่</p>
+                  <p className="text-sm text-gray-500 mt-1">Total <span className="font-semibold text-orange-600">{menu.quantity}</span> orders</p>
                 </div>
                 {selectedMenuId === menu.id && (
                   <FiCheck className="text-orange-500 w-5 h-5 flex-shrink-0" />
@@ -512,7 +512,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="ค้นหาเลขออเดอร์หรือชื่อลูกค้า..."
+              placeholder="Search order number or customer name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 font-medium text-gray-700 bg-white hover:border-gray-300 transition-all"
@@ -535,12 +535,12 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               }
               className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 font-semibold text-gray-700 bg-white hover:border-gray-300 transition-all cursor-pointer appearance-none"
             >
-              <option value="ALL">ทั้งหมด</option>
-              <option value="PENDING">รอดำเนินการ</option>
-              <option value="AWAITING_PAYMENT">รอชำระเงิน</option>
-              <option value="AWAITING_CONFIRMATION">รอตรวจสอบสลิป</option>
-              <option value="COOKING">กำลังทำอาหาร</option>
-              <option value="READY_FOR_PICKUP">พร้อมรับ</option>
+              <option value="ALL">All</option>
+              <option value="PENDING">Pending</option>
+              <option value="AWAITING_PAYMENT">Awaiting Payment</option>
+              <option value="AWAITING_CONFIRMATION">Awaiting Confirmation</option>
+              <option value="COOKING">Cooking</option>
+              <option value="READY_FOR_PICKUP">Ready for Pickup</option>
             </select>
           </div>
           <div className="md:col-span-3 relative">
@@ -549,10 +549,10 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 font-semibold text-gray-700 bg-white hover:border-gray-300 transition-all cursor-pointer appearance-none"
             >
-              <option value={10}>10 รายการ/หน้า</option>
-              <option value={20}>20 รายการ/หน้า</option>
-              <option value={50}>50 รายการ/หน้า</option>
-              <option value={100}>100 รายการ/หน้า</option>
+              <option value={10}>10 items/page</option>
+              <option value={20}>20 items/page</option>
+              <option value={50}>50 items/page</option>
+              <option value={100}>100 items/page</option>
             </select>
           </div>
         </div>
@@ -571,7 +571,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
           {selectedMenuId && (
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-semibold border border-yellow-200">
               <MdRestaurant className="w-4 h-4" />
-              เมนู: {menuStats.find(m => m.id === selectedMenuId)?.name}
+              Menu: {menuStats.find(m => m.id === selectedMenuId)?.name}
               <button
                 onClick={() => setSelectedMenuId(null)}
                 className="hover:bg-yellow-200 rounded-full p-0.5 transition-all"
@@ -582,7 +582,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
           )}
           {searchQuery && (
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-semibold">
-              ค้นหา: "{searchQuery}"
+              Search: "{searchQuery}"
               <button
                 onClick={clearSearch}
                 className="hover:bg-blue-200 rounded-full p-0.5 transition-all"
@@ -592,7 +592,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
             </span>
           )}
           <span className="text-sm text-gray-500 ml-auto">
-            แสดง {filteredOrders.length} รายการจากทั้งหมด {totalOrders} รายการ
+            Showing {filteredOrders.length} of {totalOrders} orders
           </span>
         </div>
       </div>
@@ -602,27 +602,27 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
         <>
           {filteredOrders.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
-              <KanbanColumn title="รอดำเนินการ" icon={<FiClock className="w-6 h-6" />} color="yellow" orders={categorizedOrders.pending} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="PENDING" />
-              <KanbanColumn title="รอชำระเงิน" icon={<FiDollarSign className="w-6 h-6" />} color="blue" orders={categorizedOrders.awaitingPayment} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="AWAITING_PAYMENT" />
-              <KanbanColumn title="รอตรวจสอบสลิป" icon={<FiCheck className="w-6 h-6" />} color="purple" orders={categorizedOrders.awaitingConfirmation} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="AWAITING_CONFIRMATION" />
-              <KanbanColumn title="กำลังทำอาหาร" icon={<MdRestaurant className="w-6 h-6" />} color="orange" orders={categorizedOrders.cooking} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="COOKING" />
-              <KanbanColumn title="พร้อมรับ" icon={<FiPackage className="w-6 h-6" />} color="green" orders={categorizedOrders.readyForPickup} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="READY_FOR_PICKUP" />
+              <KanbanColumn title="Pending" icon={<FiClock className="w-6 h-6" />} color="yellow" orders={categorizedOrders.pending} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="PENDING" />
+              <KanbanColumn title="Awaiting Payment" icon={<FiDollarSign className="w-6 h-6" />} color="blue" orders={categorizedOrders.awaitingPayment} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="AWAITING_PAYMENT" />
+              <KanbanColumn title="Awaiting Confirmation" icon={<FiCheck className="w-6 h-6" />} color="purple" orders={categorizedOrders.awaitingConfirmation} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="AWAITING_CONFIRMATION" />
+              <KanbanColumn title="Cooking" icon={<MdRestaurant className="w-6 h-6" />} color="orange" orders={categorizedOrders.cooking} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="COOKING" />
+              <KanbanColumn title="Ready for Pickup" icon={<FiPackage className="w-6 h-6" />} color="green" orders={categorizedOrders.readyForPickup} onDragEnd={handleDragEnd} selectedStatus={selectedStatus} status="READY_FOR_PICKUP" />
             </div>
           ) : (
             <div className="text-center py-20 bg-white rounded-3xl shadow-lg border-2 border-dashed border-gray-200">
               <FiPackage className="w-24 h-24 text-gray-300 mx-auto mb-6" />
               <h2 className="text-3xl font-bold text-gray-800 mb-3">
-                {searchQuery || selectedMenuId ? "ไม่พบออเดอร์ที่ค้นหา" : "ไม่มีออเดอร์"}
+                {searchQuery || selectedMenuId ? "No orders found" : "No orders"}
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
-                {searchQuery || selectedMenuId ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง" : "ยังไม่มีออเดอร์ใหม่ในขณะนี้"}
+                {searchQuery || selectedMenuId ? "Try searching with different terms or clear filters" : "No new orders at the moment"}
               </p>
               {(searchQuery || selectedMenuId) && (
                 <button
                   onClick={() => { clearSearch(); setSelectedMenuId(null); }}
                   className="mt-6 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg font-semibold"
                 >
-                  เคลียร์การค้นหา
+                  Clear Search
                 </button>
               )}
             </div>
@@ -660,17 +660,17 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
               <FiPackage className="w-24 h-24 text-gray-300 mx-auto mb-6" />
               <h2 className="text-3xl font-bold text-gray-800 mb-3">
                 {searchQuery || selectedMenuId
-                  ? "ไม่พบออเดอร์ที่ค้นหา"
+                  ? "No orders found"
                   : selectedStatus === "ALL"
-                    ? "ยังไม่มีออเดอร์"
-                    : "ไม่พบออเดอร์ในสถานะนี้"}
+                    ? "No orders yet"
+                    : "No orders in this status"}
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
                 {searchQuery || selectedMenuId
-                  ? "ลองค้นหาด้วยคำอื่นหรือเคลียร์ตัวกรอง"
+                  ? "Try searching with different terms or clear filters"
                   : selectedStatus === "ALL"
-                    ? "เมื่อมีลูกค้าสั่งอาหาร ออเดอร์จะแสดงที่นี่"
-                    : "ลองเปลี่ยนการกรองเพื่อดูสถานะอื่น"}
+                    ? "When customers place orders, they will appear here"
+                    : "Try changing the filter to see other statuses"}
               </p>
               {(searchQuery || selectedStatus !== "ALL" || selectedMenuId) && (
                 <button
@@ -681,7 +681,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                   }}
                   className="mt-6 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg font-semibold"
                 >
-                  เคลียร์ตัวกรอง
+                  Clear Filters
                 </button>
               )}
             </div>
@@ -694,12 +694,12 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
         <div className="mt-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl shadow-lg p-6">
             <div className="text-sm text-gray-600 font-medium">
-              แสดงหน้า <span className="font-bold text-gray-900">{ordersData.currentPage}</span> จาก <span className="font-bold text-gray-900">{ordersData.totalPages}</span> หน้า
-              <span className="text-gray-400 ml-2">(ทั้งหมด {totalOrders} รายการ)</span>
+              Page <span className="font-bold text-gray-900">{ordersData.currentPage}</span> of <span className="font-bold text-gray-900">{ordersData.totalPages}</span>
+              <span className="text-gray-400 ml-2">(Total {totalOrders} orders)</span>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm" title="หน้าแรก">««</button>
-              <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold">ถัดไป<FiChevronLeft className="w-4 h-4" /></button>
+              <button onClick={() => setPage(1)} disabled={page === 1} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm" title="First page">««</button>
+              <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold"><FiChevronLeft className="w-4 h-4" />Previous</button>
               <div className="hidden sm:flex items-center gap-1">
                 {(() => {
                   const pages = [];
@@ -732,13 +732,13 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
                 })()}
               </div>
               <div className="sm:hidden px-4 py-2 bg-gray-100 rounded-lg font-bold text-gray-700">{page} / {ordersData.totalPages}</div>
-              <button onClick={() => setPage((p) => p + 1)} disabled={page === ordersData.totalPages} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold">ถัดไป<FiChevronRight className="w-4 h-4" /></button>
-              <button onClick={() => setPage(ordersData.totalPages)} disabled={page === ordersData.totalPages} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm" title="หน้าสุดท้าย">»»</button>
+              <button onClick={() => setPage((p) => p + 1)} disabled={page === ordersData.totalPages} className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold">Next<FiChevronRight className="w-4 h-4" /></button>
+              <button onClick={() => setPage(ordersData.totalPages)} disabled={page === ordersData.totalPages} className="px-3 py-2 border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-white transition-all font-semibold text-sm" title="Last page">»»</button>
             </div>
           </div>
           {ordersData.totalPages > 5 && (
             <div className="mt-4 flex items-center justify-center gap-3">
-              <label className="text-sm font-semibold text-gray-700">ไปที่หน้า:</label>
+              <label className="text-sm font-semibold text-gray-700">Go to page:</label>
               <input
                 type="number"
                 min={1}
@@ -762,7 +762,7 @@ const StoreOrderQueue = ({ storeName }: { storeName: string }) => {
       {isFetching && !isLoading && (
         <div className="fixed top-4 right-4 bg-white rounded-xl shadow-xl px-6 py-3 flex items-center gap-3 z-50 border-2 border-orange-200">
           <FiRefreshCw className="w-5 h-5 text-orange-500 animate-spin" />
-          <span className="font-semibold text-gray-700">กำลังอัพเดท...</span>
+          <span className="font-semibold text-gray-700">Updating...</span>
         </div>
       )}
     </div>
