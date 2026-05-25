@@ -120,7 +120,7 @@ export const orderRepository = {
     findOrderById: async (orderId: string) => {
         return prisma.order.findUnique({
             where: { id: orderId },
-            include: { store: true }
+            include: { store: true, orderItems: true }
         });
     },
 

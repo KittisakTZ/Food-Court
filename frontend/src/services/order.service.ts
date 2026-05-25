@@ -71,7 +71,7 @@ export const getMyStoreOrders = async (params: GetStoreOrdersParams) => {
 
 type UpdateOrderStatusParams = {
     orderId: string;
-    action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE" | "CANCEL_BY_STORE" | "FORCE_COOKING";
+    action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "CONFIRM_CASH_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE" | "CANCEL_BY_STORE" | "FORCE_COOKING";
     issueReason?: string;
     cancelReason?: string;
 }
