@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useMyStoreOrders } from "./useOrders";
+import { toastService } from "@/services/toast.service";
 
 export interface KdsOrderItem {
     menuId: string;
@@ -81,21 +82,21 @@ export const useKDS = (storeId: string | undefined) => {
 
         socketRef.current.on("disconnect", () => setIsConnected(false));
 
-        // order ใหม่เข้าคิว
+        // new order in queue
         socketRef.current.on("kds:new_order", (order: KdsOrder) => {
             setOrders((prev) => {
                 const exists = prev.find((o) => o.id === order.id);
                 if (exists) return prev;
                 return [...prev, order];
             });
+            toastService.success(`New order #${order.queueNumber} received!`);
         });
 
-        // สถานะ order เปลี่ยน
+        // order status changed
         socketRef.current.on(
             "kds:order_update",
             (update: { id: string; status?: string; startCookingAt?: string; estimatedReadyAt?: string }) => {
                 setOrders((prev) => {
-                    // ถ้า COMPLETED / REJECTED / CANCELLED ให้เอาออกจาก KDS
                     if (update.status && ["COMPLETED", "REJECTED", "CANCELLED"].includes(update.status)) {
                         return prev.filter((o) => o.id !== update.id);
                     }
@@ -110,6 +111,14 @@ export const useKDS = (storeId: string | undefined) => {
                             : o
                     );
                 });
+
+                if (update.status === "AWAITING_CONFIRMATION") {
+                    toastService.warning("A customer has uploaded a payment slip. Please verify.");
+                } else if (update.status === "CANCELLED") {
+                    toastService.error("An order was automatically cancelled due to payment timeout.");
+                } else if (update.status === "COMPLETED") {
+                    toastService.success("Order marked as completed.");
+                }
             }
         );
 

@@ -1,10 +1,20 @@
 // @/hooks/useOrderNotifications.ts
-// Subscribes to socket order status events and shows in-app toast notifications.
+// Buyer-side: subscribes to order status socket events and shows toast notifications.
 
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import { toastService } from "@/services/toast.service";
 import { useAuthStore } from "@/zustand/useAuthStore";
+
+const STATUS_TOASTS: Record<string, { msg: string; type: 'success' | 'error' | 'warning' }> = {
+  AWAITING_PAYMENT:      { type: 'success', msg: "Store confirmed your order. Please complete your PromptPay payment." },
+  AWAITING_CONFIRMATION: { type: 'success', msg: "Payment slip received. The store is verifying your payment." },
+  COOKING:               { type: 'success', msg: "The store has confirmed your order and is now preparing your food!" },
+  READY_FOR_PICKUP:      { type: 'success', msg: "Your order is ready for pickup! Please collect it at the store." },
+  COMPLETED:             { type: 'success', msg: "Order completed. Thank you for your order!" },
+  REJECTED:              { type: 'error',   msg: "Your order was rejected by the store." },
+  CANCELLED:             { type: 'error',   msg: "Your order has been cancelled." },
+};
 
 export const useOrderNotifications = () => {
     const { user } = useAuthStore();
@@ -22,22 +32,12 @@ export const useOrderNotifications = () => {
             auth: { token: token.replace(/['"]+/g, "") },
         });
 
-        socketRef.current.on("order:status_update", (data: { status: string; orderId?: string }) => {
-            if (data.status === "COOKING") {
-                toastService.success("Your order has been confirmed and is now being prepared!");
-            } else if (data.status === "READY_FOR_PICKUP") {
-                toastService.success("Your order is ready for pickup! Please collect it at the store.");
-            } else if (data.status === "AWAITING_PAYMENT") {
-                toastService.success("Order confirmed! Please complete payment.");
-            } else if (data.status === "REJECTED") {
-                toastService.error("Your order was rejected by the store.");
-            } else if (data.status === "CANCELLED") {
-                toastService.error("Your order has been cancelled.");
-            }
+        socketRef.current.on("order:status_update", (data: { status: string }) => {
+            const toast = STATUS_TOASTS[data.status];
+            if (!toast) return;
+            toastService[toast.type](toast.msg);
         });
 
-        return () => {
-            socketRef.current?.disconnect();
-        };
+        return () => { socketRef.current?.disconnect(); };
     }, [user?.role]);
 };

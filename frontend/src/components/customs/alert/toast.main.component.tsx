@@ -1,86 +1,88 @@
-// @/components/customs/alert/toast.main.component.tsx (ฉบับแก้ไข)
-
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import * as Toast from "@radix-ui/react-toast";
+import { FiCheck, FiX, FiAlertTriangle } from "react-icons/fi";
+
+type ToastType = 'success' | 'error' | 'warning';
 
 type ToastContextType = {
-  // เปลี่ยนชื่อฟังก์ชันให้สื่อความหมายมากขึ้น
-  showToast: (message: string, type: 'success' | 'error' | 'warning') => void;
+  showToast: (message: string, type: ToastType) => void;
 };
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-// (1) รวม State ทั้งหมดไว้ใน Object เดียว
-interface ToastState {
-  open: boolean;
+interface ToastItem {
+  id: string;
   message: string;
-  type: 'success' | 'error' | 'warning';
+  type: ToastType;
 }
 
+const STYLES: Record<ToastType, { border: string; iconBg: string; icon: JSX.Element; title: string }> = {
+  success: { border: 'border-l-green-500',  iconBg: 'bg-green-500',  icon: <FiCheck className="w-4 h-4 text-white" />,         title: 'Success' },
+  error:   { border: 'border-l-red-500',    iconBg: 'bg-red-500',    icon: <FiX className="w-4 h-4 text-white" />,             title: 'Error'   },
+  warning: { border: 'border-l-yellow-500', iconBg: 'bg-yellow-500', icon: <FiAlertTriangle className="w-4 h-4 text-white" />, title: 'Notice'  },
+};
+
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
-  const [toast, setToast] = useState<ToastState>({
-    open: false,
-    message: '',
-    type: 'success',
-  });
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  // (2) แก้ไขฟังก์ชัน showToast
-  const showToast = (message: string, type: 'success' | 'error' | 'warning') => {
-    setToast({ open: true, message, type });
-  };
-  
-  // (Optional but Recommended) ใช้ useEffect จัดการการปิด Toast
-  useEffect(() => {
-    if (toast.open) {
-      const timer = setTimeout(() => {
-        setToast((currentToast) => ({ ...currentToast, open: false }));
-      }, 3000); // 3 วินาที
-
-      return () => clearTimeout(timer); // Cleanup function
-    }
-  }, [toast.open]);
-
-  const toastStyles = {
-    success: "bg-green-100 border-green-400 text-green-700",
-    error: "bg-red-100 border-red-400 text-red-700",
-    warning: "bg-yellow-100 border-yellow-400 text-yellow-700",
+  const showToast = (message: string, type: ToastType) => {
+    const id = Math.random().toString(36).slice(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
   };
 
-  const toastTitle = {
-      success: "Success!",
-      error: "Error!",
-      warning: "Warning!",
-  }
-
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <Toast.Provider swipeDirection="right">
-        <Toast.Root
-          open={toast.open}
-          onOpenChange={(open) => setToast({ ...toast, open })}
-          // (3) แก้ไข className ให้ใช้ toast.type
-          className={`fixed top-[70px] right-4 max-w-lg w-auto px-4 py-3 rounded-lg shadow-lg border transition-all duration-300 transform data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:fade-in-80 data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] ${
-            toastStyles[toast.type]
-          }`}
-        >
-          <div className="flex items-center">
-            {/* (4) แก้ไขข้อความให้ใช้ toast.type */}
-            <strong className="font-bold text-lg">{toastTitle[toast.type]}</strong>
-            <span className="ml-2 text-sm">{toast.message}</span>
-          </div>
-        </Toast.Root>
-        <Toast.Viewport className="fixed top-0 right-0 p-4" />
+      <Toast.Provider swipeDirection="right" duration={10000}>
+        {toasts.map(toast => {
+          const s = STYLES[toast.type];
+          return (
+            <Toast.Root
+              key={toast.id}
+              open={true}
+              onOpenChange={(open) => { if (!open) removeToast(toast.id); }}
+              duration={10000}
+              className={`
+                bg-white border border-slate-200 border-l-4 ${s.border}
+                rounded-xl shadow-xl p-4 flex items-start gap-3 w-80 max-w-[calc(100vw-2rem)]
+                data-[state=open]:animate-in data-[state=closed]:animate-out
+                data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-right-8
+                data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]
+                data-[swipe=cancel]:translate-x-0
+                data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]
+              `}
+            >
+              <div className={`${s.iconBg} rounded-lg p-1.5 flex-shrink-0 mt-0.5`}>
+                {s.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <Toast.Title className="font-bold text-sm text-slate-900">{s.title}</Toast.Title>
+                <Toast.Description className="text-sm text-slate-600 mt-0.5 leading-relaxed">{toast.message}</Toast.Description>
+              </div>
+              <Toast.Close asChild>
+                <button
+                  onClick={() => removeToast(toast.id)}
+                  className="flex-shrink-0 text-slate-400 hover:text-slate-700 transition-colors mt-0.5 p-0.5 rounded hover:bg-slate-100"
+                  aria-label="Close"
+                >
+                  <FiX className="w-4 h-4" />
+                </button>
+              </Toast.Close>
+            </Toast.Root>
+          );
+        })}
+        <Toast.Viewport className="fixed top-16 right-4 flex flex-col gap-2 z-50 outline-none" />
       </Toast.Provider>
     </ToastContext.Provider>
   );
 };
 
 export const useToast = () => {
-    const context = useContext(ToastContext);
-    if (context === undefined) {
-        throw new Error('useToast must be used within a ToastProvider');
-    }
-    return context;
+  const context = useContext(ToastContext);
+  if (context === undefined) throw new Error('useToast must be used within a ToastProvider');
+  return context;
 };
