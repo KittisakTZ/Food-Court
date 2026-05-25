@@ -31,5 +31,22 @@ export const analyticsRouter = (() => {
         handleServiceResponse(serviceResponse, res);
     });
 
+    router.get("/category/:storeId", authenticateToken, async (req: Request, res: Response) => {
+        if (!req.token) {
+            res.sendStatus(StatusCodes.UNAUTHORIZED);
+            return;
+        }
+
+        const { storeId } = req.params;
+        const { startDate, endDate } = req.query;
+
+        const start = startDate ? new Date(startDate as string) : new Date(new Date().setMonth(new Date().getMonth() - 1));
+        const end = endDate ? new Date(endDate as string) : new Date();
+        end.setHours(23, 59, 59, 999);
+
+        const serviceResponse = await analyticsService.getCategoryAnalytics(storeId, start, end);
+        handleServiceResponse(serviceResponse, res);
+    });
+
     return router;
 })();

@@ -17,11 +17,13 @@ import { IoFastFoodOutline } from "react-icons/io5";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FiStar } from "react-icons/fi";
 import { ChatBox } from "../customs/chat/ChatBox";
+import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 
 const MainLayout = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, clearAuth, setUser, _hasHydrated } = useAuthStore();
   const queryClient = useQueryClient();
+  useOrderNotifications();
 
   // --- 🛡️ ส่วน Gatekeeper ที่เพิ่มเข้ามา 🛡️ ---
   // 1. ใช้ useQuery เพื่อ "ทวนสอบ" session กับ backend ทันทีที่ component โหลด
@@ -66,7 +68,7 @@ const MainLayout = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-700">กำลังตรวจสอบสิทธิ์การเข้าใช้...</h2>
+          <h2 className="text-xl font-semibold text-gray-700">Verifying access...</h2>
         </div>
       </div>
     );
@@ -91,22 +93,21 @@ const MainLayout = () => {
     switch (user.role) {
       case 'ADMIN':
         return [
-          { title: "แดชบอร์ด", url: "/", icon: MdDashboard },
-          { title: "อนุมัติร้านค้า", url: "/admin/stores-approval", icon: MdStorefront },
-          { title: "จัดการผู้ใช้", url: "/admin/users", icon: FaUserShield },
+          { title: "Dashboard", url: "/", icon: MdDashboard },
+          { title: "Approve Stores", url: "/admin/stores-approval", icon: MdStorefront },
+          { title: "Manage Users", url: "/admin/users", icon: FaUserShield },
         ];
       case 'SELLER':
         return [
-          { title: "คิวออเดอร์", url: "/", icon: FaShoppingBag },
-          { title: "จัดการเมนู", url: "/my-store/menus", icon: FaUtensils },
-          { title: "รีวิว", url: "/my-store/reviews", icon: FiStar },
-          { title: "ตั้งค่าร้าน", url: "/my-store/settings", icon: IoIosSettings },
+          { title: "Order Queue", url: "/", icon: FaShoppingBag },
+          { title: "Manage Menu", url: "/my-store/menus", icon: FaUtensils },
+          { title: "Reviews", url: "/my-store/reviews", icon: FiStar },
+          { title: "Store Settings", url: "/my-store/settings", icon: IoIosSettings },
         ];
       case 'BUYER':
         return [
-          { title: "หน้าหลัก", url: "/", icon: MdDashboard },
-          //{ title: "ค้นหาร้านค้า", url: "/stores", icon: MdStorefront },
-          { title: "ออเดอร์ของฉัน", url: "/my-orders", icon: FaShoppingBag },
+          { title: "Home", url: "/", icon: MdDashboard },
+          { title: "My Orders", url: "/my-orders", icon: FaShoppingBag },
         ];
       default:
         return [];
@@ -116,7 +117,7 @@ const MainLayout = () => {
   const dataSidebar: DataSideBar = {
     sidebarItems: [
       {
-        name: "เมนู",
+        name: "Menu",
         items: generateSidebarItems(),
       },
     ],

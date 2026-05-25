@@ -10,24 +10,23 @@ export const cartRepository = {
             create: { userId: userId },
             include: {
                 items: {
-                    include: { menu: true },
+                    include: {
+                        menu: {
+                            include: {
+                                store: { select: { id: true, name: true } },
+                            },
+                        },
+                    },
                     orderBy: { createdAt: 'asc' }
                 }
             }
         });
     },
-    
-    // เพิ่ม/อัปเดต Item ใน Cart
-    upsertCartItem: async (cartId: string, menuId: string, quantity: number, storeId: string) => {
-        // อัปเดต storeId ของตะกร้าทุกครั้งที่มีการเพิ่มของ
-        await prisma.cart.update({
-            where: { id: cartId },
-            data: { storeId: storeId }
-        });
 
+    upsertCartItem: async (cartId: string, menuId: string, quantity: number, _storeId: string) => {
         return prisma.cartItem.upsert({
-            where: { cartId_menuId: { cartId, menuId } }, // ใช้ unique constraint
-            update: { quantity: { increment: quantity } }, // ถ้ามีอยู่แล้วให้บวกเพิ่ม
+            where: { cartId_menuId: { cartId, menuId } },
+            update: { quantity: { increment: quantity } },
             create: { cartId, menuId, quantity },
         });
     },
@@ -49,12 +48,6 @@ export const cartRepository = {
     
     // ล้าง Item ทั้งหมดใน Cart
     clearCart: async (cartId: string) => {
-        // ล้าง storeId ใน Cart ด้วย
-        await prisma.cart.update({
-            where: { id: cartId },
-            data: { storeId: null }
-        });
-        
         return prisma.cartItem.deleteMany({
             where: { cartId: cartId },
         });

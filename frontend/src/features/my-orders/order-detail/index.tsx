@@ -40,15 +40,15 @@ const CountdownTimer = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => {
         <div className={`rounded-2xl overflow-hidden shadow-sm ${isDone ? "bg-green-50 border border-green-200" : isAlmostReady ? "bg-amber-50 border border-amber-200" : "bg-orange-50 border border-orange-200"}`}>
             <div className={`px-5 py-3 flex items-center gap-2 ${isDone ? "bg-green-500" : isAlmostReady ? "bg-amber-500" : "bg-orange-500"}`}>
                 <MdRestaurant className="w-4 h-4 text-white" />
-                <p className="text-sm font-bold text-white">{isDone ? "ใกล้พร้อมแล้ว!" : "เวลาที่คาดว่าจะได้รับอาหาร"}</p>
+                <p className="text-sm font-bold text-white">{isDone ? "Almost Ready!" : "Estimated Ready Time"}</p>
             </div>
             <div className="px-5 py-4 flex items-center justify-between">
                 <div>
                     <p className={`text-xs font-medium mb-1 ${isDone ? "text-green-600" : isAlmostReady ? "text-amber-600" : "text-orange-600"}`}>
-                        {isDone ? "กำลังจะพร้อม..." : `พร้อมประมาณ ${readyTime} น.`}
+                        {isDone ? "Almost there..." : `Ready approx. ${readyTime}`}
                     </p>
                     {isDone ? (
-                        <p className="text-2xl font-black text-green-700 animate-pulse">กำลังจะพร้อม...</p>
+                        <p className="text-2xl font-black text-green-700 animate-pulse">Almost there...</p>
                     ) : (
                         <p className={`text-5xl font-black font-mono tabular-nums tracking-tight ${isAlmostReady ? "text-amber-700 animate-pulse" : "text-orange-600"}`}>
                             {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
@@ -66,14 +66,14 @@ const CountdownTimer = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => {
 // ── Status Config ──────────────────────────────────────────────────────────────
 const getStatusConfig = (status: Order["status"]) => {
     const configs: Record<Order["status"], { color: string; bg: string; dot: string; icon: JSX.Element; text: string }> = {
-        PENDING:               { color: "text-amber-800",  bg: "bg-amber-100",  dot: "bg-amber-500",  icon: <FiClock className="w-4 h-4" />,      text: "รอดำเนินการ" },
-        AWAITING_PAYMENT:      { color: "text-blue-800",   bg: "bg-blue-100",   dot: "bg-blue-500",   icon: <FiDollarSign className="w-4 h-4" />,  text: "รอชำระเงิน" },
-        AWAITING_CONFIRMATION: { color: "text-purple-800", bg: "bg-purple-100", dot: "bg-purple-500", icon: <FiClock className="w-4 h-4" />,      text: "รอตรวจสอบสลิป" },
-        COOKING:               { color: "text-orange-800", bg: "bg-orange-100", dot: "bg-orange-500", icon: <MdRestaurant className="w-4 h-4" />,  text: "กำลังเตรียมอาหาร" },
-        READY_FOR_PICKUP:      { color: "text-emerald-800",bg: "bg-emerald-100",dot: "bg-emerald-500",icon: <FiPackage className="w-4 h-4" />,    text: "อาหารพร้อมแล้ว!" },
-        COMPLETED:             { color: "text-slate-700",  bg: "bg-slate-100",  dot: "bg-slate-400",  icon: <FiCheckCircle className="w-4 h-4" />, text: "เสร็จสิ้น" },
-        CANCELLED:             { color: "text-red-800",    bg: "bg-red-100",    dot: "bg-red-500",    icon: <FiXCircle className="w-4 h-4" />,     text: "ยกเลิกแล้ว" },
-        REJECTED:              { color: "text-red-800",    bg: "bg-red-100",    dot: "bg-red-500",    icon: <FiXCircle className="w-4 h-4" />,     text: "ถูกปฏิเสธ" },
+        PENDING:               { color: "text-amber-800",  bg: "bg-amber-100",  dot: "bg-amber-500",  icon: <FiClock className="w-4 h-4" />,      text: "Pending" },
+        AWAITING_PAYMENT:      { color: "text-blue-800",   bg: "bg-blue-100",   dot: "bg-blue-500",   icon: <FiDollarSign className="w-4 h-4" />,  text: "Awaiting Payment" },
+        AWAITING_CONFIRMATION: { color: "text-purple-800", bg: "bg-purple-100", dot: "bg-purple-500", icon: <FiClock className="w-4 h-4" />,      text: "Verifying Slip" },
+        COOKING:               { color: "text-orange-800", bg: "bg-orange-100", dot: "bg-orange-500", icon: <MdRestaurant className="w-4 h-4" />,  text: "Preparing" },
+        READY_FOR_PICKUP:      { color: "text-emerald-800",bg: "bg-emerald-100",dot: "bg-emerald-500",icon: <FiPackage className="w-4 h-4" />,    text: "Ready for Pickup!" },
+        COMPLETED:             { color: "text-slate-700",  bg: "bg-slate-100",  dot: "bg-slate-400",  icon: <FiCheckCircle className="w-4 h-4" />, text: "Completed" },
+        CANCELLED:             { color: "text-red-800",    bg: "bg-red-100",    dot: "bg-red-500",    icon: <FiXCircle className="w-4 h-4" />,     text: "Cancelled" },
+        REJECTED:              { color: "text-red-800",    bg: "bg-red-100",    dot: "bg-red-500",    icon: <FiXCircle className="w-4 h-4" />,     text: "Rejected" },
     };
     return configs[status] ?? configs["PENDING"];
 };
@@ -87,14 +87,14 @@ const getOrderProgress = (status: Order["status"]) => {
     return steps[status] ?? 0;
 };
 
-const progressSteps = ["ยืนยัน", "ชำระเงิน", "ทำอาหาร", "พร้อมรับ", "เสร็จสิ้น"];
+const progressSteps = ["Confirmed", "Payment", "Preparing", "Ready", "Done"];
 
 const formatDate = (d: string | null) => {
     if (!d) return "-";
-    return new Date(d).toLocaleString("th-TH", {
+    return new Date(d).toLocaleString("en-GB", {
         day: "2-digit", month: "short", year: "numeric",
         hour: "2-digit", minute: "2-digit", hour12: false,
-    }) + " น.";
+    });
 };
 
 // ── Progress Bar ───────────────────────────────────────────────────────────────
@@ -106,8 +106,8 @@ const OrderProgressBar = ({ status }: { status: Order["status"] }) => {
                     <FiXCircle className="w-5 h-5 text-red-500" />
                 </div>
                 <div>
-                    <p className="font-bold text-red-700">ออร์เดอร์นี้ถูกยกเลิก / ปฏิเสธ</p>
-                    <p className="text-sm text-red-500">ไม่สามารถดำเนินการต่อได้</p>
+                    <p className="font-bold text-red-700">This order has been cancelled / rejected</p>
+                    <p className="text-sm text-red-500">No further action can be taken</p>
                 </div>
             </div>
         );
@@ -141,16 +141,16 @@ const OrderProgressBar = ({ status }: { status: Order["status"] }) => {
 // ── Timeline ───────────────────────────────────────────────────────────────────
 const OrderTimeline = ({ order }: { order: Order }) => {
     const events = [
-        { label: "สั่งอาหาร",     time: order.createdAt,    icon: <FiPackage className="w-4 h-4 text-slate-500" />,   dot: "bg-slate-400" },
-        { label: "ร้านค้ายืนยัน", time: order.confirmedAt,  icon: <MdStorefront className="w-4 h-4 text-blue-500" />,  dot: "bg-blue-400" },
-        { label: "ชำระเงินแล้ว",  time: order.paidAt,       icon: <FiCreditCard className="w-4 h-4 text-emerald-500" />,dot: "bg-emerald-400" },
-        { label: "เริ่มทำอาหาร",  time: order.startCookingAt, icon: <MdRestaurant className="w-4 h-4 text-orange-500" />, dot: "bg-orange-400" },
-        { label: "รับอาหารแล้ว",  time: order.completedAt,  icon: <FiUser className="w-4 h-4 text-purple-500" />,    dot: "bg-purple-400" },
+        { label: "Order Placed",    time: order.createdAt,      icon: <FiPackage className="w-4 h-4 text-slate-500" />,    dot: "bg-slate-400" },
+        { label: "Store Confirmed", time: order.confirmedAt,    icon: <MdStorefront className="w-4 h-4 text-blue-500" />,   dot: "bg-blue-400" },
+        { label: "Payment Received",time: order.paidAt,         icon: <FiCreditCard className="w-4 h-4 text-emerald-500" />,dot: "bg-emerald-400" },
+        { label: "Cooking Started", time: order.startCookingAt, icon: <MdRestaurant className="w-4 h-4 text-orange-500" />, dot: "bg-orange-400" },
+        { label: "Picked Up",       time: order.completedAt,    icon: <FiUser className="w-4 h-4 text-purple-500" />,       dot: "bg-purple-400" },
     ].filter(e => e.time);
 
     return (
         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-            <h3 className="text-base font-bold text-slate-800 mb-4">ไทม์ไลน์</h3>
+            <h3 className="text-base font-bold text-slate-800 mb-4">Timeline</h3>
             <div className="space-y-4">
                 {events.map((ev, i) => (
                     <div key={i} className="flex items-start gap-3">
@@ -185,7 +185,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { toastService.error("ไฟล์ใหญ่เกินไป! สูงสุด 5MB"); return; }
+        if (file.size > 5 * 1024 * 1024) { toastService.error("File too large! Maximum 5MB"); return; }
         setPreviewUrl(URL.createObjectURL(file));
         setSelectedFile(file);
     };
@@ -215,7 +215,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
                             <FiDollarSign className="w-7 h-7 text-white" />
                         </div>
                         <div className="text-left">
-                            <h2 className="text-xl font-bold text-white">ชำระเงิน</h2>
+                            <h2 className="text-xl font-bold text-white">Payment</h2>
                             <p className="text-blue-100 text-sm">#{order.id.substring(0, 8)}... · {order.store.name}</p>
                         </div>
                     </div>
@@ -223,7 +223,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
 
                 <div className="p-5 space-y-5 overflow-y-auto flex-1">
                     <div className="text-center py-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
-                        <p className="text-slate-500 text-sm mb-1">ยอดชำระทั้งหมด</p>
+                        <p className="text-slate-500 text-sm mb-1">Total Amount Due</p>
                         <p className="text-5xl font-black text-blue-600">฿{order.totalAmount.toFixed(2)}</p>
                     </div>
 
@@ -234,19 +234,19 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
                             </div>
                         ) : (
                             <div className="w-56 h-56 bg-red-50 rounded-2xl flex items-center justify-center border-2 border-red-200">
-                                <p className="text-red-600 font-semibold text-sm text-center px-4">ไม่สามารถโหลด QR Code</p>
+                                <p className="text-red-600 font-semibold text-sm text-center px-4">Unable to load QR Code</p>
                             </div>
                         )}
                     </div>
 
                     <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-900 space-y-1 text-left">
-                        <p className="font-bold mb-2">วิธีชำระเงิน</p>
-                        <p>1. สแกน QR Code ด้วยแอปธนาคาร</p>
-                        <p>2. ชำระเงินตามยอดที่แสดง</p>
-                        <p>3. แนบสลิปการโอนเงินด้านล่าง</p>
+                        <p className="font-bold mb-2">Payment Instructions</p>
+                        <p>1. Scan the QR Code with your banking app</p>
+                        <p>2. Transfer the exact amount shown above</p>
+                        <p>3. Attach your payment slip below</p>
                         {order.paymentExpiresAt && (
                             <p className="text-amber-700 font-semibold mt-2">
-                                QR หมดอายุ {new Date(order.paymentExpiresAt).toLocaleTimeString("th-TH")}
+                                QR expires at {new Date(order.paymentExpiresAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                             </p>
                         )}
                     </div>
@@ -254,8 +254,8 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
                     {previewUrl && (
                         <div className="bg-slate-50 rounded-2xl p-4 border-2 border-blue-200">
                             <div className="flex justify-between items-center mb-3">
-                                <p className="font-semibold text-slate-700">ภาพตัวอย่างสลิป</p>
-                                <button onClick={handleCancelPreview} className="text-red-500 text-sm font-semibold hover:text-red-600">ยกเลิก</button>
+                                <p className="font-semibold text-slate-700">Slip Preview</p>
+                                <button onClick={handleCancelPreview} className="text-red-500 text-sm font-semibold hover:text-red-600">Cancel</button>
                             </div>
                             <img src={previewUrl} alt="Preview" className="w-full rounded-xl max-h-72 object-contain bg-white" />
                         </div>
@@ -264,7 +264,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
                     {order.paymentSlip && !previewUrl && (
                         <button onClick={() => window.open(normalizeUrl(order.paymentSlip)!, "_blank")}
                             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                            <FiCheckCircle className="w-5 h-5" /> ดูสลิปที่อัปโหลดแล้ว
+                            <FiCheckCircle className="w-5 h-5" /> View Uploaded Slip
                         </button>
                     )}
 
@@ -273,12 +273,12 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
                     {previewUrl ? (
                         <button onClick={handleUpload} disabled={isUploading}
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                            {isUploading ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> กำลังอัปโหลด...</> : <><FiCheckCircle className="w-5 h-5" /> ยืนยันการอัปโหลด</>}
+                            {isUploading ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> Uploading...</> : <><FiCheckCircle className="w-5 h-5" /> Confirm Upload</>}
                         </button>
                     ) : (
                         <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || !!order.paymentSlip}
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                            {order.paymentSlip ? <><FiCheckCircle className="w-5 h-5" /> อัปโหลดเรียบร้อยแล้ว</> : <><FiUpload className="w-5 h-5" /> แนบสลิปการโอนเงิน</>}
+                            {order.paymentSlip ? <><FiCheckCircle className="w-5 h-5" /> Slip Uploaded</> : <><FiUpload className="w-5 h-5" /> Attach Payment Slip</>}
                         </button>
                     )}
                 </div>
@@ -324,7 +324,7 @@ const OrderDetailPage = () => {
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-14 h-14 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-slate-500 font-medium">กำลังโหลด...</p>
+                    <p className="text-slate-500 font-medium">Loading...</p>
                 </div>
             </div>
         );
@@ -337,8 +337,8 @@ const OrderDetailPage = () => {
                     <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <FiXCircle className="w-7 h-7 text-red-500" />
                     </div>
-                    <p className="font-bold text-slate-800 mb-1">ไม่พบคำสั่งซื้อ</p>
-                    <p className="text-sm text-slate-400">กรุณาลองใหม่อีกครั้ง</p>
+                    <p className="font-bold text-slate-800 mb-1">Order not found</p>
+                    <p className="text-sm text-slate-400">Please try again</p>
                 </div>
             </div>
         );
@@ -359,11 +359,11 @@ const OrderDetailPage = () => {
                     })
                 );
             }
-            if (ok === order.orderItems.length) toastService.success(`เพิ่ม ${ok} รายการลงตะกร้าแล้ว`);
-            else if (ok > 0) toastService.warning(`เพิ่มได้ ${ok}/${order.orderItems.length} รายการ`);
+            if (ok === order.orderItems.length) toastService.success(`Added ${ok} item${ok > 1 ? "s" : ""} to cart`);
+            else if (ok > 0) toastService.warning(`Added ${ok}/${order.orderItems.length} items to cart`);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_) {
-            toastService.error("ไม่สามารถสั่งซ้ำได้ กรุณาลองใหม่");
+            toastService.error("Unable to reorder. Please try again.");
         }
     };
 
@@ -373,7 +373,7 @@ const OrderDetailPage = () => {
             return (
                 <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
                     <h3 className="text-base font-bold text-slate-800 mb-4">
-                        {isSellerView ? "รีวิวจากลูกค้า" : "รีวิวของคุณ"}
+                        {isSellerView ? "Customer Review" : "Your Review"}
                     </h3>
                     <div className="flex items-center gap-1.5 mb-3">
                         {[...Array(5)].map((_, i) => (
@@ -390,7 +390,7 @@ const OrderDetailPage = () => {
         if (isSellerView) {
             return (
                 <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-2xl text-center text-sm font-semibold">
-                    ลูกค้ายังไม่ได้รีวิวออร์เดอร์นี้
+                    Customer has not reviewed this order yet
                 </div>
             );
         }
@@ -402,7 +402,7 @@ const OrderDetailPage = () => {
         return (
             <div className="text-center">
                 <Button onClick={() => setIsReviewing(true)} size="lg" className="rounded-2xl px-8">
-                    <FiStar className="mr-2 w-4 h-4" /> เขียนรีวิว
+                    <FiStar className="mr-2 w-4 h-4" /> Write a Review
                 </Button>
             </div>
         );
@@ -421,7 +421,7 @@ const OrderDetailPage = () => {
                         className="flex items-center gap-2 text-slate-500 hover:text-orange-600 font-semibold text-sm transition-colors"
                     >
                         <FiChevronLeft className="w-4 h-4" />
-                        {isSellerView ? "กลับไปรายการออเดอร์" : "กลับไปออเดอร์ของฉัน"}
+                        {isSellerView ? "Back to Order List" : "Back to My Orders"}
                     </Link>
                     <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${statusConfig.bg} ${statusConfig.color}`}>
                         <div className={`w-2 h-2 rounded-full ${statusConfig.dot} ${isActive ? "animate-pulse" : ""}`} />
@@ -439,7 +439,7 @@ const OrderDetailPage = () => {
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
                         <div>
-                            <p className="text-white/70 text-xs font-medium mb-1">จากร้าน</p>
+                            <p className="text-white/70 text-xs font-medium mb-1">From</p>
                             <h1 className="text-white text-2xl md:text-3xl font-black drop-shadow">{order.store.name}</h1>
                             <div className="flex items-center gap-3 flex-wrap mt-1">
                                 {order.store.location && (
@@ -454,13 +454,13 @@ const OrderDetailPage = () => {
                                         className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-md transition-colors border border-orange-400"
                                     >
                                         <MessageCircle className="w-3.5 h-3.5 text-white" />
-                                        คุยกับร้านค้า
+                                        Chat with Store
                                     </button>
                                 )}
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="text-white/70 text-xs">ยอดรวม</p>
+                            <p className="text-white/70 text-xs">Total</p>
                             <p className="text-white text-3xl font-black drop-shadow">฿{order.totalAmount.toFixed(2)}</p>
                         </div>
                     </div>
@@ -469,11 +469,11 @@ const OrderDetailPage = () => {
                 {/* ── Order ID + Queue ── */}
                 <div className="bg-white rounded-2xl px-5 py-4 mb-4 border border-slate-100 shadow-sm flex items-center justify-between flex-wrap gap-3">
                     <div>
-                        <p className="text-xs text-slate-400 font-medium">หมายเลขออร์เดอร์</p>
+                        <p className="text-xs text-slate-400 font-medium">Order Number</p>
                         <p className="font-mono font-bold text-slate-700 text-sm mt-0.5">#{order.id.substring(0, 16)}...</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-xs text-slate-400">คิววันนี้</p>
+                        <p className="text-xs text-slate-400">Today's Queue</p>
                         <p className="text-2xl font-black text-orange-500">Q{order.queueNumber}</p>
                     </div>
                 </div>
@@ -489,7 +489,7 @@ const OrderDetailPage = () => {
                         <div className="bg-gradient-to-r from-red-500 to-rose-500 px-5 py-3 flex items-center gap-2">
                             <FiAlertTriangle className="w-4 h-4 text-white flex-shrink-0" />
                             <p className="text-white font-bold text-sm">
-                                {order.status === 'REJECTED' ? 'เหตุผลที่ปฏิเสธออเดอร์' : 'เหตุผลที่ยกเลิกออเดอร์'}
+                                {order.status === 'REJECTED' ? 'Rejection Reason' : 'Cancellation Reason'}
                             </p>
                         </div>
                         <div className="px-5 py-4 flex items-center gap-3">
@@ -512,8 +512,8 @@ const OrderDetailPage = () => {
                             <FiPackage className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <p className="font-black text-white text-lg">อาหารพร้อมแล้ว!</p>
-                            <p className="text-emerald-100 text-sm">กรุณามารับอาหารที่ร้านได้เลย</p>
+                            <p className="font-black text-white text-lg">Order Ready for Pickup!</p>
+                            <p className="text-emerald-100 text-sm">Please collect your order at the store.</p>
                         </div>
                     </div>
                 )}
@@ -526,8 +526,8 @@ const OrderDetailPage = () => {
                         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
                             <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
                                 <MdRestaurant className="w-4 h-4 text-orange-500" />
-                                รายการอาหาร
-                                <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{order.orderItems.length} รายการ</span>
+                                Order Items
+                                <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{order.orderItems.length} {order.orderItems.length === 1 ? "item" : "items"}</span>
                             </h3>
                             <div className="space-y-3">
                                 {order.orderItems.map(item => (
@@ -551,7 +551,7 @@ const OrderDetailPage = () => {
                             </div>
                             {/* Total row */}
                             <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-                                <span className="text-sm text-slate-500 font-medium">ยอดรวมทั้งหมด</span>
+                                <span className="text-sm text-slate-500 font-medium">Total Amount</span>
                                 <span className="text-2xl font-black text-slate-900">฿{order.totalAmount.toFixed(2)}</span>
                             </div>
                         </div>
@@ -560,7 +560,7 @@ const OrderDetailPage = () => {
                         {!isSellerView && order.status === "AWAITING_PAYMENT" && (
                             <button onClick={() => setIsPayModalOpen(true)}
                                 className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-base">
-                                <FiDollarSign className="w-5 h-5 text-white" /> ชำระเงินทันที
+                                <FiDollarSign className="w-5 h-5 text-white" /> Pay Now
                             </button>
                         )}
 
@@ -569,8 +569,8 @@ const OrderDetailPage = () => {
                             <button onClick={handleReorder} disabled={isAddingToCart}
                                 className="w-full border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                 {isAddingToCart
-                                    ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-400 border-t-transparent" />กำลังเพิ่มลงตะกร้า...</>
-                                    : <><FiRefreshCw className="w-4 h-4" />สั่งซ้ำอีกครั้ง</>}
+                                    ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-400 border-t-transparent" />Adding to cart...</>
+                                    : <><FiRefreshCw className="w-4 h-4" />Reorder</>}
                             </button>
                         )}
                     </div>
@@ -580,22 +580,22 @@ const OrderDetailPage = () => {
 
                         {/* Summary card */}
                         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-                            <h3 className="text-base font-bold text-slate-800 mb-4">สรุปการชำระเงิน</h3>
+                            <h3 className="text-base font-bold text-slate-800 mb-4">Payment Summary</h3>
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-slate-500">สถานะ</span>
+                                    <span className="text-sm text-slate-500">Status</span>
                                     <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${isPaid ? "text-emerald-700 bg-emerald-50" : "text-amber-700 bg-amber-50"}`}>
-                                        {isPaid ? "ชำระแล้ว" : "ยังไม่ชำระ"}
+                                        {isPaid ? "Paid" : "Unpaid"}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-slate-500">วิธีชำระ</span>
+                                    <span className="text-sm text-slate-500">Payment Method</span>
                                     <span className="text-sm font-semibold text-slate-700">
-                                        {order.paymentMethod === "PROMPTPAY" ? "PromptPay" : "เงินสด"}
+                                        {order.paymentMethod === "PROMPTPAY" ? "PromptPay" : "Cash on Pickup"}
                                     </span>
                                 </div>
                                 <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
-                                    <span className="text-sm text-slate-500">ยอดรวม</span>
+                                    <span className="text-sm text-slate-500">Total</span>
                                     <span className="text-xl font-black text-slate-900">฿{order.totalAmount.toFixed(2)}</span>
                                 </div>
                             </div>
@@ -604,7 +604,7 @@ const OrderDetailPage = () => {
                             {!isSellerView && order.status === "AWAITING_PAYMENT" && (
                                 <button onClick={() => setIsPayModalOpen(true)}
                                     className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm">
-                                    <FiDollarSign className="w-4 h-4 text-white" /> ชำระเงินทันที
+                                    <FiDollarSign className="w-4 h-4 text-white" /> Pay Now
                                 </button>
                             )}
 
@@ -612,13 +612,13 @@ const OrderDetailPage = () => {
                             {order.paymentSlip && (
                                 <div className="mt-4 pt-4 border-t border-slate-100">
                                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1.5">
-                                        <FiCreditCard className="w-3.5 h-3.5 text-emerald-500" /> สลิปการโอนเงิน
+                                        <FiCreditCard className="w-3.5 h-3.5 text-emerald-500" /> Payment Slip
                                     </p>
                                     <div className="relative group cursor-pointer rounded-xl overflow-hidden border border-slate-200"
                                         onClick={() => window.open(order.paymentSlip!, "_blank")}>
                                         <img src={order.paymentSlip} alt="Payment Slip" className="w-full" />
                                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <p className="text-white font-semibold text-sm">คลิกดูขนาดเต็ม</p>
+                                            <p className="text-white font-semibold text-sm">Click to view full size</p>
                                         </div>
                                     </div>
                                 </div>

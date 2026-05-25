@@ -202,7 +202,7 @@ export const orderService = {
     },
 
     // 2. Seller จัดการ Order (Approve, Reject, Confirm Payment, etc.)
-    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE" | "CANCEL_BY_STORE" | "FORCE_COOKING", user: UserPayload, issueReason?: string, cancelReason?: string) => {
+    reviewOrder: async (orderId: string, action: "APPROVE" | "REJECT" | "CONFIRM_PAYMENT" | "CONFIRM_CASH_PAYMENT" | "PREPARE_COMPLETE" | "CUSTOMER_PICKED_UP" | "REPORT_ISSUE" | "CLEAR_ISSUE" | "CANCEL_BY_STORE" | "FORCE_COOKING", user: UserPayload, issueReason?: string, cancelReason?: string) => {
         const store = await prisma.store.findUnique({ where: { ownerId: user.id } });
         if (!store) {
             return new ServiceResponse(ResponseStatus.Failed, "You do not own a store.", null, StatusCodes.FORBIDDEN);
@@ -219,7 +219,25 @@ export const orderService = {
                     return new ServiceResponse(ResponseStatus.Failed, `Cannot approve an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
                 }
 
-                // ✨ (Logic ใหม่) แยกตามประเภทการจ่ายเงิน
+                // Stock check: verify each item has sufficient stock
+                for (const item of order.orderItems) {
+                    const menu = await prisma.menu.findUnique({ where: { id: item.menuId }, select: { stock: true, name: true } });
+                    if (menu && menu.stock !== null && menu.stock < item.quantity) {
+                        return new ServiceResponse(ResponseStatus.Failed, `Insufficient stock for '${menu.name}'. Available: ${menu.stock}.`, null, StatusCodes.BAD_REQUEST);
+                    }
+                }
+
+                // Decrement stock for items that have stock tracking enabled
+                await Promise.all(order.orderItems.map(async (item) => {
+                    const menu = await prisma.menu.findUnique({ where: { id: item.menuId }, select: { stock: true } });
+                    if (menu && menu.stock !== null) {
+                        await prisma.menu.update({
+                            where: { id: item.menuId },
+                            data: { stock: { decrement: item.quantity } },
+                        });
+                    }
+                }));
+
                 if (order.paymentMethod === 'PROMPTPAY') {
                     // ✨ (ปรับปรุง) ดึงข้อมูลร้านค้าเต็มรูปแบบเพื่อเอา promptPayId
                     const storeWithPaymentInfo = await prisma.store.findUnique({
@@ -295,6 +313,25 @@ export const orderService = {
                 emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: cookingNow, estimatedReadyAt: updatedAfterPayment?.estimatedReadyAt });
                 emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: cookingNow, estimatedReadyAt: updatedAfterPayment?.estimatedReadyAt });
                 return new ServiceResponse(ResponseStatus.Success, "Payment confirmed. Order is now cooking.", null, StatusCodes.OK);
+
+            case 'CONFIRM_CASH_PAYMENT': {
+                if (order.status !== 'READY_FOR_PICKUP') {
+                    return new ServiceResponse(ResponseStatus.Failed, `Cannot confirm cash payment for an order with status ${order.status}`, null, StatusCodes.BAD_REQUEST);
+                }
+                if (order.paymentMethod !== 'CASH_ON_PICKUP') {
+                    return new ServiceResponse(ResponseStatus.Failed, "This action is only valid for Cash on Pickup orders.", null, StatusCodes.BAD_REQUEST);
+                }
+                const cashPaidNow = new Date();
+                await orderRepository.updateOrder(orderId, {
+                    status: 'COMPLETED',
+                    paidAt: cashPaidNow,
+                    completedAt: cashPaidNow,
+                } as any);
+                await recalcEstimatedReadyAt(store.id);
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COMPLETED' });
+                emitOrderUpdate(orderId, { status: 'COMPLETED' });
+                return new ServiceResponse(ResponseStatus.Success, "Cash payment confirmed. Order completed.", null, StatusCodes.OK);
+            }
 
             case 'PREPARE_COMPLETE':
                 if (order.status !== 'COOKING') {

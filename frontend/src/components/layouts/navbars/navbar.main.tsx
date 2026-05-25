@@ -22,14 +22,14 @@ const NavbarMain = () => {
       const res = await getLogout();
       if (res.statusCode === 200) {
         clearAuth();
-        toastService.success("ออกจากระบบสำเร็จ");
+        toastService.success("Logged out successfully.");
         navigate("/login");
       } else {
-        toastService.error("ออกจากระบบไม่สำเร็จ");
+        toastService.error("Logout failed.");
       }
     } catch (err) {
       console.error("Logout error:", err);
-      toastService.error("เกิดข้อผิดพลาดในการออกจากระบบ");
+      toastService.error("An error occurred during logout.");
     }
   };
 
@@ -54,9 +54,9 @@ const NavbarMain = () => {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
-                ระบบจองอาหาร
+                Food Court System
               </h1>
-              <p className="text-xs text-gray-500">มหาวิทยาลัย</p>
+              <p className="text-xs text-gray-500">University</p>
             </div>
           </Link>
         </Flex>
@@ -70,14 +70,14 @@ const NavbarMain = () => {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
               >
                 <IoFastFoodOutline className="w-5 h-5" />
-                <span>หน้าหลัก</span>
+                <span>Home</span>
               </Link>
               <Link
                 to="/my-orders"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
               >
                 <MdShoppingCart className="w-5 h-5" />
-                <span>ออเดอร์</span>
+                <span>My Orders</span>
               </Link>
             </>
           )}
@@ -89,21 +89,21 @@ const NavbarMain = () => {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
               >
                 <MdShoppingCart className="w-5 h-5" />
-                <span>คิวออเดอร์</span>
+                <span>Order Queue</span>
               </Link>
               <Link
                 to="/my-store/menus"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
               >
                 <IoFastFoodOutline className="w-5 h-5" />
-                <span>จัดการเมนู</span>
+                <span>Manage Menu</span>
               </Link>
               <Link
                 to="/my-store/analytics"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all"
               >
                 <FiTrendingUp className="w-5 h-5" />
-                <span>แดชบอร์ด</span>
+                <span>Dashboard</span>
               </Link>
             </>
           )}
@@ -131,9 +131,9 @@ const NavbarMain = () => {
                   {user?.username ?? "ผู้ใช้"}
                 </Text>
                 <Text className="text-xs text-gray-500">
-                  {user?.role === "BUYER" && "ผู้ซื้อ"}
-                  {user?.role === "SELLER" && "ผู้ขาย"}
-                  {user?.role === "ADMIN" && "ผู้ดูแลระบบ"}
+                  {user?.role === "BUYER" && "Buyer"}
+                  {user?.role === "SELLER" && "Seller"}
+                  {user?.role === "ADMIN" && "Administrator"}
                 </Text>
               </div>
             </button>
@@ -161,7 +161,7 @@ const NavbarMain = () => {
                     <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
                       <IoIosLogOut className="text-red-600 w-5 h-5" />
                     </div>
-                    <span className="text-sm text-gray-700">ออกจากระบบ</span>
+                    <span className="text-sm text-gray-700">Sign Out</span>
                   </button>
                 </div>
               </>

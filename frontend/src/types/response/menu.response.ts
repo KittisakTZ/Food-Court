@@ -10,8 +10,10 @@ export interface Menu {
     cookingTime: number;
     image: string | null;
     isAvailable: boolean;
+    stock: number | null;
     categoryId: string | null;
     storeId: string;
+    store?: { id: string; name: string };
     category: {
         id: string;
         name: string;

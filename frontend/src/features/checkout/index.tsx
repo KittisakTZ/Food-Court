@@ -4,7 +4,8 @@ import { useCartStore } from "@/zustand/useCartStore";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
-import { useCreateOrder } from "@/hooks/useOrders";
+import { createOrder } from "@/services/order.service";
+import { useClearCart } from "@/hooks/useCart";
 import { toastService } from "@/services/toast.service";
 import { FiShoppingBag, FiClock, FiCheckCircle, FiChevronLeft, FiCalendar, FiZap, FiDollarSign } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
@@ -13,23 +14,28 @@ import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 
 const CheckoutFeature = () => {
   const cart = useCartStore((state) => state.cart);
-  const totalPrice = useMemo(() => {
-    if (!cart?.items) return 0;
-    return cart.items.reduce(
-      (total, item) => total + item.menu.price * item.quantity,
-      0
-    );
-  }, [cart]);
-
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+  const { mutate: clearCart } = useClearCart();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { totalPrice, storeGroups } = useMemo(() => {
+    if (!cart?.items) return { totalPrice: 0, storeGroups: [] };
+    const total = cart.items.reduce((sum, item) => sum + item.menu.price * item.quantity, 0);
+    const groupMap: Record<string, { storeId: string; storeName: string; items: typeof cart.items }> = {};
+    for (const item of cart.items) {
+      const sid = item.menu.storeId;
+      if (!groupMap[sid]) groupMap[sid] = { storeId: sid, storeName: item.menu.store?.name ?? sid, items: [] };
+      groupMap[sid].items.push(item);
+    }
+    return { totalPrice: total, storeGroups: Object.values(groupMap) };
+  }, [cart]);
 
   const [pickupOption, setPickupOption] = useState<"asap" | "scheduled">("asap");
   const [pickupHour, setPickupHour] = useState("");
   const [pickupMinute, setPickupMinute] = useState("10");
   const [paymentMethod, setPaymentMethod] = useState<'PROMPTPAY' | 'CASH_ON_PICKUP'>('PROMPTPAY');
-  const [description, setDescription] = useState(""); // Add this line
-  const { mutate: placeOrder, isPending: isSubmitting } = useCreateOrder();
+  const [description, setDescription] = useState("");
 
   // Get current date and time
   const getCurrentDateTime = () => {
@@ -76,34 +82,44 @@ const CheckoutFeature = () => {
   }, [isAuthenticated, navigate]);
 
   const handleConfirmOrder = async () => {
-    if (!cart.storeId) return;
+    if (!cart || storeGroups.length === 0) return;
 
-    // ตรวจสอบว่าเวลาที่เลือกไม่เป็นเวลาในอดีต
     if (pickupOption === 'scheduled' && pickupHour && pickupMinute) {
       const now = new Date();
       const selectedDateTime = new Date();
       selectedDateTime.setHours(parseInt(pickupHour), parseInt(pickupMinute), 0, 0);
-
       if (selectedDateTime <= now) {
-        toastService.error("กรุณาเลือกเวลาที่อยู่ในอนาคต ⏰");
+        toastService.error("Please select a future pickup time.");
         return;
       }
     }
 
-    const payload = {
-      storeId: cart.storeId,
-      items: cart.items.map(item => ({ menuId: item.menu.id, quantity: item.quantity })),
-      scheduledPickupTime: pickupOption === 'scheduled' ? `${pickupHour}:${pickupMinute}` : undefined,
-      paymentMethod: paymentMethod, // <-- เช็คว่าบรรทัดนี้ถูกเพิ่มเข้าไปใน Object payload แล้ว
-      description: description, // Add this line
-    };
-
-    placeOrder(payload, {
-      onSuccess: () => {
-        toastService.success("สั่งอาหารสำเร็จ! ตรวจสอบสถานะได้ที่ 'คำสั่งซื้อของฉัน' ✅");
-        navigate('/my-orders');
-      },
-    });
+    setIsSubmitting(true);
+    try {
+      await Promise.all(
+        storeGroups.map((group) =>
+          createOrder({
+            storeId: group.storeId,
+            items: group.items.map((item) => ({ menuId: item.menu.id, quantity: item.quantity })),
+            scheduledPickupTime: pickupOption === 'scheduled' ? `${pickupHour}:${pickupMinute}` : undefined,
+            paymentMethod,
+            description,
+          })
+        )
+      );
+      clearCart();
+      toastService.success(
+        storeGroups.length > 1
+          ? `${storeGroups.length} orders placed successfully!`
+          : "Order placed successfully! Check status in My Orders."
+      );
+      navigate('/my-orders');
+    } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      toastService.error(`Failed to place order: ${msg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Loading/Redirect State
@@ -117,7 +133,7 @@ const CheckoutFeature = () => {
               <FiCheckCircle className="w-8 h-8 text-orange-500 animate-pulse" />
             </div>
           </div>
-          <p className="text-xl font-bold text-gray-700 animate-pulse">กำลังเปลี่ยนหน้า...</p>
+          <p className="text-xl font-bold text-gray-700 animate-pulse">Redirecting...</p>
         </div>
       </div>
     );
@@ -136,16 +152,16 @@ const CheckoutFeature = () => {
               <span className="text-white text-2xl font-bold">!</span>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">ตะกร้าว่างเปล่า 🍽️</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Your cart is empty</h1>
           <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-            ยังไม่มีเมนูที่เลือกไว้<br />ลองเลือกอาหารที่ชอบสิ!
+            No items selected yet.<br />Browse restaurants and add something!
           </p>
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-yellow-600 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
           >
             <FiChevronLeft className="w-5 h-5" />
-            กลับไปเลือกร้านอาหาร
+            Browse Restaurants
           </button>
         </div>
       </div>
@@ -161,12 +177,11 @@ const CheckoutFeature = () => {
           className="inline-flex items-center gap-2 mb-6 px-6 py-3 bg-white border-2 border-orange-200 rounded-2xl hover:border-orange-400 hover:bg-orange-50 transition-all shadow-md hover:shadow-xl font-semibold text-gray-700 group animate-fade-in"
         >
           <FiChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          กลับ
+          Back
         </button>
 
         {/* Header */}
         <div className="mb-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden animate-fade-in">
-          {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
 
@@ -177,11 +192,11 @@ const CheckoutFeature = () => {
               </div>
               <div>
                 <h1 className="text-4xl font-bold flex items-center gap-3">
-                  ยืนยันการสั่งอาหาร
+                  Confirm Order
                   <HiSparkles className="w-8 h-8 animate-spin-slow" />
                 </h1>
                 <p className="text-green-100 text-lg mt-2">
-                  เช็ครายการและเลือกเวลารับอาหาร
+                  Review your items and choose pickup time
                 </p>
               </div>
             </div>
@@ -191,7 +206,7 @@ const CheckoutFeature = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Order Details */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Order Items */}
+            {/* Order Items grouped by store */}
             <div className="bg-white rounded-3xl shadow-xl border-2 border-orange-100 overflow-hidden animate-fade-in-up">
               <div className="bg-gradient-to-r from-orange-100 to-yellow-100 p-6 border-b-2 border-orange-200">
                 <div className="flex items-center gap-3">
@@ -199,51 +214,49 @@ const CheckoutFeature = () => {
                     <BiDish className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    รายการอาหารของคุณ
+                    Your Order
                     <span className="text-lg bg-orange-500 text-white px-3 py-1 rounded-full">
-                      {cart.items.length} รายการ
+                      {cart.items.length} {cart.items.length === 1 ? 'item' : 'items'}
                     </span>
                   </h2>
                 </div>
               </div>
 
-              <div className="p-6">
-                <div className="space-y-4">
-                  {cart.items.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl border-2 border-orange-100 hover:border-orange-300 transition-all hover:shadow-lg group animate-fade-in-up"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      {/* Menu Image */}
-                      <div className="w-20 h-20 rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow flex-shrink-0">
-                        <img
-                          src={item.menu.image || NO_FOOD_IMAGE}
-                          alt={item.menu.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          onError={onImgError(NO_FOOD_IMAGE)}
-                        />
-                      </div>
-
-                      {/* Item Details */}
-                      <div className="flex-grow min-w-0">
-                        <p className="font-bold text-gray-800 text-lg truncate group-hover:text-orange-600 transition-colors">
-                          {item.menu.name}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          ฿{item.menu.price.toFixed(0)} × {item.quantity}
-                        </p>
-                      </div>
-
-                      {/* Price */}
-                      <div className="text-right flex-shrink-0">
-                        <span className="text-2xl font-bold text-green-600">
-                          ฿{(item.menu.price * item.quantity).toFixed(0)}
+              <div className="p-6 space-y-6">
+                {storeGroups.map((group) => (
+                  <div key={group.storeId}>
+                    {storeGroups.length > 1 && (
+                      <p className="text-sm font-bold text-orange-600 uppercase tracking-wide mb-3">{group.storeName}</p>
+                    )}
+                    <div className="space-y-4">
+                      {group.items.map((item, index) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl border-2 border-orange-100 hover:border-orange-300 transition-all hover:shadow-lg group animate-fade-in-up"
+                          style={{ animationDelay: `${index * 0.1}s` }}
+                        >
+                          <div className="w-20 h-20 rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow flex-shrink-0">
+                            <img src={item.menu.image || NO_FOOD_IMAGE} alt={item.menu.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onError={onImgError(NO_FOOD_IMAGE)} />
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <p className="font-bold text-gray-800 text-lg truncate group-hover:text-orange-600 transition-colors">{item.menu.name}</p>
+                            <p className="text-sm text-gray-600 mt-1">฿{item.menu.price.toFixed(0)} × {item.quantity}</p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <span className="text-2xl font-bold text-green-600">฿{(item.menu.price * item.quantity).toFixed(0)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {storeGroups.length > 1 && (
+                      <div className="flex justify-end mt-2">
+                        <span className="text-sm font-semibold text-gray-600">
+                          Store subtotal: ฿{group.items.reduce((s, i) => s + i.menu.price * i.quantity, 0).toFixed(0)}
                         </span>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -255,7 +268,7 @@ const CheckoutFeature = () => {
                     <FiClock className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800">
-                    เลือกเวลารับอาหาร ⏰
+                    Pickup Time
                   </h2>
                 </div>
               </div>
@@ -279,14 +292,14 @@ const CheckoutFeature = () => {
                           <FiZap className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                          <p className="font-bold text-gray-800 text-lg">รับทันที</p>
+                          <p className="font-bold text-gray-800 text-lg">As soon as possible</p>
                           <p className="text-sm text-gray-600">As soon as possible</p>
                         </div>
                       </div>
                       {pickupOption === "asap" && (
                         <div className="mt-4 flex items-center gap-2 text-orange-600 font-semibold animate-fade-in">
                           <FiCheckCircle className="w-5 h-5" />
-                          เลือกแล้ว
+                          Selected
                         </div>
                       )}
                     </div>
@@ -309,14 +322,14 @@ const CheckoutFeature = () => {
                           <FiCalendar className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                          <p className="font-bold text-gray-800 text-lg">จองเวลา</p>
+                          <p className="font-bold text-gray-800 text-lg">Schedule</p>
                           <p className="text-sm text-gray-600">Schedule pickup</p>
                         </div>
                       </div>
                       {pickupOption === "scheduled" && (
                         <div className="mt-4 flex items-center gap-2 text-blue-600 font-semibold animate-fade-in">
                           <FiCheckCircle className="w-5 h-5" />
-                          เลือกแล้ว
+                          Selected
                         </div>
                       )}
                     </div>
@@ -328,15 +341,10 @@ const CheckoutFeature = () => {
                   <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-2xl border-2 border-blue-200 animate-slide-down space-y-4">
                     {/* Current Date Display */}
                     <div className="bg-white p-4 rounded-xl border-2 border-blue-300">
-                      <p className="text-sm text-gray-600 mb-1">วันที่รับอาหาร:</p>
+                      <p className="text-sm text-gray-600 mb-1">Pickup date:</p>
                       <p className="text-lg font-bold text-blue-600 flex items-center gap-2">
                         <FiCalendar className="w-5 h-5" />
-                        📅 {new Date().toLocaleDateString('th-TH', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          weekday: 'long'
-                        })} (วันนี้)
+                        {new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })} (Today)
                       </p>
                     </div>
 
@@ -347,7 +355,7 @@ const CheckoutFeature = () => {
                         className="flex items-center gap-2 text-lg font-bold text-gray-800 mb-3"
                       >
                         <BiTime className="w-6 h-6 text-blue-500" />
-                        เลือกชั่วโมง:
+                        Select Hour:
                       </label>
                       <select
                         id="pickupHour"
@@ -361,10 +369,10 @@ const CheckoutFeature = () => {
                         }}
                         className="w-full px-5 py-4 text-lg border-2 border-blue-300 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white"
                       >
-                        <option value="">-- เลือกชั่วโมง --</option>
+                        <option value="">-- Select hour --</option>
                         {getAvailableHours().map(hour => (
                           <option key={hour} value={hour}>
-                            {hour}:00 น.
+                            {hour}:00
                           </option>
                         ))}
                       </select>
@@ -377,7 +385,7 @@ const CheckoutFeature = () => {
                         className="flex items-center gap-2 text-lg font-bold text-gray-800 mb-3"
                       >
                         <BiTime className="w-6 h-6 text-blue-500" />
-                        เลือกนาที:
+                        Select Minute:
                       </label>
                       <select
                         id="pickupMinute"
@@ -388,29 +396,24 @@ const CheckoutFeature = () => {
                       >
                         {getAvailableMinutes().map(minute => (
                           <option key={minute} value={minute}>
-                            {minute} นาที
+                            :{minute}
                           </option>
                         ))}
                       </select>
                       {!pickupHour && (
-                        <p className="text-sm text-gray-500 mt-2">กรุณาเลือกชั่วโมงก่อน</p>
+                        <p className="text-sm text-gray-500 mt-2">Please select an hour first</p>
                       )}
                     </div>
 
                     {/* Preview */}
                     {pickupHour && pickupMinute && (
                       <div className="bg-white p-4 rounded-xl border-2 border-green-300 animate-fade-in">
-                        <p className="text-sm text-gray-600 mb-1">เวลารับอาหารที่เลือก:</p>
+                        <p className="text-sm text-gray-600 mb-1">Selected pickup time:</p>
                         <p className="text-2xl font-bold text-green-600 flex items-center gap-2">
-                          ⏰ {pickupHour}:{pickupMinute} น.
+                          {pickupHour}:{pickupMinute}
                         </p>
                         <p className="text-sm text-gray-600 mt-2">
-                          📅 {new Date().toLocaleDateString('th-TH', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            weekday: 'long'
-                          })}
+                          {new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
                         </p>
                       </div>
                     )}
@@ -426,7 +429,7 @@ const CheckoutFeature = () => {
                                 <FiDollarSign className="w-6 h-6 text-white" />
                               </div>
                               <h2 className="text-2xl font-bold text-gray-800">
-                                เลือกวิธีชำระเงิน 💳
+                                Payment Method
                               </h2>
                             </div>
                           </div>
@@ -437,17 +440,17 @@ const CheckoutFeature = () => {
                                 <input type="radio" name="paymentMethod" value="PROMPTPAY" checked={paymentMethod === "PROMPTPAY"} onChange={() => setPaymentMethod("PROMPTPAY")} className="peer sr-only" />
                                 <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-purple-500 peer-checked:bg-gradient-to-br peer-checked:from-purple-50 peer-checked:to-indigo-50 hover:border-purple-300 hover:shadow-lg group-hover:scale-105">
                                   <p className="font-bold text-gray-800 text-lg">QR PromptPay</p>
-                                  <p className="text-sm text-gray-600 mt-1">ชำระเงินผ่าน QR Code หลังจากร้านค้ายืนยันออร์เดอร์</p>
-                                  {paymentMethod === "PROMPTPAY" && (<div className="mt-4 flex items-center gap-2 text-purple-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
+                                  <p className="text-sm text-gray-600 mt-1">Pay via QR Code after the store confirms your order</p>
+                                  {paymentMethod === "PROMPTPAY" && (<div className="mt-4 flex items-center gap-2 text-purple-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />Selected</div>)}
                                 </div>
                               </label>
                               {/* Cash on Pickup Option */}
                               <label className={`relative cursor-pointer group transition-all ${paymentMethod === "CASH_ON_PICKUP" ? "scale-105" : ""}`}>
                                 <input type="radio" name="paymentMethod" value="CASH_ON_PICKUP" checked={paymentMethod === "CASH_ON_PICKUP"} onChange={() => setPaymentMethod("CASH_ON_PICKUP")} className="peer sr-only" />
                                 <div className="p-6 border-2 rounded-2xl transition-all h-full peer-checked:border-green-500 peer-checked:bg-gradient-to-br peer-checked:from-green-50 peer-checked:to-emerald-50 hover:border-green-300 hover:shadow-lg group-hover:scale-105">
-                                  <p className="font-bold text-gray-800 text-lg">จ่ายเงินสดหน้าร้าน</p>
-                                  <p className="text-sm text-gray-600 mt-1">ชำระเงินสดเมื่อมารับอาหารที่ร้าน</p>
-                                  {paymentMethod === "CASH_ON_PICKUP" && (<div className="mt-4 flex items-center gap-2 text-green-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />เลือกแล้ว</div>)}
+                                  <p className="font-bold text-gray-800 text-lg">Cash on Pickup</p>
+                                  <p className="text-sm text-gray-600 mt-1">Pay cash when you collect your order at the store</p>
+                                  {paymentMethod === "CASH_ON_PICKUP" && (<div className="mt-4 flex items-center gap-2 text-green-600 font-semibold animate-fade-in"><FiCheckCircle className="w-5 h-5" />Selected</div>)}
                                 </div>
                               </label>
                             </div>
@@ -462,7 +465,7 @@ const CheckoutFeature = () => {
                                 <BiDish className="w-6 h-6 text-white" />
                               </div>
                               <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                                คำขอเพิ่มเติม (ถ้ามี)
+                                Additional Notes (Optional)
                               </h2>
                             </div>
                           </div>
@@ -470,7 +473,7 @@ const CheckoutFeature = () => {
                             <textarea
                               className="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all resize-y"
                               rows={4}
-                              placeholder="เช่น ไม่ใส่ผัก, เผ็ดน้อย, หวานน้อย, หรือข้อความถึงร้านค้า..."
+                              placeholder="e.g. no onions, less spicy, or a message to the store..."
                               value={description}
                               onChange={(e) => setDescription(e.target.value)}
                             ></textarea>
@@ -486,26 +489,25 @@ const CheckoutFeature = () => {
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                     <FiShoppingBag className="w-6 h-6" />
                   </div>
-                  <h3 className="text-2xl font-bold">สรุปคำสั่งซื้อ</h3>
+                  <h3 className="text-2xl font-bold">Order Summary</h3>
                 </div>
               </div>
               <div className="p-6 space-y-4">
                 {/* Subtotal */}
                 <div className="flex justify-between items-center text-gray-700">
-                  <span className="font-semibold">ค่าอาหาร</span>
+                  <span className="font-semibold">Food total</span>
                   <span className="text-lg font-bold">฿{totalPrice.toFixed(0)}</span>
                 </div>
-                {/* Delivery Fee */}
                 <div className="flex justify-between items-center text-gray-700">
-                  <span className="font-semibold">ค่าจัดส่ง</span>
-                  <span className="text-lg font-bold text-green-600">ฟรี! 🎉</span>
+                  <span className="font-semibold">Delivery</span>
+                  <span className="text-lg font-bold text-green-600">Free!</span>
                 </div>
                 {/* Divider */}
                 <div className="border-t-2 border-gray-200 my-4"></div>
                 {/* Total */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-2xl border-2 border-green-200">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-800">ยอดรวมทั้งหมด</span>
+                    <span className="text-xl font-bold text-gray-800">Total</span>
                     <span className="text-3xl font-bold text-green-600">฿{totalPrice.toFixed(0)}</span>
                   </div>
                 </div>
@@ -518,18 +520,18 @@ const CheckoutFeature = () => {
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
-                      กำลังสั่งอาหาร...
+                      Placing orders...
                     </>
                   ) : (
                     <>
                       <FiCheckCircle className="w-6 h-6 group-hover:animate-bounce" />
-                      ยืนยันและสั่งอาหาร
+                      Confirm & Place Order
                     </>
                   )}
                 </button>
                 {/* Info Text */}
                 <p className="text-xs text-gray-500 text-center mt-4 leading-relaxed">
-                  เมื่อกดยืนยัน คำสั่งซื้อจะถูกส่งไปยังร้านค้าทันที
+                  Orders are sent to each store immediately after confirmation.
                 </p>
               </div>
             </div>

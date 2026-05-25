@@ -78,6 +78,8 @@ model Store {
   promptPayId String?
   isApproved   Boolean   @default(false)
   isOpen       Boolean   @default(false)
+  openTime     String?
+  closeTime    String?
   closeReason  String?
   reopenAt     DateTime?
   createdAt    DateTime  @default(now())
@@ -117,6 +119,7 @@ model Menu {
   cookingTime Int           @default(5)
   image       String?
   isAvailable Boolean       @default(true)
+  stock       Int?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   categoryId  String?

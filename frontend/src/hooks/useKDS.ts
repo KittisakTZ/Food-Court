@@ -15,6 +15,7 @@ export interface KdsOrder {
     queueNumber: number;
     status: string;
     totalAmount: number;
+    paymentMethod: string | null;
     createdAt: string;
     startCookingAt: string | null;
     estimatedReadyAt: string | null;
@@ -42,6 +43,7 @@ export const useKDS = (storeId: string | undefined) => {
                     queueNumber: o.queueNumber,
                     status: o.status,
                     totalAmount: o.totalAmount,
+                    paymentMethod: (o as any).paymentMethod ?? null,
                     createdAt: o.createdAt,
                     startCookingAt: (o as any).startCookingAt ?? null,
                     estimatedReadyAt: (o as any).estimatedReadyAt ?? null,

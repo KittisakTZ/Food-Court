@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { analyticsService } from "@/services/analytics.service";
+import { analyticsService, CategoryAnalyticsItem } from "@/services/analytics.service";
 import { useMyStore } from "@/hooks/useStores";
 import {
     BarChart,
@@ -20,7 +20,6 @@ import { MdRestaurant } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { th } from "date-fns/locale";
 import { startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, startOfWeek, endOfWeek } from "date-fns";
 import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 
@@ -50,6 +49,7 @@ type ChartType = "line" | "bar" | "area";
 export const SellerAnalyticsDashboard = () => {
     const { data: myStore } = useMyStore();
     const [data, setData] = useState<DashboardData | null>(null);
+    const [categoryData, setCategoryData] = useState<CategoryAnalyticsItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -97,20 +97,21 @@ export const SellerAnalyticsDashboard = () => {
             }
 
             try {
-                const res = await analyticsService.getDashboardData(
-                    myStore.id,
-                    startDate.toISOString(),
-                    endDate.toISOString(),
-                    interval
-                );
+                const [res, catRes] = await Promise.all([
+                    analyticsService.getDashboardData(myStore.id, startDate.toISOString(), endDate.toISOString(), interval),
+                    analyticsService.getCategoryAnalytics(myStore.id, startDate.toISOString(), endDate.toISOString()),
+                ]);
                 if (res && res.success) {
                     setData(res.responseObject);
                 } else {
-                    setError(res?.message || "ไม่พบข้อมูล");
+                    setError(res?.message || "No data found");
+                }
+                if (catRes && catRes.success) {
+                    setCategoryData(catRes.responseObject?.categories ?? []);
                 }
             } catch (error) {
                 console.error("Failed to fetch analytics data", error);
-                setError("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง");
+                setError("Failed to load data. Please try again.");
             } finally {
                 setIsLoading(false);
             }
@@ -133,13 +134,13 @@ export const SellerAnalyticsDashboard = () => {
                 <div className="text-red-500 text-6xl mb-4">
                     <FiTrendingUp />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">เกิดข้อผิดพลาด</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Data</h2>
                 <p className="text-gray-500 mb-6">{error}</p>
                 <button
                     onClick={() => window.location.reload()}
                     className="px-6 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors"
                 >
-                    ลองใหม่อีกครั้ง
+                    Try Again
                 </button>
             </div>
         );
@@ -155,10 +156,10 @@ export const SellerAnalyticsDashboard = () => {
                     <div>
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
                             <FiTrendingUp className="text-orange-500" />
-                            แดชบอร์ดวิเคราะห์ยอดขาย
+                            Sales Analytics Dashboard
                         </h1>
                         <p className="text-gray-500 text-sm mt-1">
-                            ข้อมูลร้าน: <span className="font-semibold text-gray-700">{myStore?.name}</span>
+                            Store: <span className="font-semibold text-gray-700">{myStore?.name}</span>
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -169,10 +170,10 @@ export const SellerAnalyticsDashboard = () => {
                                 onChange={(e) => setViewMode(e.target.value as ViewMode)}
                                 className="appearance-none pl-4 pr-10 py-2.5 bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-xl text-sm font-semibold text-gray-700 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-300 transition-all cursor-pointer hover:shadow-md"
                             >
-                                <option value="daily">รายวัน</option>
-                                <option value="weekly">รายสัปดาห์</option>
-                                <option value="monthly">รายเดือน</option>
-                                <option value="yearly">รายปี</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
                             </select>
                             <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none" />
                         </div>
@@ -183,7 +184,6 @@ export const SellerAnalyticsDashboard = () => {
                             <DatePicker
                                 selected={selectedDate}
                                 onChange={(date: Date | null) => date && setSelectedDate(date)}
-                                locale={th}
                                 dateFormat={
                                     viewMode === "daily" ? "dd MMMM yyyy" :
                                         viewMode === "weekly" ? "dd MMMM yyyy" :
@@ -201,7 +201,7 @@ export const SellerAnalyticsDashboard = () => {
 
                 {/* Chart Type Selector */}
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-600">รูปแบบกราฟ:</span>
+                    <span className="text-sm font-semibold text-gray-600">Chart Type:</span>
                     <div className="flex gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
                         <button
                             onClick={() => setChartType("line")}
@@ -209,10 +209,10 @@ export const SellerAnalyticsDashboard = () => {
                                 ? "bg-white text-orange-600 shadow-md border-2 border-orange-200"
                                 : "text-gray-600 hover:bg-white/50"
                                 }`}
-                            title="กราฟเส้น"
+                            title="Line Chart"
                         >
                             <FiActivity className="w-4 h-4" />
-                            เส้น
+                            Line
                         </button>
                         <button
                             onClick={() => setChartType("bar")}
@@ -220,10 +220,10 @@ export const SellerAnalyticsDashboard = () => {
                                 ? "bg-white text-orange-600 shadow-md border-2 border-orange-200"
                                 : "text-gray-600 hover:bg-white/50"
                                 }`}
-                            title="กราฟแท่ง"
+                            title="Bar Chart"
                         >
                             <FiBarChart2 className="w-4 h-4" />
-                            แท่ง
+                            Bar
                         </button>
                         <button
                             onClick={() => setChartType("area")}
@@ -231,10 +231,10 @@ export const SellerAnalyticsDashboard = () => {
                                 ? "bg-white text-orange-600 shadow-md border-2 border-orange-200"
                                 : "text-gray-600 hover:bg-white/50"
                                 }`}
-                            title="กราฟพื้นที่"
+                            title="Area Chart"
                         >
                             <HiOutlineChartBar className="w-4 h-4" />
-                            พื้นที่
+                            Area
                         </button>
                     </div>
                 </div>
@@ -247,11 +247,11 @@ export const SellerAnalyticsDashboard = () => {
                         <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
                             <span className="text-3xl font-bold">฿</span>
                         </div>
-                        <span className="text-orange-100 text-sm font-medium">ยอดขายรวม</span>
+                        <span className="text-orange-100 text-sm font-medium">Total Revenue</span>
                     </div>
                     <h3 className="text-3xl font-bold mb-1">฿{data.stats.totalRevenue.toLocaleString()}</h3>
                     <p className="text-sm text-orange-100 opacity-80">
-                        {viewMode === 'daily' ? 'วันนี้' : viewMode === 'weekly' ? 'สัปดาห์นี้' : viewMode === 'monthly' ? 'เดือนนี้' : 'ปีนี้'}
+                        {viewMode === 'daily' ? 'Today' : viewMode === 'weekly' ? 'This Week' : viewMode === 'monthly' ? 'This Month' : 'This Year'}
                     </p>
                 </div>
 
@@ -260,10 +260,10 @@ export const SellerAnalyticsDashboard = () => {
                         <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
                             <FiShoppingBag className="w-6 h-6" />
                         </div>
-                        <span className="text-blue-100 text-sm font-medium">ออเดอร์ทั้งหมด</span>
+                        <span className="text-blue-100 text-sm font-medium">Total Orders</span>
                     </div>
                     <h3 className="text-3xl font-bold mb-1">{data.stats.totalOrders.toLocaleString()}</h3>
-                    <p className="text-sm text-blue-100 opacity-80">รายการ</p>
+                    <p className="text-sm text-blue-100 opacity-80">orders</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-3xl p-6 text-white shadow-lg transform hover:-translate-y-1 transition-transform duration-300">
@@ -271,10 +271,10 @@ export const SellerAnalyticsDashboard = () => {
                         <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
                             <span className="text-3xl font-bold">฿</span>
                         </div>
-                        <span className="text-purple-100 text-sm font-medium">ยอดเฉลี่ยต่อออเดอร์</span>
+                        <span className="text-purple-100 text-sm font-medium">Avg. Order Value</span>
                     </div>
                     <h3 className="text-3xl font-bold mb-1">฿{data.stats.averageOrderValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</h3>
-                    <p className="text-sm text-purple-100 opacity-80">บาท / ออเดอร์</p>
+                    <p className="text-sm text-purple-100 opacity-80">per order</p>
                 </div>
             </div>
 
@@ -285,11 +285,11 @@ export const SellerAnalyticsDashboard = () => {
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                             <FiTrendingUp className="text-orange-500" />
-                            แนวโน้มยอดขาย
+                            Sales Trend
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                            <span>กราฟแสดงยอดขายและจำนวนออเดอร์</span>
+                            <span>Revenue and order count over time</span>
                         </div>
                     </div>
                     <div className="h-[450px] w-full">
@@ -311,8 +311,8 @@ export const SellerAnalyticsDashboard = () => {
                                         tickFormatter={(value) => {
                                             const date = new Date(value);
                                             return viewMode === 'yearly'
-                                                ? date.toLocaleDateString('th-TH', { month: 'short' })
-                                                : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                                                ? date.toLocaleDateString('en-GB', { month: 'short' })
+                                                : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                                         }}
                                     />
                                     <YAxis
@@ -335,7 +335,7 @@ export const SellerAnalyticsDashboard = () => {
                                                 return (
                                                     <div className="bg-white p-4 rounded-2xl shadow-xl border-2 border-orange-200">
                                                         <p className="font-bold text-gray-800 mb-3 text-sm border-b pb-2">
-                                                            📅 {new Date(label).toLocaleDateString('th-TH', {
+                                                            📅 {new Date(label).toLocaleDateString('en-GB', {
                                                                 weekday: 'long',
                                                                 year: 'numeric',
                                                                 month: 'long',
@@ -346,7 +346,7 @@ export const SellerAnalyticsDashboard = () => {
                                                             <div className="flex items-center justify-between gap-4">
                                                                 <span className="text-xs text-gray-600 flex items-center gap-1">
                                                                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                                                    ยอดขาย:
+                                                                    Revenue:
                                                                 </span>
                                                                 <span className="font-bold text-orange-600">฿{data.amount.toLocaleString()}</span>
                                                             </div>
@@ -354,14 +354,14 @@ export const SellerAnalyticsDashboard = () => {
                                                                 <div className="flex items-center justify-between gap-4">
                                                                     <span className="text-xs text-gray-600 flex items-center gap-1">
                                                                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                        จำนวนออเดอร์:
+                                                                        Orders:
                                                                     </span>
-                                                                    <span className="font-bold text-blue-600">{data.orderCount} รายการ</span>
+                                                                    <span className="font-bold text-blue-600">{data.orderCount} orders</span>
                                                                 </div>
                                                             )}
                                                             {data.orderCount && data.orderCount > 0 && (
                                                                 <div className="flex items-center justify-between gap-4 pt-2 border-t">
-                                                                    <span className="text-xs text-gray-600">ค่าเฉลี่ย/ออเดอร์:</span>
+                                                                    <span className="text-xs text-gray-600">Avg/order:</span>
                                                                     <span className="font-bold text-green-600">฿{(data.amount / data.orderCount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                                                                 </div>
                                                             )}
@@ -376,7 +376,7 @@ export const SellerAnalyticsDashboard = () => {
                                     <Line
                                         type="monotone"
                                         dataKey="amount"
-                                        name="ยอดขาย (บาท)"
+                                        name="Revenue (THB)"
                                         stroke="#f97316"
                                         strokeWidth={3}
                                         dot={{ r: 5, fill: '#f97316', strokeWidth: 2, stroke: '#fff' }}
@@ -394,8 +394,8 @@ export const SellerAnalyticsDashboard = () => {
                                         tickFormatter={(value) => {
                                             const date = new Date(value);
                                             return viewMode === 'yearly'
-                                                ? date.toLocaleDateString('th-TH', { month: 'short' })
-                                                : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                                                ? date.toLocaleDateString('en-GB', { month: 'short' })
+                                                : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                                         }}
                                     />
                                     <YAxis
@@ -418,7 +418,7 @@ export const SellerAnalyticsDashboard = () => {
                                                 return (
                                                     <div className="bg-white p-4 rounded-2xl shadow-xl border-2 border-orange-200">
                                                         <p className="font-bold text-gray-800 mb-3 text-sm border-b pb-2">
-                                                            📅 {new Date(label).toLocaleDateString('th-TH', {
+                                                            📅 {new Date(label).toLocaleDateString('en-GB', {
                                                                 weekday: 'long',
                                                                 year: 'numeric',
                                                                 month: 'long',
@@ -429,7 +429,7 @@ export const SellerAnalyticsDashboard = () => {
                                                             <div className="flex items-center justify-between gap-4">
                                                                 <span className="text-xs text-gray-600 flex items-center gap-1">
                                                                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                                                    ยอดขาย:
+                                                                    Revenue:
                                                                 </span>
                                                                 <span className="font-bold text-orange-600">฿{data.amount.toLocaleString()}</span>
                                                             </div>
@@ -437,14 +437,14 @@ export const SellerAnalyticsDashboard = () => {
                                                                 <div className="flex items-center justify-between gap-4">
                                                                     <span className="text-xs text-gray-600 flex items-center gap-1">
                                                                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                        จำนวนออเดอร์:
+                                                                        Orders:
                                                                     </span>
-                                                                    <span className="font-bold text-blue-600">{data.orderCount} รายการ</span>
+                                                                    <span className="font-bold text-blue-600">{data.orderCount} orders</span>
                                                                 </div>
                                                             )}
                                                             {data.orderCount && data.orderCount > 0 && (
                                                                 <div className="flex items-center justify-between gap-4 pt-2 border-t">
-                                                                    <span className="text-xs text-gray-600">ค่าเฉลี่ย/ออเดอร์:</span>
+                                                                    <span className="text-xs text-gray-600">Avg/order:</span>
                                                                     <span className="font-bold text-green-600">฿{(data.amount / data.orderCount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                                                                 </div>
                                                             )}
@@ -458,7 +458,7 @@ export const SellerAnalyticsDashboard = () => {
                                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                                     <Bar
                                         dataKey="amount"
-                                        name="ยอดขาย (บาท)"
+                                        name="Revenue (THB)"
                                         fill="#f97316"
                                         radius={[8, 8, 0, 0]}
                                         maxBarSize={60}
@@ -481,8 +481,8 @@ export const SellerAnalyticsDashboard = () => {
                                         tickFormatter={(value) => {
                                             const date = new Date(value);
                                             return viewMode === 'yearly'
-                                                ? date.toLocaleDateString('th-TH', { month: 'short' })
-                                                : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                                                ? date.toLocaleDateString('en-GB', { month: 'short' })
+                                                : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                                         }}
                                     />
                                     <YAxis
@@ -505,7 +505,7 @@ export const SellerAnalyticsDashboard = () => {
                                                 return (
                                                     <div className="bg-white p-4 rounded-2xl shadow-xl border-2 border-orange-200">
                                                         <p className="font-bold text-gray-800 mb-3 text-sm border-b pb-2">
-                                                            📅 {new Date(label).toLocaleDateString('th-TH', {
+                                                            📅 {new Date(label).toLocaleDateString('en-GB', {
                                                                 weekday: 'long',
                                                                 year: 'numeric',
                                                                 month: 'long',
@@ -516,7 +516,7 @@ export const SellerAnalyticsDashboard = () => {
                                                             <div className="flex items-center justify-between gap-4">
                                                                 <span className="text-xs text-gray-600 flex items-center gap-1">
                                                                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                                                    ยอดขาย:
+                                                                    Revenue:
                                                                 </span>
                                                                 <span className="font-bold text-orange-600">฿{data.amount.toLocaleString()}</span>
                                                             </div>
@@ -524,14 +524,14 @@ export const SellerAnalyticsDashboard = () => {
                                                                 <div className="flex items-center justify-between gap-4">
                                                                     <span className="text-xs text-gray-600 flex items-center gap-1">
                                                                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                        จำนวนออเดอร์:
+                                                                        Orders:
                                                                     </span>
-                                                                    <span className="font-bold text-blue-600">{data.orderCount} รายการ</span>
+                                                                    <span className="font-bold text-blue-600">{data.orderCount} orders</span>
                                                                 </div>
                                                             )}
                                                             {data.orderCount && data.orderCount > 0 && (
                                                                 <div className="flex items-center justify-between gap-4 pt-2 border-t">
-                                                                    <span className="text-xs text-gray-600">ค่าเฉลี่ย/ออเดอร์:</span>
+                                                                    <span className="text-xs text-gray-600">Avg/order:</span>
                                                                     <span className="font-bold text-green-600">฿{(data.amount / data.orderCount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                                                                 </div>
                                                             )}
@@ -546,7 +546,7 @@ export const SellerAnalyticsDashboard = () => {
                                     <Area
                                         type="monotone"
                                         dataKey="amount"
-                                        name="ยอดขาย (บาท)"
+                                        name="Revenue (THB)"
                                         stroke="#f97316"
                                         strokeWidth={3}
                                         fillOpacity={1}
@@ -562,7 +562,7 @@ export const SellerAnalyticsDashboard = () => {
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                         <MdRestaurant className="text-orange-500" />
-                        เมนูขายดี 5 อันดับแรก
+                        Top 5 Best-Selling Items
                     </h3>
                     <div className="space-y-4">
                         {data.topMenus.map((menu, index) => (
@@ -593,11 +593,64 @@ export const SellerAnalyticsDashboard = () => {
                         ))}
                         {data.topMenus.length === 0 && (
                             <div className="text-center py-10 text-gray-400">
-                                <p>ไม่มีข้อมูลเมนูขายดีในช่วงเวลานี้</p>
+                                <p>No bestselling items in this period</p>
                             </div>
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Category Analytics */}
+            <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <FiBarChart2 className="text-orange-500" />
+                    Sales by Category
+                </h3>
+                {categoryData.length === 0 ? (
+                    <div className="text-center py-10 text-gray-400">
+                        <p>No category data in this period</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Bar chart */}
+                        <div className="h-72">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={categoryData} layout="vertical" margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={(v) => `฿${(v / 1000).toFixed(0)}k`} />
+                                    <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#374151', fontSize: 13, fontWeight: 600 }} width={110} />
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                                        formatter={(value: number, _name: string) => [`฿${value.toLocaleString()}`, 'Revenue']}
+                                    />
+                                    <Bar dataKey="sales" name="Revenue" fill="#f97316" radius={[0, 8, 8, 0]} maxBarSize={40} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                        {/* Rankings table */}
+                        <div className="space-y-3">
+                            {categoryData.map((cat, i) => (
+                                <div key={cat.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                                    <span className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-bold flex-shrink-0 ${
+                                        i === 0 ? 'bg-orange-500 text-white' : i === 1 ? 'bg-gray-300 text-gray-700' : i === 2 ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                        {i + 1}
+                                    </span>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-gray-800 truncate">{cat.name}</p>
+                                        {cat.topMenu && (
+                                            <p className="text-xs text-gray-400 truncate">Top item: {cat.topMenu.name} ({cat.topMenu.quantity} sold)</p>
+                                        )}
+                                    </div>
+                                    <div className="text-right flex-shrink-0">
+                                        <p className="font-bold text-orange-600">฿{cat.sales.toLocaleString()}</p>
+                                        <p className="text-xs text-gray-400">{cat.quantity} items</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

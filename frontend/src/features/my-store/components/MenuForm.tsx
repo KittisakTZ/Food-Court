@@ -5,7 +5,7 @@ import { useCreateMenu, useUpdateMenu } from "@/hooks/useMenus";
 import { useState, useEffect } from "react";
 import { Menu } from "@/types/response/menu.response";
 import { MdRestaurant, MdCategory, MdCheckCircle, MdClose } from "react-icons/md";
-import { FiFileText, FiImage, FiUploadCloud, FiX, FiClock } from "react-icons/fi";
+import { FiFileText, FiImage, FiUploadCloud, FiX, FiClock, FiPackage } from "react-icons/fi";
 import { MENU_TYPE_DEFAULT_COOKING_TIME, MENU_TYPE_EMOJI, MENU_TYPE_LABEL } from "@/services/menuCategory.service";
 
 type MenuFormInputs = {
@@ -15,6 +15,7 @@ type MenuFormInputs = {
   cookingTime: number;
   categoryId: string;
   image: FileList;
+  stock: string;
 };
 
 interface MenuFormProps {
@@ -35,7 +36,6 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
   const isPending = isCreating || isUpdating;
   const selectedCategoryId = watch("categoryId");
 
-  // โหลดข้อมูลเมื่ออยู่ในโหมดแก้ไข
   useEffect(() => {
     if (isEditMode && initialData) {
       setValue("name", initialData.name);
@@ -43,6 +43,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
       setValue("price", initialData.price);
       setValue("cookingTime", initialData.cookingTime ?? 5);
       setValue("categoryId", initialData.categoryId || "");
+      setValue("stock", initialData.stock != null ? String(initialData.stock) : "");
       setPreviewImage(initialData.image || null);
     } else {
       reset();
@@ -50,7 +51,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
     }
   }, [initialData, isEditMode, setValue, reset]);
 
-  // Auto-fill cookingTime เมื่อเลือก category (เฉพาะโหมดสร้างใหม่)
+  // Auto-fill cookingTime when category is selected (create mode only)
   useEffect(() => {
     if (isEditMode) return;
     const cat = categories?.find(c => c.id === selectedCategoryId);
@@ -66,6 +67,9 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
     formData.append("price", String(data.price));
     formData.append("cookingTime", String(data.cookingTime));
     formData.append("categoryId", data.categoryId);
+    if (data.stock !== "" && data.stock != null) {
+      formData.append("stock", String(data.stock));
+    }
     if (data.image && data.image.length > 0) {
       formData.append("image", data.image[0]);
     }
@@ -96,27 +100,27 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
       <div className="bg-gradient-to-r from-orange-500 to-yellow-500 p-5">
         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
           <MdRestaurant className="w-7 h-7" />
-          {isEditMode ? "แก้ไขเมนู" : "เพิ่มเมนูใหม่"}
+          {isEditMode ? "Edit Menu Item" : "Add New Menu Item"}
         </h2>
         {isEditMode && initialData && (
           <p className="text-orange-100 text-sm mt-1">
-            กำลังแก้ไข: <span className="font-semibold">{initialData.name}</span>
+            Editing: <span className="font-semibold">{initialData.name}</span>
           </p>
         )}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-        {/* ชื่อเมนู */}
+        {/* Menu Name */}
         <div>
           <label htmlFor="name" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
             <MdRestaurant className="w-5 h-5 text-orange-600" />
-            ชื่อเมนู <span className="text-red-500">*</span>
+            Menu Name <span className="text-red-500">*</span>
           </label>
           <input
             id="name"
             type="text"
-            placeholder="เช่น ข้าวกะเพราไก่"
-            {...register("name", { required: "กรุณากรอกชื่อเมนู" })}
+            placeholder="e.g. Basil Chicken Rice"
+            {...register("name", { required: "Menu name is required" })}
             className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base font-medium shadow-sm"
           />
           {errors.name && (
@@ -127,26 +131,26 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
           )}
         </div>
 
-        {/* รายละเอียดเมนู */}
+        {/* Description */}
         <div>
           <label htmlFor="description" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
             <FiFileText className="w-5 h-5 text-orange-600" />
-            รายละเอียดเมนู
+            Description
           </label>
           <textarea
             id="description"
             rows={3}
-            placeholder="บรรยายเกี่ยวกับเมนู เช่น วัตถุดิบ รสชาติ..."
+            placeholder="Describe ingredients, taste, etc."
             {...register("description")}
             className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base resize-none shadow-sm"
           />
         </div>
 
-        {/* ราคา */}
+        {/* Price */}
         <div>
           <label htmlFor="price" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
             <span className="text-orange-600 font-bold text-lg">฿</span>
-            ราคา (บาท) <span className="text-red-500">*</span>
+            Price (THB) <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold text-lg">฿</span>
@@ -156,7 +160,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
               step="1"
               min="0"
               placeholder="45"
-              {...register("price", { required: "กรุณากรอกราคา", valueAsNumber: true })}
+              {...register("price", { required: "Price is required", valueAsNumber: true })}
               className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base font-medium shadow-sm"
             />
           </div>
@@ -168,14 +172,14 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
           )}
         </div>
 
-        {/* เวลาทำอาหาร */}
+        {/* Cooking Time */}
         <div>
           <label htmlFor="cookingTime" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
             <FiClock className="w-5 h-5 text-orange-600" />
-            เวลาทำต่อ 1 จาน (นาที) <span className="text-red-500">*</span>
+            Cooking Time per Serving (min) <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold text-sm">นาที</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold text-sm">min</span>
             <input
               id="cookingTime"
               type="number"
@@ -184,15 +188,15 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
               max="120"
               placeholder="5"
               {...register("cookingTime", {
-                required: "กรุณากรอกเวลาทำอาหาร",
+                required: "Cooking time is required",
                 valueAsNumber: true,
-                min: { value: 1, message: "ต้องมากกว่า 0 นาที" },
-                max: { value: 120, message: "ไม่เกิน 120 นาที" },
+                min: { value: 1, message: "Must be at least 1 minute" },
+                max: { value: 120, message: "Cannot exceed 120 minutes" },
               })}
               className="w-full pl-16 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base font-medium shadow-sm"
             />
           </div>
-          <p className="text-xs text-gray-400 mt-1.5">ระบบจะรวมเวลาทุกเมนูในออร์เดอร์เพื่อคำนวณนับถอยหลัง</p>
+          <p className="text-xs text-gray-400 mt-1.5">Used to calculate the estimated ready time for each order.</p>
           {errors.cookingTime && (
             <p className="text-red-500 text-sm mt-2 flex items-center gap-1 font-medium">
               <FiX className="w-4 h-4" />
@@ -201,21 +205,39 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
           )}
         </div>
 
-        {/* หมวดหมู่ */}
+        {/* Stock */}
+        <div>
+          <label htmlFor="stock" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+            <FiPackage className="w-5 h-5 text-orange-600" />
+            Remaining Stock
+          </label>
+          <input
+            id="stock"
+            type="number"
+            step="1"
+            min="0"
+            placeholder="Leave blank for unlimited"
+            {...register("stock")}
+            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base font-medium shadow-sm"
+          />
+          <p className="text-xs text-gray-400 mt-1.5">Stock decreases automatically when an order is confirmed. Leave blank for unlimited.</p>
+        </div>
+
+        {/* Category */}
         <div>
           <label htmlFor="categoryId" className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
             <MdCategory className="w-5 h-5 text-orange-600" />
-            หมวดหมู่เมนู <span className="text-red-500">*</span>
+            Category <span className="text-red-500">*</span>
           </label>
           <select
             id="categoryId"
             {...register("categoryId", {
-              required: "กรุณาเลือกหมวดหมู่เมนู",
-              validate: (value) => value !== "" || "กรุณาเลือกหมวดหมู่ที่ถูกต้อง",
+              required: "Please select a category",
+              validate: (value) => value !== "" || "Please select a valid category",
             })}
             className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-base font-medium shadow-sm bg-white"
           >
-            <option value="">-- เลือกหมวดหมู่ --</option>
+            <option value="">-- Select category --</option>
             {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {MENU_TYPE_EMOJI[cat.menuType]} {cat.name} ({MENU_TYPE_LABEL[cat.menuType]})
@@ -228,7 +250,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
             return (
               <p className="text-xs text-orange-500 mt-1.5 flex items-center gap-1 font-medium">
                 <FiClock className="w-3.5 h-3.5" />
-                เวลาทำแนะนำสำหรับ{MENU_TYPE_LABEL[cat.menuType]}: <span className="font-bold">{MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]} นาที</span>
+                Suggested cooking time for {MENU_TYPE_LABEL[cat.menuType]}: <span className="font-bold">{MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]} min</span>
               </p>
             );
           })()}
@@ -240,11 +262,11 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
           )}
         </div>
 
-        {/* รูปภาพเมนู */}
+        {/* Menu Image */}
         <div>
           <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
             <FiImage className="w-5 h-5 text-orange-600" />
-            รูปภาพเมนู
+            Menu Image
           </label>
 
           {previewImage ? (
@@ -271,8 +293,8 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
                 <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
                   <FiUploadCloud className="w-8 h-8 text-orange-500" />
                 </div>
-                <p className="text-sm font-semibold text-gray-700">คลิกเพื่อเลือกรูปภาพ</p>
-                <p className="text-xs text-gray-500">PNG หรือ JPG (ไม่เกิน 5MB)</p>
+                <p className="text-sm font-semibold text-gray-700">Click to select an image</p>
+                <p className="text-xs text-gray-500">PNG or JPG (max 5MB)</p>
               </div>
               <input
                 id="image"
@@ -287,7 +309,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
           )}
         </div>
 
-        {/* ปุ่ม */}
+        {/* Buttons */}
         <div className="flex gap-3 pt-4">
           {isEditMode && (
             <button
@@ -296,7 +318,7 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
               className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm"
             >
               <MdClose className="w-5 h-5" />
-              ยกเลิก
+              Cancel
             </button>
           )}
           <button
@@ -307,12 +329,12 @@ export const MenuForm = ({ storeId, initialData, onComplete }: MenuFormProps) =>
             {isPending ? (
               <>
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>กำลังบันทึก...</span>
+                <span>Saving...</span>
               </>
             ) : (
               <>
                 <MdCheckCircle className="w-5 h-5" />
-                <span>{isEditMode ? "บันทึกการแก้ไข" : "เพิ่มเมนู"}</span>
+                <span>{isEditMode ? "Save Changes" : "Add Menu Item"}</span>
               </>
             )}
           </button>

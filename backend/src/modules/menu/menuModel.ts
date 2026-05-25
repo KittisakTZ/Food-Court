@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 
-// Payload สำหรับการสร้างและอัปเดตเมนู
 export type MenuPayload = {
     name: string;
     description?: string | null;
@@ -10,10 +9,10 @@ export type MenuPayload = {
     cookingTime?: number;
     image?: string | null;
     isAvailable?: boolean;
-    categoryId: string; // **สำคัญ:** เมนูต้องสังกัดหมวดหมู่
+    categoryId: string;
+    stock?: number | null;
 };
 
-// Schema สำหรับการสร้างเมนู
 export const CreateMenuSchema = z.object({
     body: z.object({
         name: z.string().min(1, "Menu name is required").max(100),
@@ -22,10 +21,10 @@ export const CreateMenuSchema = z.object({
         cookingTime: z.coerce.number().int().min(1).max(120).optional().default(5),
         isAvailable: z.coerce.boolean().optional().default(true),
         categoryId: z.string().cuid("A valid category ID is required"),
+        stock: z.coerce.number().int().min(0).optional().nullable(),
     }),
 });
 
-// Schema สำหรับการอัปเดตเมนู
 export const UpdateMenuSchema = z.object({
     params: z.object({
         menuId: z.string().cuid("Invalid menu ID"),
@@ -37,6 +36,7 @@ export const UpdateMenuSchema = z.object({
         cookingTime: z.coerce.number().int().min(1).max(120).optional(),
         isAvailable: z.coerce.boolean().optional(),
         categoryId: z.string().cuid().optional(),
+        stock: z.coerce.number().int().min(0).optional().nullable(),
     }),
 });
 
