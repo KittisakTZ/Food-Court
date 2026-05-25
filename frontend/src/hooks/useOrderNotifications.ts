@@ -9,13 +9,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyOrders } from "@/services/order.service";
 
 const STATUS_TOASTS: Record<string, { msg: string; type: 'success' | 'error' | 'warning' }> = {
-  AWAITING_PAYMENT:      { type: 'success', msg: "ร้านค้ายืนยันคำสั่งซื้อแล้ว กรุณาชำระเงิน (Order confirmed, please pay)" },
-  AWAITING_CONFIRMATION: { type: 'success', msg: "ระบบได้รับหลักฐานการชำระเงินแล้ว กำลังตรวจสอบ (Payment slip received)" },
-  COOKING:               { type: 'success', msg: "ร้านค้ากำลังปรุงอาหารของคุณ (Preparing your food)" },
-  READY_FOR_PICKUP:      { type: 'success', msg: "อาหารของคุณเสร็จเรียบร้อยแล้ว กรุณามารับหน้าร้าน (Food is ready for pickup)" },
-  COMPLETED:             { type: 'success', msg: "ออร์เดอร์ของคุณเสร็จสมบูรณ์ ขอบคุณที่ใช้บริการ (Order completed)" },
-  REJECTED:              { type: 'error',   msg: "ขออภัย ออร์เดอร์ของคุณถูกปฏิเสธโดยร้านค้า (Order rejected)" },
-  CANCELLED:             { type: 'error',   msg: "ออร์เดอร์ของคุณถูกยกเลิกแล้ว (Order cancelled)" },
+  AWAITING_PAYMENT:      { type: 'success', msg: "Order confirmed, please pay." },
+  AWAITING_CONFIRMATION: { type: 'success', msg: "Payment slip received. The store is verifying your payment." },
+  COOKING:               { type: 'success', msg: "The store is now preparing your food!" },
+  READY_FOR_PICKUP:      { type: 'success', msg: "Your food is ready! Please collect it at the store." },
+  COMPLETED:             { type: 'success', msg: "Order completed. Thank you for your order!" },
+  REJECTED:              { type: 'error',   msg: "Your order was rejected by the store." },
+  CANCELLED:             { type: 'error',   msg: "Your order has been cancelled." },
 };
 
 export const useOrderNotifications = () => {
