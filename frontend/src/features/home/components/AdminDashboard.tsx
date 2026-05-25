@@ -63,8 +63,8 @@ export const AdminDashboard = () => {
     const handleApprove = (storeId: string, storeName: string) => {
         setDialogState({
             isOpen: true,
-            title: "ยืนยันการอนุมัติ",
-            description: `คุณแน่ใจหรือไม่ที่จะอนุมัติร้านค้า "${storeName}"?`,
+            title: "Confirm Approval",
+            description: `Are you sure you want to approve the store "${storeName}"?`,
             onConfirm: () => approveStore(storeId),
         });
     };
@@ -72,8 +72,8 @@ export const AdminDashboard = () => {
     const handleReject = (storeId: string, storeName: string) => {
         setDialogState({
             isOpen: true,
-            title: "ยืนยันการยกเลิก",
-            description: `คุณแน่ใจหรือไม่ที่จะยกเลิกการอนุมัติร้านค้า "${storeName}"? ร้านค้านี้จะไม่สามารถให้บริการลูกค้าได้`,
+            title: "Confirm Revocation",
+            description: `Are you sure you want to revoke approval for the store "${storeName}"? This store will no longer be available to customers.`,
             onConfirm: () => rejectStore(storeId),
         });
     };
@@ -86,7 +86,7 @@ export const AdminDashboard = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
                 <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                <p className="mt-4 text-slate-500 text-sm font-medium">กำลังโหลดข้อมูล...</p>
+                <p className="mt-4 text-slate-500 text-sm font-medium">Loading data...</p>
             </div>
         );
     }
@@ -96,8 +96,8 @@ export const AdminDashboard = () => {
             <div className="flex items-center justify-center min-h-screen bg-slate-50">
                 <div className="bg-white p-8 rounded-2xl shadow border border-red-100 text-center">
                     <FiXCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-                    <p className="text-slate-700 font-semibold">ไม่สามารถโหลดข้อมูลร้านค้าได้</p>
-                    <p className="text-slate-400 text-sm mt-1">กรุณาลองใหม่อีกครั้งภายหลัง</p>
+                    <p className="text-slate-700 font-semibold">Unable to load store data</p>
+                    <p className="text-slate-400 text-sm mt-1">Please try again later</p>
                 </div>
             </div>
         );
@@ -123,8 +123,8 @@ export const AdminDashboard = () => {
                         <MdRestaurant className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black text-slate-800">แดชบอร์ดผู้ดูแลระบบ</h1>
-                        <p className="text-sm text-slate-400 mt-0.5">จัดการและอนุมัติการลงทะเบียนร้านค้า</p>
+                        <h1 className="text-2xl font-black text-slate-800">Admin Dashboard</h1>
+                        <p className="text-sm text-slate-400 mt-0.5">Manage and approve store registrations</p>
                     </div>
                 </div>
 
@@ -133,9 +133,9 @@ export const AdminDashboard = () => {
                     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">ร้านค้าทั้งหมด</p>
+                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Total Stores</p>
                                 <p className="text-3xl font-black text-slate-800">{stats.total}</p>
-                                <p className="text-xs text-slate-400 mt-1">รวมทุกสถานะ</p>
+                                <p className="text-xs text-slate-400 mt-1">All statuses included</p>
                             </div>
                             <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
                                 <FiShoppingBag className="w-6 h-6 text-orange-500" />
@@ -145,9 +145,9 @@ export const AdminDashboard = () => {
                     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">อนุมัติแล้ว</p>
+                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Approved</p>
                                 <p className="text-3xl font-black text-emerald-600">{stats.approved}</p>
-                                <p className="text-xs text-slate-400 mt-1">พร้อมให้บริการ</p>
+                                <p className="text-xs text-slate-400 mt-1">Ready to serve</p>
                             </div>
                             <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
                                 <FiCheckCircle className="w-6 h-6 text-emerald-500" />
@@ -157,9 +157,9 @@ export const AdminDashboard = () => {
                     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">รออนุมัติ</p>
+                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Pending</p>
                                 <p className="text-3xl font-black text-amber-600">{stats.pending}</p>
-                                <p className="text-xs text-slate-400 mt-1">ต้องตรวจสอบ</p>
+                                <p className="text-xs text-slate-400 mt-1">Needs review</p>
                             </div>
                             <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
                                 <FiClock className="w-6 h-6 text-amber-500" />
@@ -171,9 +171,9 @@ export const AdminDashboard = () => {
                 {/* Filter Tabs */}
                 <div className="mb-5 flex gap-2">
                     {([
-                        { key: 'pending', label: 'รออนุมัติ', icon: <FiClock className="w-4 h-4" /> },
-                        { key: 'approved', label: 'อนุมัติแล้ว', icon: <FiCheckCircle className="w-4 h-4" /> },
-                        { key: 'all', label: 'ทั้งหมด', icon: <FiSliders className="w-4 h-4" /> },
+                        { key: 'pending', label: 'Pending', icon: <FiClock className="w-4 h-4" /> },
+                        { key: 'approved', label: 'Approved', icon: <FiCheckCircle className="w-4 h-4" /> },
+                        { key: 'all', label: 'All', icon: <FiSliders className="w-4 h-4" /> },
                     ] as { key: FilterStatus; label: string; icon: React.ReactNode }[]).map(tab => (
                         <button
                             key={tab.key}
@@ -199,14 +199,14 @@ export const AdminDashboard = () => {
                             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             <input
                                 type="text"
-                                placeholder="ค้นหาร้านค้า..."
+                                placeholder="Search stores..."
                                 value={searchText}
                                 onChange={(e) => handleSearchChange(e.target.value)}
                                 className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all"
                             />
                         </div>
                         <div className="flex items-center gap-2 text-sm text-slate-500">
-                            <span>แสดง</span>
+                            <span>Show</span>
                             <select
                                 value={pageSize}
                                 onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
@@ -217,7 +217,7 @@ export const AdminDashboard = () => {
                                 <option value={20}>20</option>
                                 <option value={50}>50</option>
                             </select>
-                            <span>รายการ</span>
+                            <span>items</span>
                         </div>
                     </div>
 
@@ -226,11 +226,11 @@ export const AdminDashboard = () => {
                         <table className="min-w-full">
                             <thead>
                                 <tr className="border-b border-slate-100 bg-slate-50">
-                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">ข้อมูลร้านค้า</th>
-                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">เจ้าของร้าน</th>
-                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">สถานะ</th>
-                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">วันที่สร้าง</th>
-                                    <th className="px-5 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wide">การจัดการ</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">Store Information</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">Owner</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">Status</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">Created Date</th>
+                                    <th className="px-5 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wide">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -240,11 +240,11 @@ export const AdminDashboard = () => {
                                             <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                                                 <FiShoppingBag className="w-7 h-7 text-slate-400" />
                                             </div>
-                                            <p className="font-semibold text-slate-600 mb-1">ไม่พบร้านค้า</p>
+                                            <p className="font-semibold text-slate-600 mb-1">No stores found</p>
                                             <p className="text-sm text-slate-400">
-                                                {filterStatus === 'pending' && 'ไม่มีร้านค้าที่รออนุมัติ'}
-                                                {filterStatus === 'approved' && 'ยังไม่มีร้านค้าที่ได้รับการอนุมัติ'}
-                                                {filterStatus === 'all' && 'ลองปรับเปลี่ยนการค้นหาหรือตัวกรอง'}
+                                                {filterStatus === 'pending' && 'No stores awaiting approval'}
+                                                {filterStatus === 'approved' && 'No approved stores yet'}
+                                                {filterStatus === 'all' && 'Try adjusting your search or filter'}
                                             </p>
                                         </td>
                                     </tr>
@@ -255,12 +255,12 @@ export const AdminDashboard = () => {
                                                 <div className="flex items-start gap-3">
                                                     <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
                                                         store.isApproved ? 'bg-emerald-100' : 'bg-amber-100'
-                                                    }`}>
+                                                     }`}>
                                                         <FiShoppingBag className={`w-5 h-5 ${store.isApproved ? 'text-emerald-600' : 'text-amber-600'}`} />
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-bold text-slate-800">{store.name}</p>
-                                                        <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{store.description || 'ไม่มีคำอธิบาย'}</p>
+                                                        <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{store.description || 'No description'}</p>
                                                         {store.location && (
                                                             <p className="text-xs text-orange-500 mt-0.5 font-medium">📍 {store.location}</p>
                                                         )}
@@ -268,23 +268,23 @@ export const AdminDashboard = () => {
                                                 </div>
                                             </td>
                                             <td className="px-5 py-4 whitespace-nowrap">
-                                                <p className="text-sm font-semibold text-slate-700">{store.owner?.username ?? 'ไม่ระบุ'}</p>
+                                                <p className="text-sm font-semibold text-slate-700">{store.owner?.username ?? 'Unspecified'}</p>
                                             </td>
                                             <td className="px-5 py-4 whitespace-nowrap">
                                                 {store.isApproved ? (
                                                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
                                                         <FiCheckCircle className="w-3.5 h-3.5" />
-                                                        อนุมัติแล้ว
+                                                        Approved
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
                                                         <FiClock className="w-3.5 h-3.5" />
-                                                        รออนุมัติ
+                                                        Pending
                                                     </span>
                                                 )}
                                             </td>
                                             <td className="px-5 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                {new Date(store.createdAt).toLocaleDateString('th-TH', {
+                                                {new Date(store.createdAt).toLocaleDateString('en-US', {
                                                     year: 'numeric',
                                                     month: 'short',
                                                     day: 'numeric',
@@ -298,7 +298,7 @@ export const AdminDashboard = () => {
                                                         className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-600 border border-red-200 text-sm font-semibold rounded-xl hover:bg-red-100 hover:border-red-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                                     >
                                                         <FiXCircle className="w-4 h-4" />
-                                                        {isRejecting ? 'กำลังยกเลิก...' : 'ยกเลิก'}
+                                                        {isRejecting ? 'Revoking...' : 'Revoke'}
                                                     </button>
                                                 ) : (
                                                     <button
@@ -307,7 +307,7 @@ export const AdminDashboard = () => {
                                                         className="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 text-white text-sm font-semibold rounded-xl hover:bg-orange-600 shadow-sm shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                                     >
                                                         <FiCheckCircle className="w-4 h-4" />
-                                                        {isApproving ? 'กำลังอนุมัติ...' : 'อนุมัติ'}
+                                                        {isApproving ? 'Approving...' : 'Approve'}
                                                     </button>
                                                 )}
                                             </td>
@@ -322,12 +322,12 @@ export const AdminDashboard = () => {
                     {totalPages > 1 && (
                         <div className="px-5 py-4 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <p className="text-sm text-slate-500">
-                                แสดง{' '}
+                                Showing{' '}
                                 <span className="font-semibold text-slate-700">{(currentPage - 1) * pageSize + 1}</span>
-                                {' '}ถึง{' '}
+                                {' '}to{' '}
                                 <span className="font-semibold text-slate-700">{Math.min(currentPage * pageSize, totalCount)}</span>
-                                {' '}จาก{' '}
-                                <span className="font-semibold text-slate-700">{totalCount}</span> ร้านค้า
+                                {' '}of{' '}
+                                <span className="font-semibold text-slate-700">{totalCount}</span> stores
                             </p>
                             <div className="flex items-center gap-1.5">
                                 <button

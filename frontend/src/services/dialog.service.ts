@@ -92,7 +92,7 @@ class DialogService {
             title: options.title,
             description: options.description,
             type: options.type || 'alert',
-            confirmText: options.confirmText || 'ตกลง',
+            confirmText: options.confirmText || 'OK',
             hideCancel: true,
           })
         );
@@ -104,28 +104,28 @@ class DialogService {
    * แสดง success dialog
    */
   success(title: string, description: string): Promise<void> {
-    return this.alert({ title, description, type: 'success', confirmText: 'เยี่ยม!' });
+    return this.alert({ title, description, type: 'success', confirmText: 'Great!' });
   }
 
   /**
    * แสดง error dialog
    */
   error(title: string, description: string): Promise<void> {
-    return this.alert({ title, description, type: 'error', confirmText: 'เข้าใจแล้ว' });
+    return this.alert({ title, description, type: 'error', confirmText: 'Got it' });
   }
 
   /**
    * แสดง warning dialog
    */
   warning(title: string, description: string): Promise<void> {
-    return this.alert({ title, description, type: 'warning', confirmText: 'รับทราบ' });
+    return this.alert({ title, description, type: 'warning', confirmText: 'Acknowledged' });
   }
 
   /**
    * แสดง info dialog
    */
   info(title: string, description: string): Promise<void> {
-    return this.alert({ title, description, type: 'info', confirmText: 'เข้าใจแล้ว' });
+    return this.alert({ title, description, type: 'info', confirmText: 'Got it' });
   }
 }
 

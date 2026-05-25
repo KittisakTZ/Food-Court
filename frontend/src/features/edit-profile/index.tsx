@@ -24,15 +24,15 @@ function validateField(field: keyof FormValues, value: string): string | undefin
   switch (field) {
     case "firstName":
     case "lastName":
-      if (value && !NAME_REGEX.test(value))  return "ใช้ตัวอักษรภาษาไทยหรืออังกฤษเท่านั้น ห้ามตัวเลขและอักขระพิเศษ";
-      if (value.length > 50)                  return "ไม่เกิน 50 ตัวอักษร";
+      if (value && !NAME_REGEX.test(value))  return "Only Thai or English letters are allowed. No numbers or special characters.";
+      if (value.length > 50)                  return "Must not exceed 50 characters";
       break;
     case "phone":
-      if (value && !PHONE_REGEX.test(value))  return "กรอกตัวเลขเท่านั้น";
-      if (value && value.length !== 10)        return "ต้องมี 10 หลักพอดี";
+      if (value && !PHONE_REGEX.test(value))  return "Only numbers are allowed";
+      if (value && value.length !== 10)        return "Must be exactly 10 digits";
       break;
     case "email":
-      if (value && !EMAIL_REGEX.test(value))  return "รูปแบบอีเมลไม่ถูกต้อง เช่น name@email.com";
+      if (value && !EMAIL_REGEX.test(value))  return "Invalid email format. E.g., name@email.com";
       break;
   }
 }
@@ -75,7 +75,7 @@ function FieldStatus({
 }
 
 // ─── Role display ─────────────────────────────────────────
-const ROLE_LABEL: Record<string, string> = { BUYER: "ผู้ซื้อ", SELLER: "ผู้ขาย", ADMIN: "ผู้ดูแลระบบ" };
+const ROLE_LABEL: Record<string, string> = { BUYER: "Buyer", SELLER: "Seller", ADMIN: "Administrator" };
 const ROLE_GRADIENT: Record<string, string> = {
   BUYER:  "from-orange-400 to-amber-400",
   SELLER: "from-emerald-400 to-teal-500",
@@ -135,7 +135,7 @@ export default function EditProfileFeature() {
     setTouched(allTouched);
     const errs = validateAll(values);
     setErrors(errs);
-    if (Object.keys(errs).length > 0) { toastService.error("กรุณาแก้ไขข้อมูลที่ไม่ถูกต้อง"); return; }
+    if (Object.keys(errs).length > 0) { toastService.error("Please correct the invalid fields"); return; }
 
     setIsSubmitting(true);
     try {
@@ -149,14 +149,14 @@ export default function EditProfileFeature() {
       if (res.statusCode === 200 && res.responseObject) {
         setUser(res.responseObject);
         queryClient.invalidateQueries({ queryKey: ["me"] });
-        toastService.success("อัปเดตโปรไฟล์สำเร็จ");
+        toastService.success("Profile updated successfully");
         navigate("/");
       } else {
-        toastService.error(res.message || "เกิดข้อผิดพลาด");
+        toastService.error(res.message || "An error occurred");
       }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      toastService.error(e?.response?.data?.message || "เกิดข้อผิดพลาด");
+      toastService.error(e?.response?.data?.message || "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -188,7 +188,7 @@ export default function EditProfileFeature() {
           <span className="w-7 h-7 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center hover:border-orange-300">
             <FiArrowLeft className="w-3.5 h-3.5" />
           </span>
-          ย้อนกลับ
+          Back
         </button>
 
         {/* ── Profile Card ── */}
@@ -220,7 +220,7 @@ export default function EditProfileFeature() {
               {values.email && <Pill icon={<FiMail className="w-3 h-3" />} text={values.email} />}
               {values.phone && <Pill icon={<FiPhone className="w-3 h-3" />} text={values.phone} />}
               {!values.firstName && !values.email && !values.phone && (
-                <p className="text-xs text-gray-400 italic">ยังไม่ได้กรอกข้อมูล</p>
+                <p className="text-xs text-gray-400 italic">No information provided yet</p>
               )}
             </div>
           </div>
@@ -230,8 +230,8 @@ export default function EditProfileFeature() {
         <div className="flex gap-2.5 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
           <FiShield className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
           <p className="text-xs text-blue-600 leading-relaxed">
-            <span className="font-semibold">กฎการกรอก:</span>{" "}
-            ชื่อ-นามสกุลใช้ตัวอักษรเท่านั้น · เบอร์โทรตัวเลข 10 หลัก · อีเมลรูปแบบ name@domain.com · ทุกช่องไม่บังคับ
+            <span className="font-semibold">Form Rules:</span>{" "}
+            Name/Surname: letters only · Phone: 10 digits · Email: name@domain.com · All fields are optional
           </p>
         </div>
 
@@ -240,12 +240,12 @@ export default function EditProfileFeature() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50">
 
             {/* Section: ชื่อ-นามสกุล */}
-            <Section title="ชื่อ-นามสกุล">
+            <Section title="Name & Surname">
               <div className="grid sm:grid-cols-2 gap-3">
-                <Field label="ชื่อ">
+                <Field label="First Name">
                   <InputWrapper icon={<FiUser />}>
                     <input
-                      type="text" placeholder="ชื่อจริง"
+                      type="text" placeholder="First Name"
                       value={values.firstName}
                       onChange={e => handleChange("firstName", e.target.value)}
                       onBlur={() => handleBlur("firstName")}
@@ -255,15 +255,15 @@ export default function EditProfileFeature() {
                   </InputWrapper>
                   <FieldStatus
                     touched={touched.firstName} error={errors.firstName}
-                    value={values.firstName} successText="ถูกต้อง"
-                    hint="ภาษาไทยหรืออังกฤษเท่านั้น"
+                    value={values.firstName} successText="Valid"
+                    hint="Thai or English letters only"
                   />
                 </Field>
 
-                <Field label="นามสกุล">
+                <Field label="Last Name">
                   <InputWrapper icon={<FiUser />}>
                     <input
-                      type="text" placeholder="นามสกุล"
+                      type="text" placeholder="Last Name"
                       value={values.lastName}
                       onChange={e => handleChange("lastName", e.target.value)}
                       onBlur={() => handleBlur("lastName")}
@@ -273,16 +273,16 @@ export default function EditProfileFeature() {
                   </InputWrapper>
                   <FieldStatus
                     touched={touched.lastName} error={errors.lastName}
-                    value={values.lastName} successText="ถูกต้อง"
-                    hint="ภาษาไทยหรืออังกฤษเท่านั้น"
+                    value={values.lastName} successText="Valid"
+                    hint="Thai or English letters only"
                   />
                 </Field>
               </div>
             </Section>
 
             {/* Section: ติดต่อ */}
-            <Section title="ข้อมูลติดต่อ">
-              <Field label="เบอร์โทรศัพท์">
+            <Section title="Contact Info">
+              <Field label="Phone Number">
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                     <FiPhone className="w-4 h-4" />
@@ -302,12 +302,12 @@ export default function EditProfileFeature() {
                 </div>
                 <FieldStatus
                   touched={touched.phone} error={errors.phone}
-                  value={values.phone} successText="ครบ 10 หลัก"
-                  hint="ตัวเลขเท่านั้น ระบบบล็อกตัวอักษรอัตโนมัติ"
+                  value={values.phone} successText="Exactly 10 digits"
+                  hint="Numbers only, non-digits are blocked"
                 />
               </Field>
 
-              <Field label="อีเมล" className="mt-3">
+              <Field label="Email" className="mt-3">
                 <InputWrapper icon={<FiMail />}>
                   <input
                     type="text" placeholder="example@email.com"
@@ -320,20 +320,20 @@ export default function EditProfileFeature() {
                 </InputWrapper>
                 <FieldStatus
                   touched={touched.email} error={errors.email}
-                  value={values.email} successText="รูปแบบถูกต้อง"
-                  hint="เช่น student@university.ac.th"
+                  value={values.email} successText="Valid format"
+                  hint="E.g., student@university.ac.th"
                 />
               </Field>
             </Section>
 
             {/* Section: เพศ */}
-            <Section title="เพศ">
+            <Section title="Gender">
               <div className="grid grid-cols-3 gap-2.5">
                 {(
                   [
-                    { value: "MALE",          label: "ชาย",    emoji: "👨" },
-                    { value: "FEMALE",        label: "หญิง",   emoji: "👩" },
-                    { value: "NOT_SPECIFIED", label: "ไม่ระบุ", emoji: "🧑" },
+                    { value: "MALE",          label: "Male",        emoji: "👨" },
+                    { value: "FEMALE",        label: "Female",      emoji: "👩" },
+                    { value: "NOT_SPECIFIED", label: "Not Specified", emoji: "🧑" },
                   ] as { value: Gender; label: string; emoji: string }[]
                 ).map(opt => {
                   const active = values.gender === opt.value;
@@ -364,7 +364,7 @@ export default function EditProfileFeature() {
                   );
                 })}
               </div>
-              <Hint text="เลือกหรือไม่เลือกก็ได้" />
+              <Hint text="Optional field" />
             </Section>
           </div>
 
@@ -385,18 +385,18 @@ export default function EditProfileFeature() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
-                กำลังบันทึก...
+                Saving...
               </>
             ) : (
               <>
                 <FiSave className="w-4 h-4" />
-                บันทึกโปรไฟล์
+                Save Profile
               </>
             )}
           </button>
 
           <p className="text-center text-xs text-gray-400 mt-3">
-            ข้อมูลของคุณจะถูกเก็บไว้อย่างปลอดภัย
+            Your data will be stored securely
           </p>
         </form>
       </div>

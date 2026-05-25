@@ -18,11 +18,11 @@ export const useCreateCategory = () => {
     return useMutation({
         mutationFn: createCategory,
         onSuccess: (data) => {
-            toastService.success('สร้างหมวดหมู่สำเร็จ');
+            toastService.success('Category created successfully');
             queryClient.invalidateQueries({ queryKey: [CATEGORIES_QUERY_KEY, data.storeId] });
         },
         onError: (error) => {
-            toastService.error(`ไม่สามารถสร้างหมวดหมู่ได้: ${error.message}`);
+            toastService.error(`Unable to create category: ${error.message}`);
         }
     });
 };
@@ -32,11 +32,11 @@ export const useUpdateCategory = () => {
     return useMutation({
         mutationFn: updateCategory,
         onSuccess: (data) => {
-            toastService.success('อัปเดตหมวดหมู่สำเร็จ');
+            toastService.success('Category updated successfully');
             queryClient.invalidateQueries({ queryKey: [CATEGORIES_QUERY_KEY, data.storeId] });
         },
         onError: (error) => {
-            toastService.error(`ไม่สามารถอัปเดตหมวดหมู่ได้: ${error.message}`);
+            toastService.error(`Unable to update category: ${error.message}`);
         }
     });
 };
@@ -47,15 +47,15 @@ export const useDeleteCategory = () => {
         mutationFn: deleteCategory,
         onSuccess: (data, variables) => {
             if (data.statusCode >= 200 && data.statusCode < 300) {
-                toastService.success('ลบหมวดหมู่สำเร็จ');
+                toastService.success('Category deleted successfully');
                 queryClient.invalidateQueries({ queryKey: [CATEGORIES_QUERY_KEY, variables.storeId] });
             } else {
-                toastService.error(data.message || 'ไม่สามารถลบหมวดหมู่ได้');
+                toastService.error(data.message || 'Unable to delete category');
             }
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถลบหมวดหมู่ได้: ${errorMessage}`);
+            toastService.error(`Unable to delete category: ${errorMessage}`);
         }
     });
 };

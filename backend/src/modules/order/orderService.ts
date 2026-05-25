@@ -113,6 +113,12 @@ export const orderService = {
                 if (!menu.isAvailable) {
                     return new ServiceResponse(ResponseStatus.Failed, `Menu '${menu.name}' is currently unavailable.`, null, StatusCodes.BAD_REQUEST);
                 }
+                if (menu.stock !== null && menu.stock < item.quantity) {
+                    const msg = menu.stock === 0
+                        ? `'${menu.name}' is out of stock.`
+                        : `'${menu.name}' only has ${menu.stock} left (you requested ${item.quantity}).`;
+                    return new ServiceResponse(ResponseStatus.Failed, msg, null, StatusCodes.BAD_REQUEST);
+                }
                 const subtotal = menu.price * item.quantity;
                 totalAmount += subtotal;
                 itemsForRepo.push({

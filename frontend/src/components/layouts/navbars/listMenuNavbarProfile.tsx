@@ -21,16 +21,16 @@ const ListMenuNavbarProfile = ({ title }: { title: string }) => {
       const response = await getLogout();
       if (response.statusCode === 200) {
         clearAuth(); // เคลียร์ข้อมูล auth ใน store
-        toastService.success("ออกจากระบบสำเร็จ");
+        toastService.success("Logged out successfully");
         navigate("/login");
       } else {
-        toastService.error(`เกิดข้อผิดพลาด: ${response.message}`);
+        toastService.error(`Error: ${response.message}`);
       }
     } catch (error: unknown) {
       console.error("Logout error:", error);
       // แม้ API ล้มเหลว ก็ยังให้ logout ที่ฝั่ง client
       clearAuth();
-      toastService.warning("ออกจากระบบแล้ว (บางข้อมูลอาจไม่ถูกล้างจากเซิร์ฟเวอร์)");
+      toastService.warning("Logged out (some session data may not be cleared from server)");
       navigate("/login");
     } finally {
       setIsLoading(false);
@@ -52,7 +52,7 @@ const ListMenuNavbarProfile = ({ title }: { title: string }) => {
           {title}
         </Text>
         {isLoading && (
-          <Text className="text-xs text-gray-500">กำลังออกจากระบบ...</Text>
+          <Text className="text-xs text-gray-500">Logging out...</Text>
         )}
       </div>
       {isLoading && (

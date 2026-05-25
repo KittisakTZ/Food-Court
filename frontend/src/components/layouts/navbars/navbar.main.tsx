@@ -128,7 +128,7 @@ const NavbarMain = () => {
               </Box>
               <div className="hidden md:block text-left">
                 <Text className="text-sm font-semibold text-gray-800">
-                  {user?.username ?? "ผู้ใช้"}
+                  {user?.username ?? "User"}
                 </Text>
                 <Text className="text-xs text-gray-500">
                   {user?.role === "BUYER" && "Buyer"}
@@ -149,7 +149,7 @@ const NavbarMain = () => {
                     <p className="text-sm font-semibold text-gray-800">
                       {user?.username}
                     </p>
-                    <p className="text-xs text-gray-500">{user?.email || "ไม่มีอีเมล"}</p>
+                    <p className="text-xs text-gray-500">{user?.email || "No Email"}</p>
                   </div>
                   <div className="border-t border-gray-200 my-2"></div>
 

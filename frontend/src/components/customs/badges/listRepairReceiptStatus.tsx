@@ -38,11 +38,11 @@ const ListRepairReceiptStatus = (props: ListRepairReceiptStatusType) => {
 
   switch (value) {
     case "active":
-      textValue = "เพิ่มรายการ";
+      textValue = "Active";
       color = "blue";
       break;
     case "not_active":
-      textValue = "ยกเลิกรายการ";
+      textValue = "Cancelled";
       color = "red";
       break;
 

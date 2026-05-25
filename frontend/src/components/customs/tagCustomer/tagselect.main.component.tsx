@@ -38,7 +38,7 @@ const TagSelectComponent: React.FC<TagSelectComponentProps> = ({
   fetchDataFromGetAPI,
   id = "",
   nextFields = {},
-  placeholder = "กรุณาเลือก...",
+  placeholder = "Please select...",
   isClearable = true,
   label = "",
   labelOrientation = "horizontal",

@@ -67,8 +67,8 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               <IoFastFoodOutline className="w-10 h-10 text-orange-500 animate-bounce" />
             </div>
           </div>
-          <p className="text-xl font-bold text-gray-700 mb-2 animate-pulse">กำลังโหลดข้อมูลร้านค้า...</p>
-          <p className="text-sm text-gray-500">กรุณารอสักครู่ ✨</p>
+          <p className="text-xl font-bold text-gray-700 mb-2 animate-pulse">Loading store data...</p>
+          <p className="text-sm text-gray-500">Please wait a moment ✨</p>
         </div>
       </div>
     );
@@ -82,14 +82,14 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
           <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
             <FiInfo className="w-12 h-12 text-red-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">เกิดข้อผิดพลาด 😢</h2>
-          <p className="text-gray-600 mb-8">เกิดข้อผิดพลาดในการโหลดข้อมูลร้านค้า</p>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">An Error Occurred 😢</h2>
+          <p className="text-gray-600 mb-8">Failed to load store data</p>
           <Link
             to="/"
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1"
           >
             <FiChevronLeft className="w-5 h-5" />
-            กลับหน้าหลัก
+            Back to Home
           </Link>
         </div>
       </div>
@@ -104,14 +104,14 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
           <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
             <IoFastFoodOutline className="w-12 h-12 text-gray-400" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">ไม่พบข้อมูลร้านค้า 🔍</h2>
-          <p className="text-gray-600 mb-8">ไม่พบร้านค้าที่คุณกำลังค้นหา</p>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Store Not Found 🔍</h2>
+          <p className="text-gray-600 mb-8">The store you are looking for was not found</p>
           <Link
             to="/"
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-yellow-600 transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1"
           >
             <FiChevronLeft className="w-5 h-5" />
-            กลับหน้าหลัก
+            Back to Home
           </Link>
         </div>
       </div>
@@ -127,7 +127,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
           className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white border border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-all shadow-sm hover:shadow-md font-semibold text-gray-700 text-sm group"
         >
           <FiChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          กลับหน้าหลัก
+          Back to Home
         </Link>
 
         {/* Store Header Section - Compact */}
@@ -150,12 +150,12 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                 <div className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
                   <div className="w-1.5 h-1.5 bg-white rounded-full absolute"></div>
-                  เปิดอยู่
+                  Open
                 </div>
               ) : (
                 <div className="bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
                   <FiClock className="w-3 h-3" />
-                  ปิด
+                  Closed
                 </div>
               )}
             </div>
@@ -184,7 +184,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                         className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg transition-colors border border-orange-400"
                     >
                         <MessageCircle className="w-4 h-4" />
-                        คุยกับร้านค้า
+                        Chat with Store
                     </button>
                   </div>
                 </div>
@@ -197,14 +197,14 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
             <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-start gap-3">
               <FiAlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-red-700">ร้านนี้ปิดให้บริการอยู่</p>
+                <p className="font-bold text-red-700">This store is currently closed</p>
                 {store.closeReason && (
                   <p className="text-red-600 text-sm mt-0.5">{store.closeReason}</p>
                 )}
                 {store.reopenAt && (
                   <p className="text-red-500 text-sm mt-0.5 flex items-center gap-1">
                     <FiClock className="w-3.5 h-3.5" />
-                    เปิดอีกครั้งเมื่อ {new Date(store.reopenAt).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })}
+                    Reopens at {new Date(store.reopenAt).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
                   </p>
                 )}
               </div>
@@ -219,10 +219,10 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                 <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-lg flex items-center justify-center">
                   <FiInfo className="w-4 h-4 text-white" />
                 </div>
-                <h3 className="text-base font-bold text-gray-800">รายละเอียดร้าน</h3>
+                <h3 className="text-base font-bold text-gray-800">Store Details</h3>
               </div>
               <p className="text-gray-600 text-sm leading-relaxed">
-                {store.description || "ร้านอาหารคุณภาพดี บริการด้วยใจ อาหารอร่อย สดใหม่ทุกวัน"}
+                {store.description || "Quality restaurant, serving with heart, delicious and fresh food every day"}
               </p>
             </div>
 
@@ -230,20 +230,20 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
             <div className="bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl p-4 shadow-md text-white">
               <div className="flex items-center gap-2 mb-3">
                 <HiSparkles className="w-5 h-5" />
-                <h3 className="text-base font-bold">ข้อมูลเพิ่มเติม</h3>
+                <h3 className="text-base font-bold">More Info</h3>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-2">
                   <BiDish className="w-4 h-4" />
-                  <span className="font-semibold text-sm">เมนูหลากหลาย</span>
+                  <span className="font-semibold text-sm">Variety of Menus</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-2">
                   <FiMapPin className="w-4 h-4" />
-                  <span className="font-semibold text-sm">จัดส่งฟรี</span>
+                  <span className="font-semibold text-sm">Free Delivery</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-2">
                   <FiClock className="w-4 h-4" />
-                  <span className="font-semibold text-sm">จัดส่งรวดเร็ว</span>
+                  <span className="font-semibold text-sm">Fast Delivery</span>
                 </div>
               </div>
             </div>
@@ -260,15 +260,15 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
-                  เมนูอาหาร
+                  Menu
                 </h2>
-                <p className="text-gray-500 text-xs">เลือกเมนูที่คุณชื่นชอบ</p>
+                <p className="text-gray-500 text-xs">Choose your favourite menu</p>
               </div>
             </div>
             {menus?.total && (
               <div className="bg-gradient-to-r from-orange-100 to-yellow-100 px-4 py-2 rounded-full border border-orange-200">
                 <p className="font-bold text-orange-600 text-sm">
-                  {menus.total} เมนู
+                  {menus.total} items
                 </p>
               </div>
             )}
@@ -283,7 +283,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                   <BiDish className="w-8 h-8 text-orange-500 animate-pulse" />
                 </div>
               </div>
-              <p className="text-xl font-bold text-gray-700 animate-pulse">กำลังโหลดเมนู...</p>
+              <p className="text-xl font-bold text-gray-700 animate-pulse">Loading menus...</p>
             </div>
           )}
 
@@ -293,8 +293,8 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FiInfo className="w-10 h-10 text-red-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-3">เกิดข้อผิดพลาด</h3>
-              <p className="text-gray-600">เกิดข้อผิดพลาดในการโหลดเมนู</p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-3">An Error Occurred</h3>
+              <p className="text-gray-600">Failed to load menus</p>
             </div>
           )}
 
@@ -305,7 +305,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                 onClick={() => handleCategorySelect("")}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md ${selectedCategoryId === "" ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white' : 'bg-white text-gray-700'}`}
               >
-                ทั้งหมด
+                All
               </button>
               {categories.map((category) => (
                 <button
@@ -325,8 +325,8 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
               {menus.data.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-3xl shadow-xl border-2 border-dashed border-gray-300">
                   <BiDish className="w-24 h-24 text-gray-300 mx-auto mb-6 animate-pulse" />
-                  <h3 className="text-3xl font-bold text-gray-800 mb-3">ยังไม่มีเมนูในร้าน</h3>
-                  <p className="text-gray-600">กรุณาลองใหม่ภายหลัง</p>
+                  <h3 className="text-3xl font-bold text-gray-800 mb-3">No menus in this store yet</h3>
+                  <p className="text-gray-600">Please try again later</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
@@ -362,7 +362,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                         </h3>
 
                         <p className="text-xs text-gray-500 mb-2 line-clamp-1 flex-grow">
-                          {menu.description || "เมนูอาหารรสชาติเด็ด"}
+                          {menu.description || "Delicious menu item"}
                         </p>
 
                         {/* Price Display - Compact */}
@@ -381,12 +381,12 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                           {isAdding && addingItemId === menu.id ? (
                             <>
                               <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
-                              กำลังเพิ่ม...
+                              Adding...
                             </>
                           ) : (
                             <>
                               <FiShoppingCart className="w-3.5 h-3.5" />
-                              เพิ่มลงตะกร้า
+                              Add to Cart
                             </>
                           )}
                         </button>
@@ -407,7 +407,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                 className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-bold text-gray-700 text-sm"
               >
                 <FiChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">ก่อนหน้า</span>
+                <span className="hidden sm:inline">Previous</span>
               </button>
 
               <div className="flex items-center gap-2">
@@ -447,7 +447,7 @@ const StoreDetailFeature = ({ storeId }: StoreDetailFeatureProps) => {
                 disabled={page === menus.totalPages}
                 className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-bold text-gray-700 text-sm"
               >
-                <span className="hidden sm:inline">ถัดไป</span>
+                <span className="hidden sm:inline">Next</span>
                 <FiChevronRight className="w-4 h-4" />
               </button>
             </div>

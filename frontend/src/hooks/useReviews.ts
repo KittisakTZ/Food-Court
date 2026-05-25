@@ -18,17 +18,17 @@ export const useCreateReview = () => {
             reviewService.createReview(payload.storeId, { rating: payload.rating, comment: payload.comment, isAnonymous: payload.isAnonymous }),
         onSuccess: (response) => {
             if (response.success) {
-                toastService.success("รีวิวของคุณถูกส่งเรียบร้อยแล้ว");
+                toastService.success("Your review has been submitted successfully");
                 // Invalidate the order query to refetch and update the UI
                 // We can invalidate all order queries or a specific one if we have the orderId
                 queryClient.invalidateQueries({ queryKey: ["order"] });
                 queryClient.invalidateQueries({ queryKey: ["reviews"] });
             } else {
-                toastService.error(response.message || "เกิดข้อผิดพลาดในการส่งรีวิว");
+                toastService.error(response.message || "An error occurred while submitting the review");
             }
         },
         onError: (error) => {
-            toastService.error(error.message || "เกิดข้อผิดพลาดบางอย่าง");
+            toastService.error(error.message || "Something went wrong");
         },
     });
 };

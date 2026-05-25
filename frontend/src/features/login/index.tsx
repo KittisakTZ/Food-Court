@@ -28,7 +28,7 @@ export default function LoginFeature() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier.trim() || !password) return toastService.error("กรุณากรอกข้อมูลให้ครบ");
+    if (!identifier.trim() || !password) return toastService.error("Please fill in all fields");
 
     setIsSubmitting(true);
     try {
@@ -40,16 +40,16 @@ export default function LoginFeature() {
         const me = await getMe();
         if (me.responseObject) {
           setUser(me.responseObject);
-          toastService.success("เข้าสู่ระบบสำเร็จ!");
+          toastService.success("Logged in successfully!");
           navigate("/");
         } else throw new Error();
       } else {
-        toastService.error(res.message || "เกิดข้อผิดพลาด");
+        toastService.error(res.message || "An error occurred");
       }
     } catch (err: unknown) {
       toastService.error(
         (err as { response?: { data?: { message: string } } })?.response?.data?.message
-          || "ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง"
+          || "Invalid username/email or password"
       );
     } finally {
       setIsSubmitting(false);
@@ -70,15 +70,15 @@ export default function LoginFeature() {
 
         <div>
           <h2 className="text-4xl font-black text-white leading-snug mb-4">
-            สั่งอาหาร<br />ง่าย · เร็ว · ทั่วถึง
+            Order Food<br />Easy · Fast · Accessible
           </h2>
           <p className="text-orange-100 text-sm leading-relaxed mb-8">
-            ระบบจองอาหารออนไลน์สำหรับมหาวิทยาลัย<br />
-            รองรับลูกค้าและร้านค้าทุกประเภท
+            Online food ordering system for universities<br />
+            Supports all customer and store types
           </p>
           <div className="flex flex-wrap gap-2">
-            <RoleBadge icon="🛍️" label="ลูกค้า" color="bg-white/20 text-white" />
-            <RoleBadge icon="🏪" label="ร้านค้า" color="bg-white/20 text-white" />
+            <RoleBadge icon="🛍️" label="Customer" color="bg-white/20 text-white" />
+            <RoleBadge icon="🏪" label="Store" color="bg-white/20 text-white" />
           </div>
         </div>
 
@@ -99,8 +99,8 @@ export default function LoginFeature() {
 
           {/* Heading */}
           <div className="mb-7">
-            <h1 className="text-2xl font-black text-slate-800">เข้าสู่ระบบ</h1>
-            <p className="text-sm text-slate-400 mt-1">เข้าสู่ระบบด้วยชื่อผู้ใช้หรืออีเมล</p>
+            <h1 className="text-2xl font-black text-slate-800">Sign In</h1>
+            <p className="text-sm text-slate-400 mt-1">Sign in with your username or email</p>
           </div>
 
           {/* Form */}
@@ -109,13 +109,13 @@ export default function LoginFeature() {
             {/* Identifier */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                ชื่อผู้ใช้หรืออีเมล
+                Username or Email
               </label>
               <div className="relative">
                 <FiAtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="username หรือ email@example.com"
+                  placeholder="username or email@example.com"
                   value={identifier}
                   onChange={e => setIdentifier(e.target.value)}
                   className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:border-orange-400 focus:ring-3 focus:ring-orange-100 transition-all disabled:opacity-50"
@@ -129,7 +129,7 @@ export default function LoginFeature() {
             {/* Password */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                รหัสผ่าน
+                Password
               </label>
               <div className="relative">
                 <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -160,9 +160,9 @@ export default function LoginFeature() {
               className="w-full mt-2 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
-                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> กำลังเข้าสู่ระบบ...</>
+                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Signing in...</>
               ) : (
-                <>เข้าสู่ระบบ <FiArrowRight className="w-4 h-4" /></>
+                <>Sign In <FiArrowRight className="w-4 h-4" /></>
               )}
             </button>
           </form>
@@ -170,7 +170,7 @@ export default function LoginFeature() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-xs text-slate-400">หรือ</span>
+            <span className="text-xs text-slate-400">or</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
@@ -179,11 +179,11 @@ export default function LoginFeature() {
             to="/register"
             className="flex items-center justify-center gap-2 w-full py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-all"
           >
-            สมัครสมาชิกใหม่
+            Create a new account
           </Link>
 
           <p className="text-center text-xs text-slate-400 mt-5">
-            สำหรับนักศึกษาและร้านค้าในมหาวิทยาลัย
+            For students and stores in the university
           </p>
         </div>
       </div>

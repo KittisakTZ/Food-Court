@@ -43,11 +43,11 @@ export default function UploadField(props: UploadFieldProps) {
             className="mb-4 self-center mt-[8px] touch-none pointer-events-none"
           />
         )}
-        <span className=" font-semibold text-16">คลิกเพื่ออัปโหลด</span>
+        <span className=" font-semibold text-16">Click to upload</span>
         {props.files && props.files?.length > 0 ? null : (
           <span className="text-[#98A2B3] text-sm">
             {props.acceptDescription ??
-              "กรุณาเลือกรูป 3:4 กว้างxสูง  (ประเภทไฟล์ PNG หรือ JPG, 5 Mb/ไฟล์)"}
+              "Please select a 3:4 aspect ratio image (PNG or JPG format, max 5 MB/file)"}
           </span>
         )}
       </div>

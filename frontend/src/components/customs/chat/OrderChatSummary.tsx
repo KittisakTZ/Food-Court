@@ -11,17 +11,17 @@ import { Order } from '@/types/response/order.response';
 export const STATUS_CFG: Record<Order['status'], {
     text: string; color: string; bg: string; border: string; dot: string; badgeBg: string;
 }> = {
-    PENDING:               { text: 'รอดำเนินการ',   color: 'text-amber-700',   bg: 'bg-amber-50',   border: 'border-amber-300',  dot: 'bg-amber-500',  badgeBg: 'bg-amber-100' },
-    AWAITING_PAYMENT:      { text: 'รอชำระเงิน',    color: 'text-blue-700',    bg: 'bg-blue-50',    border: 'border-blue-300',   dot: 'bg-blue-500',   badgeBg: 'bg-blue-100' },
-    AWAITING_CONFIRMATION: { text: 'รอยืนยันสลิป', color: 'text-purple-700',  bg: 'bg-purple-50',  border: 'border-purple-300', dot: 'bg-purple-500', badgeBg: 'bg-purple-100' },
-    COOKING:               { text: 'กำลังทำอาหาร', color: 'text-orange-700',  bg: 'bg-orange-50',  border: 'border-orange-300', dot: 'bg-orange-500', badgeBg: 'bg-orange-100' },
-    READY_FOR_PICKUP:      { text: 'พร้อมรับแล้ว!', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-400',dot: 'bg-emerald-500',badgeBg: 'bg-emerald-100' },
-    COMPLETED:             { text: 'เสร็จสิ้น',     color: 'text-slate-600',   bg: 'bg-slate-50',   border: 'border-slate-200',  dot: 'bg-slate-400',  badgeBg: 'bg-slate-100' },
-    CANCELLED:             { text: 'ยกเลิกแล้ว',    color: 'text-red-700',     bg: 'bg-red-50',     border: 'border-red-400',    dot: 'bg-red-500',    badgeBg: 'bg-red-100' },
-    REJECTED:              { text: 'ถูกปฏิเสธ',     color: 'text-red-700',     bg: 'bg-red-50',     border: 'border-red-400',    dot: 'bg-red-500',    badgeBg: 'bg-red-100' },
+    PENDING:               { text: 'Pending',       color: 'text-amber-700',   bg: 'bg-amber-50',   border: 'border-amber-300',  dot: 'bg-amber-500',  badgeBg: 'bg-amber-100' },
+    AWAITING_PAYMENT:      { text: 'Awaiting Payment', color: 'text-blue-700',    bg: 'bg-blue-50',    border: 'border-blue-300',   dot: 'bg-blue-500',   badgeBg: 'bg-blue-100' },
+    AWAITING_CONFIRMATION: { text: 'Awaiting Confirmation', color: 'text-purple-700',  bg: 'bg-purple-50',  border: 'border-purple-300', dot: 'bg-purple-500', badgeBg: 'bg-purple-100' },
+    COOKING:               { text: 'Cooking',       color: 'text-orange-700',  bg: 'bg-orange-50',  border: 'border-orange-300', dot: 'bg-orange-500', badgeBg: 'bg-orange-100' },
+    READY_FOR_PICKUP:      { text: 'Ready for Pickup!', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-400',dot: 'bg-emerald-500',badgeBg: 'bg-emerald-100' },
+    COMPLETED:             { text: 'Completed',     color: 'text-slate-600',   bg: 'bg-slate-50',   border: 'border-slate-200',  dot: 'bg-slate-400',  badgeBg: 'bg-slate-100' },
+    CANCELLED:             { text: 'Cancelled',    color: 'text-red-700',     bg: 'bg-red-50',     border: 'border-red-400',    dot: 'bg-red-500',    badgeBg: 'bg-red-100' },
+    REJECTED:              { text: 'Rejected',     color: 'text-red-700',     bg: 'bg-red-50',     border: 'border-red-400',    dot: 'bg-red-500',    badgeBg: 'bg-red-100' },
 };
 
-const STEPS = ['ยืนยัน', 'ชำระเงิน', 'ทำอาหาร', 'พร้อมรับ', 'เสร็จสิ้น'];
+const STEPS = ['Confirm', 'Payment', 'Cooking', 'Pickup', 'Complete'];
 const getStep = (status: Order['status']): number => ({
     PENDING: 0, AWAITING_PAYMENT: 1, AWAITING_CONFIRMATION: 1,
     COOKING: 2, READY_FOR_PICKUP: 3, COMPLETED: 4,
@@ -44,7 +44,7 @@ export const Countdown = ({ estimatedReadyAt, large = false }: { estimatedReadyA
     const cls = done ? 'text-green-600' : almost ? 'text-amber-500 animate-pulse' : 'text-orange-500';
     return (
         <span className={`font-mono font-black tabular-nums ${large ? 'text-3xl' : 'text-sm'} ${cls}`}>
-            {done ? 'ใกล้พร้อมแล้ว' : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`}
+            {done ? 'Almost ready' : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`}
         </span>
     );
 };
@@ -135,7 +135,7 @@ export const OrderChatCard = ({ order, onSelect, onViewDetail, isSelected }: Car
                     )}
                     {isSelected && (
                         <span className="text-[9px] bg-orange-500 text-white font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">
-                            เลือกอยู่
+                            Selected
                         </span>
                     )}
                 </div>
@@ -145,15 +145,15 @@ export const OrderChatCard = ({ order, onSelect, onViewDetail, isSelected }: Car
                     {showCountdown && order.estimatedReadyAt ? (
                         <span className="flex items-center gap-1">
                             <Clock size={11} className="text-slate-400" />
-                            <span className="text-xs text-slate-500">เหลือ </span>
+                            <span className="text-xs text-slate-500">Remaining </span>
                             <Countdown estimatedReadyAt={order.estimatedReadyAt} />
                         </span>
                     ) : isReady ? (
-                        <span className="text-xs font-bold text-emerald-600 animate-pulse">มารับอาหารได้เลย!</span>
+                        <span className="text-xs font-bold text-emerald-600 animate-pulse">Pick up food now!</span>
                     ) : isRejected ? (
-                        <span className="text-xs text-red-500 font-medium">คำสั่งซื้อล้มเหลว</span>
+                        <span className="text-xs text-red-500 font-medium">Order failed</span>
                     ) : (
-                        <span className="text-xs text-slate-400">สั่งสำเร็จ</span>
+                        <span className="text-xs text-slate-400">Order success</span>
                     )}
                 </div>
             </div>
@@ -165,7 +165,7 @@ export const OrderChatCard = ({ order, onSelect, onViewDetail, isSelected }: Car
                     onViewDetail();
                 }}
                 className="p-2 hover:bg-black/5 rounded-lg text-slate-500 hover:text-slate-700 transition-colors flex-shrink-0 flex items-center justify-center"
-                title="ดูรายละเอียด"
+                title="View details"
             >
                 <ExternalLink size={15} />
             </button>
@@ -213,7 +213,7 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-white/60 text-[10px]">คิว</p>
+                        <p className="text-white/60 text-[10px]">Queue</p>
                         <p className="text-white font-black text-2xl drop-shadow">Q{order.queueNumber}</p>
                     </div>
                 </div>
@@ -224,11 +224,11 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                 <div className="mx-3 mt-3 rounded-2xl overflow-hidden border border-red-300">
                     <div className="bg-red-500 px-4 py-2.5 flex items-center gap-2">
                         <XCircle size={18} className="text-white flex-shrink-0" />
-                        <p className="text-white font-bold text-sm">ออร์เดอร์ถูกปฏิเสธ</p>
+                        <p className="text-white font-bold text-sm">Order Rejected</p>
                     </div>
                     <div className="bg-red-50 px-4 py-2.5">
-                        <p className="text-red-700 text-xs">ร้านค้าไม่สามารถรับออร์เดอร์ของคุณได้</p>
-                        <p className="text-red-500 text-xs mt-1">คุณสามารถสั่งซ้ำหรือเลือกร้านค้าอื่น</p>
+                        <p className="text-red-700 text-xs">The store cannot accept your order.</p>
+                        <p className="text-red-500 text-xs mt-1">You can try ordering again or choose another store.</p>
                     </div>
                 </div>
             )}
@@ -238,10 +238,10 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                 <div className="mx-3 mt-3 rounded-2xl overflow-hidden border border-red-300">
                     <div className="bg-red-500 px-4 py-2.5 flex items-center gap-2">
                         <XCircle size={18} className="text-white flex-shrink-0" />
-                        <p className="text-white font-bold text-sm">ออร์เดอร์ถูกยกเลิก</p>
+                        <p className="text-white font-bold text-sm">Order Cancelled</p>
                     </div>
                     <div className="bg-red-50 px-4 py-2.5">
-                        <p className="text-red-700 text-xs">ออร์เดอร์นี้ถูกยกเลิกแล้ว</p>
+                        <p className="text-red-700 text-xs">This order has been cancelled.</p>
                     </div>
                 </div>
             )}
@@ -252,8 +252,8 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                     <div className="bg-emerald-500 px-4 py-3 flex items-center gap-3">
                         <Package size={20} className="text-white flex-shrink-0 animate-bounce" />
                         <div>
-                            <p className="text-white font-black text-sm">อาหารพร้อมรับแล้ว!</p>
-                            <p className="text-emerald-100 text-xs">กรุณามารับอาหารที่ร้านได้เลย</p>
+                            <p className="text-white font-black text-sm">Food ready for pickup!</p>
+                            <p className="text-emerald-100 text-xs">Please pick up your food at the store.</p>
                         </div>
                     </div>
                 </div>
@@ -264,8 +264,8 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                 <div className="mx-3 mt-3 flex items-center gap-3 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
                     <CheckCircle size={18} className="text-slate-500 flex-shrink-0" />
                     <div>
-                        <p className="text-xs font-bold text-slate-700">รับอาหารเสร็จสิ้น</p>
-                        <p className="text-xs text-slate-400">ขอบคุณที่ใช้บริการ</p>
+                        <p className="text-xs font-bold text-slate-700">Food Picked Up</p>
+                        <p className="text-xs text-slate-400">Thank you for using our service</p>
                     </div>
                 </div>
             )}
@@ -282,11 +282,11 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                 <div className="mx-3 mt-3 rounded-2xl overflow-hidden border border-orange-200 bg-orange-50">
                     <div className="px-4 py-2 bg-orange-500 flex items-center gap-2">
                         <Clock size={14} className="text-white" />
-                        <p className="text-white text-xs font-bold">เวลาที่เหลือก่อนรับอาหาร</p>
+                        <p className="text-white text-xs font-bold">Time remaining before pickup</p>
                     </div>
                     <div className="px-4 py-3 flex items-center justify-between">
                         <div>
-                            <p className="text-xs text-orange-600 font-medium mb-0.5">นับถอยหลัง</p>
+                            <p className="text-xs text-orange-600 font-medium mb-0.5">Countdown</p>
                             <Countdown estimatedReadyAt={order.estimatedReadyAt} large />
                         </div>
                         <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center">
@@ -301,7 +301,7 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                 <div className="mx-3 mt-3 rounded-2xl overflow-hidden border border-red-300">
                     <div className="bg-red-500 px-4 py-2 flex items-center gap-2">
                         <AlertTriangle size={14} className="text-white flex-shrink-0" />
-                        <p className="text-white text-xs font-bold">ร้านค้าแจ้งปัญหา</p>
+                        <p className="text-white text-xs font-bold">Store reported an issue</p>
                     </div>
                     <div className="bg-red-50 px-4 py-2.5">
                         <p className="text-red-700 text-sm">{order.issueReason}</p>
@@ -312,7 +312,7 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
             {/* ── Order Items ──────────────────────────────────────────── */}
             <div className="mx-3 mt-3">
                 <p className="text-xs font-bold text-slate-500 mb-2">
-                    รายการอาหาร ({order.orderItems.length} รายการ)
+                    Food Items ({order.orderItems.length} items)
                 </p>
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     {order.orderItems.map((item, i) => (
@@ -343,20 +343,20 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
                 <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
                     <div className="flex items-center gap-2">
                         <CreditCard size={14} className="text-slate-400" />
-                        <span className="text-xs text-slate-500">การชำระเงิน</span>
+                        <span className="text-xs text-slate-500">Payment</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-slate-600">
-                            {order.paymentMethod === 'PROMPTPAY' ? 'PromptPay' : 'เงินสด'}
+                            {order.paymentMethod === 'PROMPTPAY' ? 'PromptPay' : 'Cash'}
                         </span>
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full
                             ${isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                            {isPaid ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}
+                            {isPaid ? 'Paid' : 'Unpaid'}
                         </span>
                     </div>
                 </div>
                 <div className="px-4 py-3 flex items-center justify-between">
-                    <span className="text-sm text-slate-500 font-medium">ยอดรวมทั้งหมด</span>
+                    <span className="text-sm text-slate-500 font-medium">Total Amount</span>
                     <span className="text-xl font-black text-slate-900">฿{order.totalAmount.toFixed(2)}</span>
                 </div>
             </div>
@@ -372,7 +372,7 @@ export const OrderDetailView = ({ order, isStore = false }: DetailProps) => {
             <div className="px-3 pt-1 pb-4">
                 <Link to={isStore ? `/my-store/orders/${order.id}` : `/my-orders/${order.id}`}>
                     <button className="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-bold py-3 rounded-2xl text-sm transition-all flex items-center justify-center gap-2 shadow-sm">
-                        {isBad ? 'สั่งซ้ำ / ดูรายละเอียดทั้งหมด' : 'ดูรายละเอียดทั้งหมด'}
+                        {isBad ? 'Reorder / View Details' : 'View Details'}
                         <ExternalLink size={15} />
                     </button>
                 </Link>

@@ -26,7 +26,7 @@ export const SidebarItemLogout = () => {
       className={`sm:w-[256px] w-[60px] h-[48px] border-l-4 border-white p-2 flex gap-2 items-center hover:bg-bg_main  active:text-text_main_blue  cursor-pointer`}
     >
       <IoIosLogOut style={{ width: "24px", height: "24px" }} />
-      <div className=" text-4 leading-6 font-normal  hidden sm:block">ออกจากระบบ</div>
+      <div className=" text-4 leading-6 font-normal  hidden sm:block">Logout</div>
     </div>
   );
 };

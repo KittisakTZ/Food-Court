@@ -8,7 +8,7 @@ export default function StoreDetailPage() {
     const { storeId } = useParams<{ storeId: string }>();
 
     if (!storeId) {
-        return <div>เกิดข้อผิดพลาด: ไม่พบรหัสร้านค้า</div>;
+        return <div>Error: Store ID not found</div>;
     }
 
     return <StoreDetailFeature storeId={storeId} />;

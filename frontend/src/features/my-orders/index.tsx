@@ -29,7 +29,7 @@ const CountdownBadge = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => {
   const s = remaining % 60;
   const isDone = remaining === 0;
   const isAlmostReady = !isDone && remaining <= 120;
-  const readyTime = new Date(estimatedReadyAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+  const readyTime = new Date(estimatedReadyAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
   if (isDone) {
     return (
@@ -90,7 +90,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toastService.error("ไฟล์ใหญ่เกินไป! สูงสุด 5MB"); return; }
+    if (file.size > 5 * 1024 * 1024) { toastService.error("File too large! Maximum 5MB"); return; }
     setPreviewUrl(URL.createObjectURL(file));
     setSelectedFile(file);
   };
@@ -201,7 +201,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
   const showCountdown = ["COOKING", "AWAITING_PAYMENT", "AWAITING_CONFIRMATION"].includes(order.status) && !!order.estimatedReadyAt;
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("th-TH", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " น.";
+    new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   const handleReorder = async () => {
     try {
@@ -211,10 +211,10 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           addToCart({ menuId: item.menuId, quantity: item.quantity }, { onSuccess: () => { ok++; res(); }, onError: rej })
         );
       }
-      if (ok === order.orderItems.length) toastService.success(`เพิ่ม ${ok} รายการลงตะกร้าแล้ว`);
-      else if (ok > 0) toastService.warning(`เพิ่มได้ ${ok}/${order.orderItems.length} รายการ`);
+      if (ok === order.orderItems.length) toastService.success(`Added ${ok} items to cart`);
+      else if (ok > 0) toastService.warning(`Added ${ok}/${order.orderItems.length} items`);
     } catch {
-      toastService.error("ไม่สามารถสั่งซ้ำได้ กรุณาลองใหม่");
+      toastService.error("Unable to reorder. Please try again.");
     }
   };
 

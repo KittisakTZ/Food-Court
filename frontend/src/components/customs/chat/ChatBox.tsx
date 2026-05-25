@@ -243,10 +243,10 @@ export const ChatBox = () => {
     // ── Header ────────────────────────────────────────────────────────────────
     const showBackBtn = !!(activeRoom || showOrderDetail);
     const headerTitle = showOrderDetail
-        ? 'รายละเอียดออเดอร์'
+        ? 'Order Details'
         : activeRoom
         ? (isBuyer ? activeRoom.store?.name : activeRoom.buyer?.username)
-        : 'ข้อความของคุณ';
+        : 'Your Messages';
 
     return (
         <div className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2">
@@ -286,12 +286,12 @@ export const ChatBox = () => {
                             {/* Collapsible Order List Header */}
                             {chatOrders.length > 0 && (
                                 <div className="bg-slate-100 border-b border-slate-200 px-3 py-1.5 flex justify-between items-center text-xs font-bold text-slate-600 select-none flex-shrink-0">
-                                    <span>ออเดอร์ที่เกี่ยวข้อง ({chatOrders.length})</span>
+                                    <span>Related Orders ({chatOrders.length})</span>
                                     <button 
                                         onClick={() => setIsOrdersExpanded(prev => !prev)}
                                         className="text-orange-500 hover:text-orange-600 font-bold transition-colors"
                                     >
-                                        {isOrdersExpanded ? "ซ่อนทั้งหมด" : `ดูทั้งหมด (หน้า ${orderPage}/${totalOrderPages})`}
+                                        {isOrdersExpanded ? "Hide All" : `View All (Page ${orderPage}/${totalOrderPages})`}
                                     </button>
                                 </div>
                             )}
@@ -330,15 +330,15 @@ export const ChatBox = () => {
                                                 onClick={() => setOrderPage(p => Math.max(p - 1, 1))}
                                                 className="text-orange-500 disabled:text-slate-400 hover:underline transition-colors"
                                             >
-                                                ย้อนกลับ
+                                                Back
                                             </button>
-                                            <span>หน้า {orderPage} / {totalOrderPages}</span>
+                                            <span>Page {orderPage} / {totalOrderPages}</span>
                                             <button 
                                                 disabled={orderPage === totalOrderPages}
                                                 onClick={() => setOrderPage(p => Math.min(p + 1, totalOrderPages))}
                                                 className="text-orange-500 disabled:text-slate-400 hover:underline transition-colors"
                                             >
-                                                ถัดไป
+                                                Next
                                             </button>
                                         </div>
                                     )}
@@ -383,7 +383,7 @@ export const ChatBox = () => {
                                     {messages.length === 0 && (
                                         <div className="flex flex-col items-center justify-center h-24 gap-1">
                                             <MessageCircle size={24} className="text-slate-300" />
-                                            <p className="text-xs text-slate-400">เริ่มการสนทนาได้เลย</p>
+                                            <p className="text-xs text-slate-400">Start a conversation!</p>
                                         </div>
                                     )}
                                     {messages.map(m => {
@@ -408,7 +408,7 @@ export const ChatBox = () => {
                                     value={inputText}
                                     onChange={e => setInputText(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                    placeholder="พิมพ์ข้อความ..."
+                                    placeholder="Type a message..."
                                     className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
                                 />
                                 <button
@@ -428,7 +428,7 @@ export const ChatBox = () => {
                             {rooms.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-40 gap-2">
                                     <MessageCircle size={32} className="text-gray-300" />
-                                    <p className="text-gray-400 text-sm">ยังไม่มีข้อความ</p>
+                                    <p className="text-gray-400 text-sm">No messages yet</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-gray-100">
@@ -476,7 +476,7 @@ export const ChatBox = () => {
                                                             </p>
                                                         </div>
                                                     ) : (
-                                                        <p className="text-xs text-gray-400 mt-0.5">แตะเพื่อเปิดการสนทนา</p>
+                                                        <p className="text-xs text-gray-400 mt-0.5">Tap to open conversation</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -496,7 +496,7 @@ export const ChatBox = () => {
                     className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-full shadow-lg font-semibold text-sm transition-all hover:scale-105 hover:shadow-xl"
                 >
                     <MessageCircle size={18} />
-                    <span>ข้อความ</span>
+                    <span>Messages</span>
                     {unreadCount > 0 ? (
                         <span className="min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1 border-2 border-white animate-bounce">
                             {unreadCount > 99 ? '99+' : unreadCount}

@@ -20,8 +20,8 @@ export const ConfirmationDialog = ({
     title,
     description,
     type = 'confirm',
-    confirmText = 'ยืนยัน',
-    cancelText = 'ยกเลิก',
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
 }: ConfirmationDialogProps) => {
     return (
         <ModernDialog

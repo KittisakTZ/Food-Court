@@ -69,7 +69,7 @@ export const useUpdateOrderStatus = () => {
         },
         onError: (error) => {
             const errorMessage = (error as any)?.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถอัปเดตสถานะคำสั่งซื้อได้: ${errorMessage}`);
+            toastService.error(`Unable to update order status: ${errorMessage}`);
         }
     });
 };
@@ -82,14 +82,14 @@ export const useReportOrderIssue = () => {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
             if (variables.action === 'REPORT_ISSUE') {
-                toastService.success('รายงานปัญหาออเดอร์เรียบร้อยแล้ว');
+                toastService.success('Order issue reported successfully');
             } else {
-                toastService.success('ล้างปัญหาออเดอร์เรียบร้อยแล้ว');
+                toastService.success('Order issue cleared successfully');
             }
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || error.message;
-            toastService.error(`เกิดข้อผิดพลาด: ${errorMessage}`);
+            toastService.error(`An error occurred: ${errorMessage}`);
         }
     });
 };
@@ -106,7 +106,7 @@ export const useMoveOrderPosition = () => {
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             dialogService.error(
-                'ไม่สามารถย้ายคำสั่งซื้อได้',
+                'Unable to move order',
                 errorMessage
             );
             // ถ้าล้มเหลว, ก็ควร invalidate เพื่อให้ UI กลับไปเป็นลำดับเดิมที่ถูกต้อง
@@ -131,7 +131,7 @@ export const useCreateOrder = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถสร้างคำสั่งซื้อได้: ${errorMessage}`);
+            toastService.error(`Unable to create order: ${errorMessage}`);
         }
     });
 };
@@ -143,11 +143,11 @@ export const useAdjustOrderTime = () => {
         mutationFn: adjustOrderTime,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [STORE_ORDERS_QUERY_KEY] });
-            toastService.success('ปรับเวลาเสร็จเรียบร้อยแล้ว');
+            toastService.success('Estimated time adjusted successfully');
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถปรับเวลาได้: ${errorMessage}`);
+            toastService.error(`Unable to adjust time: ${errorMessage}`);
         }
     });
 };
@@ -158,13 +158,13 @@ export const useUploadSlip = () => {
     return useMutation({
         mutationFn: uploadPaymentSlip,
         onSuccess: () => {
-            toastService.success("อัปโหลดสลิปสำเร็จ! กรุณารอการยืนยัน");
+            toastService.success("Slip uploaded successfully! Please wait for confirmation.");
             // Invalidate query 'my-orders' เพื่อให้สถานะอัปเดตเป็น AWAITING_CONFIRMATION
             queryClient.invalidateQueries({ queryKey: ['my-orders'] });
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถอัปโหลดสลิปได้: ${errorMessage}`);
+            toastService.error(`Unable to upload slip: ${errorMessage}`);
         }
     });
 };

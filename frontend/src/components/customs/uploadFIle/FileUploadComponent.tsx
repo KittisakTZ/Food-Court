@@ -45,14 +45,14 @@ const FileUploadComponent: React.FC<FileUploadProps> = ({
     );
 
     if (acceptedFiles.length === 0) {
-      showToast("ไฟล์ไม่รองรับ หรือยังไม่ได้เลือกไฟล์", false);
+      showToast("File format not supported or no file selected", false);
       return;
     }
 
     const updatedFiles = [...files, ...acceptedFiles];
     setFiles(updatedFiles);
     onFilesChange(updatedFiles);
-    showToast("เพิ่มไฟล์เรียบร้อยแล้ว", true);
+    showToast("File added successfully", true);
 
     e.target.value = "";
   };
@@ -89,7 +89,7 @@ const FileUploadComponent: React.FC<FileUploadProps> = ({
             <TiAttachment className="mr-1" />
             {labelFile}
           </button>
-          <span className="text-sm text-gray-400">รองรับ JPG, PNG, PDF</span>
+          <span className="text-sm text-gray-400">Supports JPG, PNG, PDF</span>
         </div>
 
         <input
@@ -126,7 +126,7 @@ const FileUploadComponent: React.FC<FileUploadProps> = ({
                   onClick={() => handleRemoveFile(index)}
                   className="text-red-500 text-xs mt-2"
                 >
-                  ลบ
+                  Remove
                 </button>
               </div>
             );
@@ -147,7 +147,7 @@ const FileUploadComponent: React.FC<FileUploadProps> = ({
                 onClick={() => handleRemoveFile(index)}
                 className="absolute top-1 right-1 bg-white bg-opacity-80 text-red-500 text-xs px-1 rounded opacity-0 group-hover:opacity-100"
               >
-                ลบ
+                Remove
               </button>
             </div>
           );
@@ -158,7 +158,7 @@ const FileUploadComponent: React.FC<FileUploadProps> = ({
       {previewImage && (
         <Dialog.Root open onOpenChange={() => setPreviewImage(null)}>
           <Dialog.Content className="w-auto flex justify-center items-center bg-white p-4 rounded shadow">
-            <Dialog.Title className="sr-only">ดูรูปภาพ</Dialog.Title>
+            <Dialog.Title className="sr-only">View Image</Dialog.Title>
             <img
               src={previewImage}
               className="max-h-[80vh] object-contain"

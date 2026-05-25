@@ -7,18 +7,18 @@ type TagColorPickerProps = {
 };
 
 const presetColors = [
-  { color: "แดง", value: "#CC0033" },
-  { color: "ส้ม", value: "#FF6633" },
-  { color: "เหลือง", value: "#FFCC33" },
-  { color: "เขียว", value: "#33CC66" },
-  { color: "ฟ้า", value: "#33CCFF" },
-  { color: "น้ำเงิน", value: "#0033FF" },
-  { color: "ม่วง", value: "#6633FF" },
-  { color: "ชมพู", value: "#FF99FF" },
-  { color: "เทา", value: "#778899" },
+  { color: "Red", value: "#CC0033" },
+  { color: "Orange", value: "#FF6633" },
+  { color: "Yellow", value: "#FFCC33" },
+  { color: "Green", value: "#33CC66" },
+  { color: "Light Blue", value: "#33CCFF" },
+  { color: "Blue", value: "#0033FF" },
+  { color: "Purple", value: "#6633FF" },
+  { color: "Pink", value: "#FF99FF" },
+  { color: "Gray", value: "#778899" },
 ];
 
-const ColorPicker: React.FC<TagColorPickerProps> = ({ value, onChange, label = "สีแท็ก" }) => {
+const ColorPicker: React.FC<TagColorPickerProps> = ({ value, onChange, label = "Tag Color" }) => {
   return (
     <div className="flex items-center gap-4">
       <span className="text-md me-2">{label}</span>
