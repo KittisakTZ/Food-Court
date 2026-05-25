@@ -15,7 +15,7 @@ import {
     AreaChart,
     Area,
 } from "recharts";
-import { FiCalendar, FiShoppingBag, FiTrendingUp, FiChevronDown, FiBarChart2, FiActivity } from "react-icons/fi";
+import { FiCalendar, FiShoppingBag, FiTrendingUp, FiChevronDown, FiBarChart2, FiActivity, FiX, FiInbox, FiChevronRight } from "react-icons/fi";
 import { MdRestaurant } from "react-icons/md";
 import { HiOutlineChartBar } from "react-icons/hi";
 import DatePicker from "react-datepicker";
@@ -57,6 +57,7 @@ export const SellerAnalyticsDashboard = () => {
     const [viewMode, setViewMode] = useState<ViewMode>("monthly");
     const [chartType, setChartType] = useState<ChartType>("line");
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [selectedCategoryForModal, setSelectedCategoryForModal] = useState<CategoryAnalyticsItem | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -623,28 +624,47 @@ export const SellerAnalyticsDashboard = () => {
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                                         formatter={(value: number, _name: string) => [`฿${value.toLocaleString()}`, 'Revenue']}
                                     />
-                                    <Bar dataKey="sales" name="Revenue" fill="#f97316" radius={[0, 8, 8, 0]} maxBarSize={40} />
+                                    <Bar 
+                                        dataKey="sales" 
+                                        name="Revenue" 
+                                        fill="#f97316" 
+                                        radius={[0, 8, 8, 0]} 
+                                        maxBarSize={40} 
+                                        onClick={(entry) => {
+                                            if (entry) {
+                                                setSelectedCategoryForModal(entry);
+                                            }
+                                        }}
+                                        className="cursor-pointer"
+                                    />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
                         {/* Rankings table */}
                         <div className="space-y-3">
                             {categoryData.map((cat, i) => (
-                                <div key={cat.id} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                                <div 
+                                    key={cat.id} 
+                                    onClick={() => setSelectedCategoryForModal(cat)}
+                                    className="flex items-center gap-4 p-3 rounded-2xl hover:bg-orange-50/50 hover:shadow-sm border border-transparent hover:border-orange-100 transition-all cursor-pointer group"
+                                >
                                     <span className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-bold flex-shrink-0 ${
                                         i === 0 ? 'bg-orange-500 text-white' : i === 1 ? 'bg-gray-300 text-gray-700' : i === 2 ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-500'
                                     }`}>
                                         {i + 1}
                                     </span>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-gray-800 truncate">{cat.name}</p>
+                                        <p className="font-semibold text-gray-800 group-hover:text-orange-600 transition-colors truncate">{cat.name}</p>
                                         {cat.topMenu && (
                                             <p className="text-xs text-gray-400 truncate">Top item: {cat.topMenu.name} ({cat.topMenu.quantity} sold)</p>
                                         )}
                                     </div>
-                                    <div className="text-right flex-shrink-0">
-                                        <p className="font-bold text-orange-600">฿{cat.sales.toLocaleString()}</p>
-                                        <p className="text-xs text-gray-400">{cat.quantity} items</p>
+                                    <div className="text-right flex-shrink-0 flex items-center gap-2">
+                                        <div>
+                                            <p className="font-bold text-orange-600">฿{cat.sales.toLocaleString()}</p>
+                                            <p className="text-xs text-gray-400">{cat.quantity} items</p>
+                                        </div>
+                                        <FiChevronRight className="w-5 h-5 text-gray-300 group-hover:text-orange-500 transition-colors" />
                                     </div>
                                 </div>
                             ))}
@@ -652,6 +672,124 @@ export const SellerAnalyticsDashboard = () => {
                     </div>
                 )}
             </div>
+
+            {/* Category Details Modal */}
+            {selectedCategoryForModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl border border-gray-100 flex flex-col transform transition-all scale-100">
+                        {/* Header */}
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-orange-50 to-yellow-50/50">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <span className="p-2 bg-orange-100 text-orange-600 rounded-xl">
+                                        <MdRestaurant className="w-5 h-5" />
+                                    </span>
+                                    {selectedCategoryForModal.name} Sales Breakdown
+                                </h3>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Detailed sales performance for menus in this category
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedCategoryForModal(null)}
+                                className="p-2 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full transition-colors"
+                            >
+                                <FiX className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {/* Summary Badges */}
+                        <div className="grid grid-cols-2 gap-4 p-6 bg-gray-50/50 border-b border-gray-100">
+                            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                <span className="text-xs text-gray-400 block font-medium">Total Category Revenue</span>
+                                <span className="text-2xl font-black text-orange-600 mt-1 block">฿{selectedCategoryForModal.sales.toLocaleString()}</span>
+                            </div>
+                            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                <span className="text-xs text-gray-400 block font-medium">Total Items Sold</span>
+                                <span className="text-2xl font-black text-gray-800 mt-1 block">{selectedCategoryForModal.quantity.toLocaleString()} units</span>
+                            </div>
+                        </div>
+
+                        {/* Menus List */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Menus Performance</h4>
+                            {selectedCategoryForModal.menus && selectedCategoryForModal.menus.length > 0 ? (
+                                <div className="space-y-3">
+                                    {selectedCategoryForModal.menus.map((menu, index) => {
+                                        // Calculate percentage of category sales
+                                        const salesPercent = selectedCategoryForModal.sales > 0 
+                                            ? (menu.sales / selectedCategoryForModal.sales) * 100 
+                                            : 0;
+
+                                        return (
+                                            <div 
+                                                key={menu.id} 
+                                                className="flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-orange-100 hover:bg-orange-50/10 transition-all duration-200"
+                                            >
+                                                {/* Rank & Image */}
+                                                <div className="flex items-center gap-3 flex-shrink-0">
+                                                    <span className="w-6 h-6 flex items-center justify-center bg-gray-100 text-gray-600 rounded-lg text-xs font-bold">
+                                                        #{index + 1}
+                                                    </span>
+                                                    <img
+                                                        src={menu.image || NO_FOOD_IMAGE}
+                                                        alt={menu.name}
+                                                        className="w-12 h-12 rounded-xl object-cover shadow-sm"
+                                                        onError={onImgError(NO_FOOD_IMAGE)}
+                                                    />
+                                                </div>
+
+                                                {/* Name & Progress bar */}
+                                                <div className="flex-1 min-w-0">
+                                                    <h5 className="font-bold text-gray-800 text-sm truncate mb-1">{menu.name}</h5>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full"
+                                                                style={{ width: `${salesPercent}%` }}
+                                                            ></div>
+                                                        </div>
+                                                        <span className="text-[10px] font-semibold text-orange-600 flex-shrink-0 w-8 text-right">
+                                                            {salesPercent.toFixed(0)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Stats */}
+                                                <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-0 pt-2 md:pt-0 border-gray-50">
+                                                    <div className="text-left md:text-right">
+                                                        <span className="text-[10px] text-gray-400 block uppercase">Sold</span>
+                                                        <span className="font-semibold text-gray-700 text-sm">{menu.quantity} units</span>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="text-[10px] text-gray-400 block uppercase">Revenue</span>
+                                                        <span className="font-extrabold text-orange-600 text-sm">฿{menu.sales.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-gray-400">
+                                    <FiInbox className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                                    <p className="text-sm">No menus sold in this category during the selected period</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+                            <button
+                                onClick={() => setSelectedCategoryForModal(null)}
+                                className="px-5 py-2.5 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 transition-colors shadow-md hover:shadow-lg"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -26,6 +26,13 @@ export interface CategoryAnalyticsItem {
     quantity: number;
     sales: number;
     topMenu: { name: string; quantity: number; sales: number } | null;
+    menus?: {
+        id: string;
+        name: string;
+        image: string | null;
+        quantity: number;
+        sales: number;
+    }[];
 }
 
 export interface CategoryAnalyticsData {
