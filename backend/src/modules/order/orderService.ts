@@ -157,6 +157,8 @@ export const orderService = {
                 queueNumber: newOrder.queueNumber,
                 status: newOrder.status,
                 totalAmount: newOrder.totalAmount,
+                paymentMethod: newOrder.paymentMethod,
+                paidAt: null,
                 createdAt: newOrder.createdAt,
                 startCookingAt: null,
                 orderItems: (newOrder as any).orderItems ?? [],
@@ -333,8 +335,8 @@ export const orderService = {
                 } as any);
                 await recalcEstimatedReadyAt(store.id);
                 const updatedOrder = await orderRepository.findOrderById(orderId);
-                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: cashPaidNow, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
-                emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: cashPaidNow, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
+                emitKdsUpdate(store.id, "kds:order_update", { id: orderId, status: 'COOKING', startCookingAt: cashPaidNow, paidAt: cashPaidNow, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
+                emitOrderUpdate(orderId, { status: 'COOKING', startCookingAt: cashPaidNow, paidAt: cashPaidNow, estimatedReadyAt: updatedOrder?.estimatedReadyAt });
                 return new ServiceResponse(ResponseStatus.Success, "Cash payment confirmed. Order is now cooking.", null, StatusCodes.OK);
             }
 

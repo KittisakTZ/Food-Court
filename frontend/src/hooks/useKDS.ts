@@ -17,6 +17,7 @@ export interface KdsOrder {
     status: string;
     totalAmount: number;
     paymentMethod: string | null;
+    paidAt: string | null;
     createdAt: string;
     startCookingAt: string | null;
     estimatedReadyAt: string | null;
@@ -45,6 +46,7 @@ export const useKDS = (storeId: string | undefined) => {
                     status: o.status,
                     totalAmount: o.totalAmount,
                     paymentMethod: (o as any).paymentMethod ?? null,
+                    paidAt: (o as any).paidAt ?? null,
                     createdAt: o.createdAt,
                     startCookingAt: (o as any).startCookingAt ?? null,
                     estimatedReadyAt: (o as any).estimatedReadyAt ?? null,
@@ -95,7 +97,7 @@ export const useKDS = (storeId: string | undefined) => {
         // order status changed
         socketRef.current.on(
             "kds:order_update",
-            (update: { id: string; status?: string; startCookingAt?: string; estimatedReadyAt?: string }) => {
+            (update: { id: string; status?: string; startCookingAt?: string; estimatedReadyAt?: string; paidAt?: string }) => {
                 setOrders((prev) => {
                     if (update.status && ["COMPLETED", "REJECTED", "CANCELLED"].includes(update.status)) {
                         return prev.filter((o) => o.id !== update.id);
@@ -107,6 +109,7 @@ export const useKDS = (storeId: string | undefined) => {
                                   ...(update.status && { status: update.status }),
                                   ...(update.startCookingAt && { startCookingAt: update.startCookingAt }),
                                   ...(update.estimatedReadyAt !== undefined && { estimatedReadyAt: update.estimatedReadyAt }),
+                                  ...(update.paidAt !== undefined && { paidAt: update.paidAt }),
                               }
                             : o
                     );
