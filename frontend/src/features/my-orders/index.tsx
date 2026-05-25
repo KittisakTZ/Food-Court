@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import {
   FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiUpload,
   FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag, FiRefreshCw,
-  FiAlertTriangle, FiMapPin,
+  FiAlertTriangle, FiMapPin, FiLayers,
 } from "react-icons/fi";
 import { MdRestaurant, MdPayment } from "react-icons/md";
 import { Order } from "@/types/response/order.response";
@@ -377,6 +377,46 @@ const SkeletonCard = () => (
   </div>
 );
 
+// ── Batch grouping ─────────────────────────────────────────────────────────────
+interface OrderBatch { orders: Order[]; isMultiStore: boolean; }
+
+const groupByBatch = (orders: Order[]): OrderBatch[] => {
+  if (orders.length === 0) return [];
+  const sorted = [...orders].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const batches: OrderBatch[] = [];
+  let current: Order[] = [sorted[0]];
+  for (let i = 1; i < sorted.length; i++) {
+    const gap = new Date(sorted[i].createdAt).getTime() - new Date(current[current.length - 1].createdAt).getTime();
+    if (gap <= 10_000) { current.push(sorted[i]); }
+    else { batches.push({ orders: current, isMultiStore: current.length > 1 }); current = [sorted[i]]; }
+  }
+  batches.push({ orders: current, isMultiStore: current.length > 1 });
+  return batches;
+};
+
+// ── Multi-Store Order Wrapper ───────────────────────────────────────────────────
+const MultiStoreOrderWrapper = ({ batch, onPayClick }: { batch: OrderBatch; onPayClick: (o: Order) => void }) => {
+  const total = batch.orders.reduce((sum, o) => sum + o.totalAmount, 0);
+  const storeNames = batch.orders.map(o => o.store.name).join(", ");
+  return (
+    <div className="col-span-full space-y-3">
+      <div className="flex items-center gap-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-md">
+        <FiLayers className="w-5 h-5 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="font-black text-base">Multi-Store Order · {batch.orders.length} stores</p>
+          <p className="text-violet-200 text-xs truncate">{storeNames}</p>
+        </div>
+        <p className="font-black text-xl flex-shrink-0">฿{total.toFixed(2)}</p>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pl-4 border-l-4 border-violet-300">
+        {batch.orders.map(order => (
+          <OrderCard key={order.id} order={order} onPayClick={onPayClick} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // ── Main Feature Component ─────────────────────────────────────────────────────
 const MyOrdersFeature = () => {
   const [page, setPage] = useState(1);
@@ -460,14 +500,16 @@ const MyOrdersFeature = () => {
                     <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
                       Active Orders
                       <span className="text-sm font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full">
-                        {activeOrders.length} items
+                        {activeOrders.length} orders
                       </span>
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {activeOrders.map(order => (
-                      <OrderCard key={order.id} order={order} onPayClick={setSelectedOrder} />
-                    ))}
+                    {groupByBatch(activeOrders).map((batch, i) =>
+                      batch.isMultiStore
+                        ? <MultiStoreOrderWrapper key={i} batch={batch} onPayClick={setSelectedOrder} />
+                        : <OrderCard key={batch.orders[0].id} order={batch.orders[0]} onPayClick={setSelectedOrder} />
+                    )}
                   </div>
                 </section>
               )}
@@ -480,14 +522,16 @@ const MyOrdersFeature = () => {
                     <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
                       Order History
                       <span className="text-sm font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-                        {historyOrders.length} items
+                        {historyOrders.length} orders
                       </span>
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {historyOrders.map(order => (
-                      <OrderCard key={order.id} order={order} onPayClick={setSelectedOrder} />
-                    ))}
+                    {groupByBatch(historyOrders).map((batch, i) =>
+                      batch.isMultiStore
+                        ? <MultiStoreOrderWrapper key={i} batch={batch} onPayClick={setSelectedOrder} />
+                        : <OrderCard key={batch.orders[0].id} order={batch.orders[0]} onPayClick={setSelectedOrder} />
+                    )}
                   </div>
                 </section>
               )}
