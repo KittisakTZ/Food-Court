@@ -394,24 +394,130 @@ const groupByBatch = (orders: Order[]): OrderBatch[] => {
   return batches;
 };
 
-// ── Multi-Store Order Wrapper ───────────────────────────────────────────────────
-const MultiStoreOrderWrapper = ({ batch, onPayClick }: { batch: OrderBatch; onPayClick: (o: Order) => void }) => {
+// ── Batch Order Card (multi-store single bill) ─────────────────────────────────
+const BatchOrderCard = ({ batch, onPayClick }: { batch: OrderBatch; onPayClick: (o: Order) => void }) => {
+  const { mutate: addToCart, isPending: isAddingToCart } = useAddItemToCart();
   const total = batch.orders.reduce((sum, o) => sum + o.totalAmount, 0);
-  const storeNames = batch.orders.map(o => o.store.name).join(", ");
+  const awaitingPayment = batch.orders.find(o => o.status === "AWAITING_PAYMENT");
+  const allDone = batch.orders.every(o => ["COMPLETED", "CANCELLED", "REJECTED"].includes(o.status));
+  const hasIssue = batch.orders.some(o => o.hasIssue);
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
+  const handleReorderAll = async () => {
+    try {
+      let count = 0;
+      for (const order of batch.orders) {
+        for (const item of order.orderItems) {
+          await new Promise<void>((res, rej) =>
+            addToCart({ menuId: item.menuId, quantity: item.quantity }, { onSuccess: () => { count++; res(); }, onError: rej })
+          );
+        }
+      }
+      toastService.success(`Added ${count} items to cart!`);
+    } catch {
+      toastService.error("Could not reorder. Please try again.");
+    }
+  };
+
   return (
-    <div className="col-span-full space-y-3">
-      <div className="flex items-center gap-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-md">
-        <FiLayers className="w-5 h-5 flex-shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="font-black text-base">Multi-Store Order · {batch.orders.length} stores</p>
-          <p className="text-violet-200 text-xs truncate">{storeNames}</p>
+    <div className={`col-span-full bg-white rounded-2xl overflow-hidden transition-all duration-300
+      ${hasIssue ? "border-2 border-red-300 shadow-red-100 shadow-lg" : "border border-slate-200 shadow-md hover:shadow-xl"}`}>
+
+      {/* ── Header ── */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-5 text-white">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <FiLayers className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-black text-lg leading-tight">Multi-Store Order</p>
+              <p className="text-violet-200 text-sm">{batch.orders.length} stores · {formatDate(batch.orders[0].createdAt)}</p>
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <p className="text-violet-200 text-xs">Combined Total</p>
+            <p className="font-black text-2xl">฿{total.toFixed(2)}</p>
+          </div>
         </div>
-        <p className="font-black text-xl flex-shrink-0">฿{total.toFixed(2)}</p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pl-4 border-l-4 border-violet-300">
-        {batch.orders.map(order => (
-          <OrderCard key={order.id} order={order} onPayClick={onPayClick} />
-        ))}
+
+      {/* ── Store sections ── */}
+      <div className="p-5 space-y-3">
+        {batch.orders.map(order => {
+          const cfg = getStatusConfig(order.status);
+          const isActive = !["COMPLETED", "CANCELLED", "REJECTED"].includes(order.status);
+          return (
+            <div key={order.id} className="border border-slate-200 rounded-xl overflow-hidden">
+              {/* Store header row */}
+              <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between border-b border-slate-100">
+                <div className="flex items-center gap-2 min-w-0">
+                  <MdRestaurant className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <span className="font-bold text-slate-800 truncate">{order.store.name}</span>
+                </div>
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0 ml-2 ${cfg.bgColor} ${cfg.color}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${cfg.dotColor} ${isActive ? "animate-pulse" : ""}`} />
+                  {cfg.text}
+                </div>
+              </div>
+
+              {/* Issue notice */}
+              {order.issueReason && (
+                <div className="bg-red-50 border-b border-red-100 px-4 py-2 flex items-center gap-2">
+                  <FiAlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                  <p className="text-xs text-red-700 font-medium">{order.issueReason}</p>
+                </div>
+              )}
+
+              {/* Items list */}
+              <div className="px-4 py-3 space-y-1.5">
+                {order.orderItems.slice(0, 3).map((item, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <span className="text-slate-700 truncate flex-1 pr-2">
+                      {item.menu.name} <span className="text-slate-400">×{item.quantity}</span>
+                    </span>
+                    <span className="font-semibold text-slate-800 flex-shrink-0">฿{item.subtotal.toFixed(0)}</span>
+                  </div>
+                ))}
+                {order.orderItems.length > 3 && (
+                  <p className="text-xs text-slate-400">+{order.orderItems.length - 3} more items</p>
+                )}
+              </div>
+
+              {/* Store subtotal + detail link */}
+              <div className="px-4 pb-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
+                <span className="text-sm text-slate-500">
+                  Subtotal: <span className="font-bold text-slate-800">฿{order.totalAmount.toFixed(2)}</span>
+                  <span className="ml-2 text-slate-400">· {order.paymentMethod === "PROMPTPAY" ? "PromptPay" : "Cash"}</span>
+                </span>
+                <Link to={`/my-orders/${order.id}`}
+                  className="text-xs font-semibold text-violet-600 hover:text-violet-800 flex items-center gap-1 transition-colors">
+                  Details <FiChevronRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Footer actions ── */}
+      <div className="px-5 pb-5 space-y-2.5">
+        {awaitingPayment && (
+          <button onClick={() => onPayClick(awaitingPayment)}
+            className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+            <FiDollarSign className="w-5 h-5" /> Pay Now · {awaitingPayment.store.name}
+          </button>
+        )}
+        {allDone && (
+          <button onClick={handleReorderAll} disabled={isAddingToCart}
+            className="w-full border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            {isAddingToCart
+              ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-400 border-t-transparent" /> Adding to cart...</>
+              : <><FiRefreshCw className="w-5 h-5" /> Reorder All</>}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -507,7 +613,7 @@ const MyOrdersFeature = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     {groupByBatch(activeOrders).map((batch, i) =>
                       batch.isMultiStore
-                        ? <MultiStoreOrderWrapper key={i} batch={batch} onPayClick={setSelectedOrder} />
+                        ? <BatchOrderCard key={i} batch={batch} onPayClick={setSelectedOrder} />
                         : <OrderCard key={batch.orders[0].id} order={batch.orders[0]} onPayClick={setSelectedOrder} />
                     )}
                   </div>
@@ -529,7 +635,7 @@ const MyOrdersFeature = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     {groupByBatch(historyOrders).map((batch, i) =>
                       batch.isMultiStore
-                        ? <MultiStoreOrderWrapper key={i} batch={batch} onPayClick={setSelectedOrder} />
+                        ? <BatchOrderCard key={i} batch={batch} onPayClick={setSelectedOrder} />
                         : <OrderCard key={batch.orders[0].id} order={batch.orders[0]} onPayClick={setSelectedOrder} />
                     )}
                   </div>
