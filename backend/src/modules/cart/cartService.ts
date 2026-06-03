@@ -19,19 +19,13 @@ export const cartService = {
             return new ServiceResponse(ResponseStatus.Failed, "Menu not found or is unavailable.", null, StatusCodes.NOT_FOUND);
         }
 
-        // 2. หาหรือสร้างตะกร้า
+        // 2. Find or create cart
         const cart = await cartRepository.findOrCreateCart(userId);
 
-        // 3. **Logic สำคัญ:** ตรวจสอบว่ากำลังสั่งจากร้านเดิมหรือไม่
-        if (cart.storeId && cart.storeId !== menu.storeId) {
-            // ถ้าสั่งจากคนละร้าน, ให้ล้างตะกร้าเก่าก่อน
-            await cartRepository.clearCart(cart.id);
-        }
-
-        // 4. เพิ่มของลงตะกร้า
+        // 3. Add item (multi-store: no restriction on mixing stores)
         await cartRepository.upsertCartItem(cart.id, menuId, quantity, menu.storeId);
-        
-        // 5. ดึงข้อมูลตะกร้าล่าสุดกลับไป
+
+        // 4. Return updated cart
         const updatedCart = await cartRepository.findOrCreateCart(userId);
         return new ServiceResponse(ResponseStatus.Success, "Item added to cart.", updatedCart, StatusCodes.OK);
     },

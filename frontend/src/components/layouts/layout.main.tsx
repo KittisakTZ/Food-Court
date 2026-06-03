@@ -35,7 +35,7 @@ const MainLayout = () => {
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 to-yellow-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-lg font-medium text-gray-700">กำลังโหลดแอปพลิเคชัน...</p>
+          <p className="text-lg font-medium text-gray-700">Loading application...</p>
         </div>
       </div>
     );
@@ -62,22 +62,22 @@ const MainLayout = () => {
     switch (user.role) {
       case 'ADMIN':
         return [
-          { title: "แดชบอร์ด", url: "/", icon: MdDashboard },
-          { title: "อนุมัติร้านค้า", url: "/admin/stores-approval", icon: MdStorefront },
-          { title: "จัดการผู้ใช้", url: "/admin/users", icon: FaUserShield },
+          { title: "Dashboard", url: "/", icon: MdDashboard },
+          { title: "Store Approvals", url: "/admin/stores-approval", icon: MdStorefront },
+          { title: "Manage Users", url: "/admin/users", icon: FaUserShield },
         ];
       case 'SELLER':
         return [
-          { title: "แดชบอร์ด", url: "/", icon: MdDashboard },
-          { title: "คิวออเดอร์", url: "/orders", icon: FaShoppingBag },
-          { title: "จัดการเมนู", url: "/my-store/menus", icon: FaUtensils },
-          { title: "ตั้งค่าร้าน", url: "/my-store/settings", icon: IoIosSettings },
+          { title: "Dashboard", url: "/", icon: MdDashboard },
+          { title: "Order Queue", url: "/orders", icon: FaShoppingBag },
+          { title: "Manage Menu", url: "/my-store/menus", icon: FaUtensils },
+          { title: "Store Settings", url: "/my-store/settings", icon: IoIosSettings },
         ];
       case 'BUYER':
         return [
-          { title: "หน้าหลัก", url: "/", icon: MdDashboard },
-          //{ title: "ค้นหาร้านค้า", url: "/stores", icon: MdStorefront },
-          { title: "ออเดอร์ของฉัน", url: "/my-orders", icon: FaShoppingBag },
+          { title: "Home", url: "/", icon: MdDashboard },
+          //{ title: "Search Stores", url: "/stores", icon: MdStorefront },
+          { title: "My Orders", url: "/my-orders", icon: FaShoppingBag },
         ];
       default:
         return [];
@@ -87,19 +87,19 @@ const MainLayout = () => {
   const dataSidebar: DataSideBar = {
     sidebarItems: [
       {
-        name: "เมนู",
+        name: "Menu",
         items: generateSidebarItems(),
       },
     ],
     sidebarFooter: {
       profile: {
-        name: user?.username ?? "ผู้ใช้",
+        name: user?.username ?? "User",
         avatar: "/images/avatar2.png",
       },
       items: [
         {
           icon: <IoIosLogOut className="text-orange-500" />,
-          name: "ออกจากระบบ",
+          name: "Logout",
           onClick: handleLogout,
         },
       ],

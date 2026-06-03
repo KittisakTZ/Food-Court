@@ -146,4 +146,88 @@ export const analyticsService = {
             );
         }
     },
+
+    getCategoryAnalytics: async (storeId: string, startDate: Date, endDate: Date) => {
+        try {
+            const orderItems = await prisma.orderItem.findMany({
+                where: {
+                    order: {
+                        storeId,
+                        orderDate: { gte: startDate, lte: endDate },
+                        status: { not: "CANCELLED" as OrderStatus },
+                    },
+                },
+                select: {
+                    quantity: true,
+                    subtotal: true,
+                    menu: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true,
+                            category: { select: { id: true, name: true } },
+                        },
+                    },
+                },
+            });
+
+            const categoryMap: Record<string, {
+                id: string;
+                name: string;
+                quantity: number;
+                sales: number;
+                menus: Record<string, { id: string; name: string; image: string | null; quantity: number; sales: number }>;
+            }> = {};
+
+            for (const item of orderItems) {
+                const cat = item.menu.category;
+                const catId = cat?.id ?? "__uncategorized__";
+                const catName = cat?.name ?? "Uncategorized";
+                if (!categoryMap[catId]) {
+                    categoryMap[catId] = { id: catId, name: catName, quantity: 0, sales: 0, menus: {} };
+                }
+                categoryMap[catId].quantity += item.quantity;
+                categoryMap[catId].sales += item.subtotal;
+                
+                const menuId = item.menu.id;
+                if (!categoryMap[catId].menus[menuId]) {
+                    categoryMap[catId].menus[menuId] = {
+                        id: menuId,
+                        name: item.menu.name,
+                        image: item.menu.image,
+                        quantity: 0,
+                        sales: 0
+                    };
+                }
+                categoryMap[catId].menus[menuId].quantity += item.quantity;
+                categoryMap[catId].menus[menuId].sales += item.subtotal;
+            }
+
+            const categories = Object.values(categoryMap)
+                .map(({ menus, ...cat }) => {
+                    const sortedMenus = Object.values(menus).sort((a, b) => b.sales - a.sales);
+                    return {
+                        ...cat,
+                        topMenu: sortedMenus[0] ? { name: sortedMenus[0].name, quantity: sortedMenus[0].quantity, sales: sortedMenus[0].sales } : null,
+                        menus: sortedMenus,
+                    };
+                })
+                .sort((a, b) => b.sales - a.sales);
+
+            return new ServiceResponse(
+                ResponseStatus.Success,
+                "Category analytics fetched successfully",
+                { categories },
+                StatusCodes.OK
+            );
+        } catch (error) {
+            console.error("Error in getCategoryAnalytics:", error);
+            return new ServiceResponse(
+                ResponseStatus.Failed,
+                "Error fetching category analytics",
+                null,
+                StatusCodes.INTERNAL_SERVER_ERROR
+            );
+        }
+    },
 };

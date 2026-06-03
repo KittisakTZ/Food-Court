@@ -40,15 +40,15 @@ const BadgeStatus = (props: BadgeStatusType) => {
 
   switch (value) {
     case "pending":
-      textValue = "กำลังดำเนินการ";
+      textValue = "Processing";
       color = "sky";
       break;
     case "success":
-      textValue = "เสร็จสมบูรณ์";
+      textValue = "Completed";
       color = "green";
       break;
     case "cancel":
-      textValue = "ยกเลิก";
+      textValue = "Cancelled";
       color = "gray";
       break;
 

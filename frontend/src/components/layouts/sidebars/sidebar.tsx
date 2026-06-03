@@ -140,7 +140,7 @@ export function SidebarComponent(props: SidebarComponentProps) {
                               {item.name}
                             </span>
                             <span className="text-xs text-gray-500 group-hover:text-orange-500 transition-colors">
-                              คลิกเพื่อสลับ
+                              Click to switch
                             </span>
                           </div>
                         </DropdownMenuItem>

@@ -15,7 +15,7 @@ const ACTIVE_STATUSES: Order['status'][] = [
 export const ChatBox = () => {
     const { user } = useAuthStore();
     const {
-        isOpen, setIsOpen, targetStoreId, closeChat,
+        isOpen, setIsOpen, targetStoreId, targetOrderId, closeChat,
         unreadCount, incrementUnread, resetUnread,
     } = useChatStore();
 
@@ -25,6 +25,9 @@ export const ChatBox = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputText, setInputText] = useState('');
     const [showOrderDetail, setShowOrderDetail] = useState(false);
+    const [isOrdersExpanded, setIsOrdersExpanded] = useState(false);
+    const [orderPage, setOrderPage] = useState(1);
+    const orderPageSize = 20;
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const isOpenRef = useRef(isOpen);
@@ -35,15 +38,21 @@ export const ChatBox = () => {
     const isBuyer = user?.role === 'BUYER';
     const isSeller = user?.role === 'SELLER';
 
+    // Reset pagination when activeRoom changes
+    useEffect(() => {
+        setOrderPage(1);
+        setIsOrdersExpanded(false);
+    }, [activeRoom]);
+
     // ── ดึงออเดอร์ BUYER เพื่อแสดง card และ indicator ──────────────────────
     const { data: ordersData } = useMyOrders({
-        page: 1, pageSize: 50,
+        page: 1, pageSize: 100,
         refetchInterval: isOpen && isBuyer ? 30000 : undefined,
     });
 
     // ── ดึงออเดอร์ SELLER เพื่อแสดงรายละเอียดออเดอร์ของลูกค้าในแชท ──────
     const { data: storeOrdersData } = useMyStoreOrders({
-        page: 1, pageSize: 50,
+        page: 1, pageSize: 100,
         enabled: isSeller,
         refetchInterval: isOpen && isSeller ? 30000 : undefined,
     });
@@ -52,36 +61,80 @@ export const ChatBox = () => {
     // เงื่อนไข: ต้องเป็นออเดอร์ของ user ปัจจุบัน + ตรงร้าน + ผ่าน PENDING แล้ว (store อนุมัติแล้ว)
     const currentStoreOrder = useMemo<Order | null>(() => {
         if (!isBuyer || !activeRoom || !ordersData?.data?.length) return null;
+        if (targetOrderId) {
+            const found = ordersData.data.find(o => o.id === targetOrderId);
+            if (found) return found;
+        }
         const storeId: string | undefined = activeRoom.storeId ?? activeRoom.store?.id;
         if (!storeId) return null;
-        return ordersData.data.find(o =>
-            o.store?.id === storeId &&   // ตรงร้านที่กำลังแชท
-            o.status !== 'PENDING'       // store อนุมัติแล้ว (ไม่ใช่รอดำเนินการ)
-        ) ?? null;
-    }, [activeRoom, ordersData, isBuyer]);
+        const matchingOrders = ordersData.data.filter(o =>
+            o.store?.id === storeId &&
+            o.status !== 'PENDING'
+        );
+        if (matchingOrders.length === 0) return null;
+        matchingOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return matchingOrders[0];
+    }, [activeRoom, ordersData, isBuyer, targetOrderId]);
 
     // ออเดอร์ของลูกค้าที่ SELLER กำลังแชทด้วย
     const sellerBuyerOrder = useMemo<Order | null>(() => {
         if (!isSeller || !activeRoom || !storeOrdersData?.data?.length) return null;
+        if (targetOrderId) {
+            const found = storeOrdersData.data.find(o => o.id === targetOrderId);
+            if (found) return found;
+        }
         const buyerUsername: string | undefined = activeRoom.buyer?.username;
         if (!buyerUsername) return null;
-        const active = storeOrdersData.data.find(o =>
+
+        const matchingActive = storeOrdersData.data.filter(o =>
             o.buyer?.username === buyerUsername &&
             !['COMPLETED', 'CANCELLED', 'REJECTED'].includes(o.status)
         );
-        return active ?? storeOrdersData.data.find(o => o.buyer?.username === buyerUsername) ?? null;
-    }, [activeRoom, storeOrdersData, isSeller]);
+        if (matchingActive.length > 0) {
+            matchingActive.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return matchingActive[0];
+        }
+
+        const allMatching = storeOrdersData.data.filter(o => o.buyer?.username === buyerUsername);
+        if (allMatching.length === 0) return null;
+        allMatching.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return allMatching[0];
+    }, [activeRoom, storeOrdersData, isSeller, targetOrderId]);
 
     // Map storeId → ออเดอร์ล่าสุด สำหรับ room list indicator เท่านั้น
     const orderByStoreId = useMemo(() => {
         if (!isBuyer || !ordersData?.data) return new Map<string, Order>();
         const map = new Map<string, Order>();
-        for (const o of ordersData.data) {
+        const sortedOrders = [...ordersData.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        for (const o of sortedOrders) {
             const sid = o.store?.id;
-            if (sid && !map.has(sid)) map.set(sid, o);   // skip ถ้า store.id undefined
+            if (sid && !map.has(sid)) map.set(sid, o);
         }
         return map;
     }, [ordersData, isBuyer]);
+
+    // รายการออเดอร์ทั้งหมดที่เกี่ยวข้องกับห้องแชทนี้
+    const chatOrders = useMemo<Order[]>(() => {
+        if (isBuyer) {
+            const storeId: string | undefined = activeRoom?.storeId ?? activeRoom?.store?.id;
+            if (!storeId || !ordersData?.data?.length) return [];
+            return ordersData.data
+                .filter(o => o.store?.id === storeId)
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        } else {
+            const buyerUsername: string | undefined = activeRoom?.buyer?.username;
+            if (!buyerUsername || !storeOrdersData?.data?.length) return [];
+            return storeOrdersData.data
+                .filter(o => o.buyer?.username === buyerUsername)
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+    }, [activeRoom, ordersData, storeOrdersData, isBuyer]);
+
+    const totalOrderPages = Math.ceil(chatOrders.length / orderPageSize) || 1;
+    const paginatedChatOrders = useMemo(() => {
+        const start = (orderPage - 1) * orderPageSize;
+        return chatOrders.slice(start, start + orderPageSize);
+    }, [chatOrders, orderPage]);
 
     // นับ active orders สำหรับ floating badge
     const activeOrderCount = isBuyer
@@ -141,6 +194,25 @@ export const ChatBox = () => {
         return () => { socket.off('receive_message', handle); };
     }, [socket]);
 
+    useEffect(() => {
+        if (!socket) return;
+        const handleOrderSelected = (data: { roomId: string; orderId: string }) => {
+            if (activeRoom && data.roomId === activeRoom.id) {
+                useChatStore.setState({ targetOrderId: data.orderId });
+            }
+        };
+        socket.on('order_selected', handleOrderSelected);
+        return () => {
+            socket.off('order_selected', handleOrderSelected);
+        };
+    }, [socket, activeRoom]);
+
+    useEffect(() => {
+        if (socket && activeRoom && targetOrderId) {
+            socket.emit('select_order', { roomId: activeRoom.id, orderId: targetOrderId });
+        }
+    }, [activeRoom, socket]);
+
     useEffect(() => { if (isOpen) resetUnread(); }, [isOpen]);
 
     const handleSend = () => {
@@ -171,10 +243,10 @@ export const ChatBox = () => {
     // ── Header ────────────────────────────────────────────────────────────────
     const showBackBtn = !!(activeRoom || showOrderDetail);
     const headerTitle = showOrderDetail
-        ? 'รายละเอียดออเดอร์'
+        ? 'Order Details'
         : activeRoom
         ? (isBuyer ? activeRoom.store?.name : activeRoom.buyer?.username)
-        : 'ข้อความของคุณ';
+        : 'Your Messages';
 
     return (
         <div className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2">
@@ -211,19 +283,98 @@ export const ChatBox = () => {
                     {/* ── View: Chat Room ────────────────────────────────── */}
                     {!showOrderDetail && activeRoom && (
                         <>
-                            {/* Order Card — BUYER */}
-                            {isBuyer && currentStoreOrder && (
-                                <OrderChatCard
-                                    order={currentStoreOrder}
-                                    onViewDetail={() => setShowOrderDetail(true)}
-                                />
+                            {/* Collapsible Order List Header */}
+                            {chatOrders.length > 0 && (
+                                <div className="bg-slate-100 border-b border-slate-200 px-3 py-1.5 flex justify-between items-center text-xs font-bold text-slate-600 select-none flex-shrink-0">
+                                    <span>Related Orders ({chatOrders.length})</span>
+                                    <button 
+                                        onClick={() => setIsOrdersExpanded(prev => !prev)}
+                                        className="text-orange-500 hover:text-orange-600 font-bold transition-colors"
+                                    >
+                                        {isOrdersExpanded ? "Hide All" : `View All (Page ${orderPage}/${totalOrderPages})`}
+                                    </button>
+                                </div>
                             )}
-                            {/* Order Card — SELLER */}
-                            {isSeller && sellerBuyerOrder && (
-                                <OrderChatCard
-                                    order={sellerBuyerOrder}
-                                    onViewDetail={() => setShowOrderDetail(true)}
-                                />
+
+                            {/* Expanded Order List with Pagination */}
+                            {isOrdersExpanded && chatOrders.length > 0 && (
+                                <div className="bg-slate-50 border-b border-slate-200 max-h-48 overflow-y-auto flex-shrink-0 flex flex-col">
+                                    <div className="divide-y divide-slate-100">
+                                        {paginatedChatOrders.map(o => (
+                                            <OrderChatCard
+                                                key={o.id}
+                                                order={o}
+                                                isSelected={(isBuyer ? currentStoreOrder?.id : sellerBuyerOrder?.id) === o.id}
+                                                onSelect={() => {
+                                                    useChatStore.setState({ targetOrderId: o.id });
+                                                    setIsOrdersExpanded(false);
+                                                    if (socket && activeRoom) {
+                                                        socket.emit('select_order', { roomId: activeRoom.id, orderId: o.id });
+                                                    }
+                                                }}
+                                                onViewDetail={() => {
+                                                    useChatStore.setState({ targetOrderId: o.id });
+                                                    setShowOrderDetail(true);
+                                                    if (socket && activeRoom) {
+                                                        socket.emit('select_order', { roomId: activeRoom.id, orderId: o.id });
+                                                    }
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                    {/* Pagination Controls */}
+                                    {totalOrderPages > 1 && (
+                                        <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100 text-[11px] font-semibold text-slate-500 border-t border-slate-200 flex-shrink-0">
+                                            <button 
+                                                disabled={orderPage === 1}
+                                                onClick={() => setOrderPage(p => Math.max(p - 1, 1))}
+                                                className="text-orange-500 disabled:text-slate-400 hover:underline transition-colors"
+                                            >
+                                                Back
+                                            </button>
+                                            <span>Page {orderPage} / {totalOrderPages}</span>
+                                            <button 
+                                                disabled={orderPage === totalOrderPages}
+                                                onClick={() => setOrderPage(p => Math.min(p + 1, totalOrderPages))}
+                                                className="text-orange-500 disabled:text-slate-400 hover:underline transition-colors"
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Collapsed view (shows only the active/latest order) */}
+                            {!isOrdersExpanded && (
+                                <>
+                                    {isBuyer && currentStoreOrder && (
+                                        <OrderChatCard
+                                            order={currentStoreOrder}
+                                            isSelected={true}
+                                            onViewDetail={() => {
+                                                useChatStore.setState({ targetOrderId: currentStoreOrder.id });
+                                                setShowOrderDetail(true);
+                                                if (socket && activeRoom) {
+                                                    socket.emit('select_order', { roomId: activeRoom.id, orderId: currentStoreOrder.id });
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    {isSeller && sellerBuyerOrder && (
+                                        <OrderChatCard
+                                            order={sellerBuyerOrder}
+                                            isSelected={true}
+                                            onViewDetail={() => {
+                                                useChatStore.setState({ targetOrderId: sellerBuyerOrder.id });
+                                                setShowOrderDetail(true);
+                                                if (socket && activeRoom) {
+                                                    socket.emit('select_order', { roomId: activeRoom.id, orderId: sellerBuyerOrder.id });
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                </>
                             )}
 
                             {/* Messages */}
@@ -232,7 +383,7 @@ export const ChatBox = () => {
                                     {messages.length === 0 && (
                                         <div className="flex flex-col items-center justify-center h-24 gap-1">
                                             <MessageCircle size={24} className="text-slate-300" />
-                                            <p className="text-xs text-slate-400">เริ่มการสนทนาได้เลย</p>
+                                            <p className="text-xs text-slate-400">Start a conversation!</p>
                                         </div>
                                     )}
                                     {messages.map(m => {
@@ -257,7 +408,7 @@ export const ChatBox = () => {
                                     value={inputText}
                                     onChange={e => setInputText(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                    placeholder="พิมพ์ข้อความ..."
+                                    placeholder="Type a message..."
                                     className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
                                 />
                                 <button
@@ -277,7 +428,7 @@ export const ChatBox = () => {
                             {rooms.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-40 gap-2">
                                     <MessageCircle size={32} className="text-gray-300" />
-                                    <p className="text-gray-400 text-sm">ยังไม่มีข้อความ</p>
+                                    <p className="text-gray-400 text-sm">No messages yet</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-gray-100">
@@ -325,7 +476,7 @@ export const ChatBox = () => {
                                                             </p>
                                                         </div>
                                                     ) : (
-                                                        <p className="text-xs text-gray-400 mt-0.5">แตะเพื่อเปิดการสนทนา</p>
+                                                        <p className="text-xs text-gray-400 mt-0.5">Tap to open conversation</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -345,7 +496,7 @@ export const ChatBox = () => {
                     className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-full shadow-lg font-semibold text-sm transition-all hover:scale-105 hover:shadow-xl"
                 >
                     <MessageCircle size={18} />
-                    <span>ข้อความ</span>
+                    <span>Messages</span>
                     {unreadCount > 0 ? (
                         <span className="min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1 border-2 border-white animate-bounce">
                             {unreadCount > 99 ? '99+' : unreadCount}

@@ -15,17 +15,17 @@ export const getStatusColor = (status: string) => {
     }
 }
 
-// Helper function เพื่อแสดงชื่อสถานะเป็นภาษาไทย
+// Helper function to display status name in English
 export const getStatusName = (status: string) => {
     switch (status) {
-        case 'PENDING': return '⏳ รอการอนุมัติ';
-        case 'AWAITING_PAYMENT': return '💳 รอชำระเงิน';
-        case 'AWAITING_CONFIRMATION': return '✅ รอยืนยันการชำระ';
-        case 'COOKING': return '🍳 กำลังทำอาหาร';
-        case 'READY_FOR_PICKUP': return '📦 พร้อมรับ';
-        case 'COMPLETED': return '✨ เสร็จสิ้น';
-        case 'CANCELLED': return '🚫 ยกเลิก';
-        case 'REJECTED': return '❌ ปฏิเสธ';
+        case 'PENDING': return '⏳ Pending';
+        case 'AWAITING_PAYMENT': return '💳 Awaiting Payment';
+        case 'AWAITING_CONFIRMATION': return '✅ Verifying Slip';
+        case 'COOKING': return '🍳 Preparing';
+        case 'READY_FOR_PICKUP': return '📦 Ready for Pickup';
+        case 'COMPLETED': return '✨ Completed';
+        case 'CANCELLED': return '🚫 Cancelled';
+        case 'REJECTED': return '❌ Rejected';
         default: return status;
     }
 }

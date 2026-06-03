@@ -2,6 +2,7 @@ import { env } from "@common/utils/envConfig";
 import { initializeSocket } from "./socket";
 import { app, logger } from "./server";
 import { startStoreReopenJob } from "@common/jobs/store-job";
+import { startOrderTimeoutJob } from "@common/jobs/order-timeout-job";
 
 const port = env.PORT;
 
@@ -13,6 +14,7 @@ const server = app.listen(port, () => {
 // Start Socket.IO server using the created HTTP server instance
 initializeSocket(server);
 startStoreReopenJob();
+startOrderTimeoutJob();
 
 const onCloseSignal = () => {
   logger.info("sigint received, shutting down");

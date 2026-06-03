@@ -38,19 +38,19 @@ const RepairCeiptStatus = (props: RepairCeiptStatusType) => {
 
   switch (value) {
     case "pending":
-      textValue = "กำลังดำเนินการ";
+      textValue = "Processing";
       color = "sky";
       break;
     case "success":
-      textValue = "เสร็จสมบูรม์";
+      textValue = "Completed";
       color = "green";
       break;
     case "cancel":
-      textValue = "ยกเลิก";
+      textValue = "Cancelled";
       color = "gray";
       break;
     default:
-      textValue = "กำลังดำเนินการ";
+      textValue = "Processing";
       color = "sky";
       break;
   }

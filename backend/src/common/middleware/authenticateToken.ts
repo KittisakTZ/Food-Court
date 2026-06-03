@@ -25,7 +25,14 @@ declare global {
 }
 
 const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
-  const token = req.cookies.token;
+  let token = req.cookies.token;
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7);
+    }
+  }
 
   if (!token) {
     res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Authentication failed: No token provided' });

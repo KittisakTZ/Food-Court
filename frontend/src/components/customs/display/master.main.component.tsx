@@ -303,7 +303,7 @@ const MasterTableFeature: React.FC<MasterTableFeatureProps> = ({
               onClick={onSearch}
               className="w-28"
             >
-              ค้นหา
+              Search
             </Buttons>
           )}
           {onDropdown && dropdownItem?.map((item, index) => (

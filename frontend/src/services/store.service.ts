@@ -63,6 +63,8 @@ export interface UpdateStorePayload {
     location?: string;
     promptPayId?: string;
     image?: File;
+    openTime?: string | null;
+    closeTime?: string | null;
 }
 
 // (ใหม่) ฟังก์ชันสำหรับ Seller อัปเดตข้อมูลร้านของตัวเอง

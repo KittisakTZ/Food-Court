@@ -61,7 +61,7 @@ export const BoxLoadingData = ({
             <Spinner size={"3"} className=" text-blue-400"/>
           </div>
         </Box>
-        <Box style={{ color: textColor ?? "" }}>กำลังโหลด</Box>
+        <Box style={{ color: textColor ?? "" }}>Loading...</Box>
       </Box>
     </Box>
   );

@@ -59,11 +59,11 @@ const ElapsedTimer = ({
 
 // ── Status Badge ──────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-    PENDING:               { label: "รอยืนยัน",     className: "bg-slate-100 text-slate-600" },
-    AWAITING_PAYMENT:      { label: "รอชำระ",         className: "bg-blue-50 text-blue-600" },
-    AWAITING_CONFIRMATION: { label: "รอตรวจสลิป",    className: "bg-violet-50 text-violet-600" },
-    COOKING:               { label: "กำลังทำ",        className: "bg-orange-50 text-orange-600" },
-    READY_FOR_PICKUP:      { label: "พร้อมรับ",       className: "bg-green-50 text-green-700" },
+    PENDING:               { label: "Pending",          className: "bg-slate-100 text-slate-600" },
+    AWAITING_PAYMENT:      { label: "Awaiting Payment", className: "bg-blue-50 text-blue-600" },
+    AWAITING_CONFIRMATION: { label: "Verifying Slip",   className: "bg-violet-50 text-violet-600" },
+    COOKING:               { label: "Cooking",          className: "bg-orange-50 text-orange-600" },
+    READY_FOR_PICKUP:      { label: "Ready",            className: "bg-green-50 text-green-700" },
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -90,7 +90,7 @@ const CancelModal = ({
     const [selectedReason, setSelectedReason] = useState("");
     const [customReason, setCustomReason] = useState("");
 
-    const presetReasons = ["วัตถุดิบไม่พอ", "สินค้าหมด", "ร้านปิด", "เมนูหยุดให้บริการชั่วคราว", "ไม่สามารถรับออเดอร์ได้"];
+    const presetReasons = ["Insufficient ingredients", "Item sold out", "Store closed", "Menu temporarily unavailable", "Unable to accept order"];
     const finalReason = selectedReason === "__custom__" ? customReason.trim() : selectedReason;
 
     return (
@@ -102,8 +102,8 @@ const CancelModal = ({
                         <FiAlertTriangle className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-white">ยกเลิกออเดอร์ #{queueNumber}</h3>
-                        <p className="text-red-100 text-xs">เลือกเหตุผลเพื่อแจ้งให้ลูกค้าทราบ</p>
+                        <h3 className="text-base font-bold text-white">Cancel Order #{queueNumber}</h3>
+                        <p className="text-red-100 text-xs">Select a reason to notify the customer</p>
                     </div>
                     <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
                         <FiX className="w-5 h-5" />
@@ -120,14 +120,14 @@ const CancelModal = ({
                     ))}
                     <label className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${selectedReason === "__custom__" ? "border-red-400 bg-red-50" : "border-gray-100 bg-gray-50 hover:border-gray-200"}`}>
                         <input type="radio" name="cancelReason" value="__custom__" checked={selectedReason === "__custom__"} onChange={() => setSelectedReason("__custom__")} className="accent-red-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-800">อื่นๆ (ระบุเอง)</span>
+                        <span className="text-sm text-gray-800">Other (specify)</span>
                     </label>
                     {selectedReason === "__custom__" && (
                         <input
                             type="text"
                             value={customReason}
                             onChange={e => setCustomReason(e.target.value)}
-                            placeholder="ระบุเหตุผล..."
+                            placeholder="Enter reason..."
                             className="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 bg-gray-50"
                             autoFocus
                         />
@@ -140,7 +140,7 @@ const CancelModal = ({
                         onClick={onClose}
                         className="flex-1 py-2.5 rounded-2xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
                     >
-                        ปิด
+                        Close
                     </button>
                     <button
                         onClick={() => finalReason && onConfirm(finalReason)}
@@ -148,9 +148,9 @@ const CancelModal = ({
                         className="flex-1 py-2.5 rounded-2xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5"
                     >
                         {isPending ? (
-                            <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> กำลังยกเลิก...</>
+                            <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Cancelling...</>
                         ) : (
-                            <><FiX className="w-4 h-4" /> ยืนยันยกเลิก</>
+                            <><FiX className="w-4 h-4" /> Confirm Cancel</>
                         )}
                     </button>
                 </div>
@@ -181,8 +181,8 @@ const AdjustTimeModal = ({
                         <FiEdit2 className="w-5 h-5 text-orange-500" />
                     </div>
                     <div>
-                        <h3 className="text-base font-bold text-gray-900">ปรับเวลา #{queueNumber}</h3>
-                        <p className="text-xs text-gray-400">ออเดอร์นี้จะเสร็จในอีกกี่นาที?</p>
+                        <h3 className="text-base font-bold text-gray-900">Adjust Time #{queueNumber}</h3>
+                        <p className="text-xs text-gray-400">How many more minutes until this order is ready?</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3 mb-4 bg-orange-50 rounded-2xl p-4">
@@ -194,7 +194,7 @@ const AdjustTimeModal = ({
                     </button>
                     <div className="flex-1 text-center">
                         <span className="text-5xl font-extrabold text-orange-500">{minutes}</span>
-                        <span className="text-gray-500 ml-2 text-sm">นาที</span>
+                        <span className="text-gray-500 ml-2 text-sm">min</span>
                     </div>
                     <button
                         onClick={() => setMinutes(Math.min(180, minutes + 5))}
@@ -214,7 +214,7 @@ const AdjustTimeModal = ({
                                     : "border-gray-200 text-gray-600 hover:bg-gray-50"
                             }`}
                         >
-                            {m} นาที
+                            {m} min
                         </button>
                     ))}
                 </div>
@@ -223,14 +223,14 @@ const AdjustTimeModal = ({
                         onClick={onClose}
                         className="flex-1 py-2.5 rounded-2xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
                     >
-                        ยกเลิก
+                        Cancel
                     </button>
                     <button
                         onClick={() => onConfirm(minutes)}
                         disabled={isPending}
                         className="flex-1 py-2.5 rounded-2xl bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 disabled:opacity-50 transition-colors"
                     >
-                        {isPending ? "กำลังบันทึก..." : "บันทึก"}
+                        {isPending ? "Saving..." : "Save"}
                     </button>
                 </div>
             </div>
@@ -300,7 +300,7 @@ const KdsCard = ({
         {/* Footer Info */}
         <div className="px-4 py-2 border-t border-gray-50 flex items-center justify-between">
             <span className="text-xs text-gray-400">
-                {new Date(order.createdAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
+                {new Date(order.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
             </span>
             <span className="text-sm font-bold text-gray-700">
                 ฿{order.totalAmount.toLocaleString()}
@@ -427,49 +427,59 @@ export default function KDSPage() {
 
         if (order.status === "PENDING") {
             actions.push({
-                label: "อนุมัติ",
+                label: "Approve",
                 icon: <FiCheck className="w-4 h-4" />,
                 onClick: () => handleAction(order.id, "APPROVE"),
                 variant: "primary",
                 isPending: updateStatus.isPending,
             });
             actions.push({
-                label: "ปฏิเสธ",
+                label: "Reject",
                 icon: <FiX className="w-4 h-4" />,
                 onClick: () => setCancelTarget(order),
                 variant: "danger",
             });
         } else if (order.status === "AWAITING_PAYMENT") {
+            if (order.paymentMethod === "CASH_ON_PICKUP") {
+                actions.push({
+                    label: "Confirm Payment",
+                    icon: <FiDollarSign className="w-4 h-4" />,
+                    onClick: () => handleAction(order.id, "CONFIRM_CASH_PAYMENT"),
+                    variant: "primary",
+                    isPending: updateStatus.isPending,
+                });
+            } else {
+                actions.push({
+                    label: "Skip Payment",
+                    icon: <FiZap className="w-4 h-4" />,
+                    onClick: () => handleAction(order.id, "FORCE_COOKING"),
+                    variant: "info",
+                    isPending: updateStatus.isPending,
+                });
+            }
             actions.push({
-                label: "ข้ามการชำระ",
-                icon: <FiZap className="w-4 h-4" />,
-                onClick: () => handleAction(order.id, "FORCE_COOKING"),
-                variant: "info",
-                isPending: updateStatus.isPending,
-            });
-            actions.push({
-                label: "ยกเลิก",
+                label: "Cancel",
                 icon: <FiX className="w-4 h-4" />,
                 onClick: () => setCancelTarget(order),
                 variant: "danger",
             });
         } else if (order.status === "AWAITING_CONFIRMATION") {
             actions.push({
-                label: "ยืนยันสลิป",
+                label: "Confirm Slip",
                 icon: <FiDollarSign className="w-4 h-4" />,
                 onClick: () => handleAction(order.id, "CONFIRM_PAYMENT"),
                 variant: "secondary",
                 isPending: updateStatus.isPending,
             });
             actions.push({
-                label: "ข้ามขั้นตอน",
+                label: "Skip Step",
                 icon: <FiZap className="w-4 h-4" />,
                 onClick: () => handleAction(order.id, "FORCE_COOKING"),
                 variant: "info",
                 isPending: updateStatus.isPending,
             });
             actions.push({
-                label: "ยกเลิก",
+                label: "Cancel",
                 icon: <FiX className="w-4 h-4" />,
                 onClick: () => setCancelTarget(order),
                 variant: "danger",
@@ -481,34 +491,53 @@ export default function KDSPage() {
 
     const getCookingActions = (order: KdsOrder): CardAction[] => [
         {
-            label: "ทำเสร็จแล้ว",
+            label: "Done",
             icon: <FiCheck className="w-4 h-4" />,
             onClick: () => handleAction(order.id, "PREPARE_COMPLETE"),
             variant: "primary",
             isPending: updateStatus.isPending,
         },
         {
-            label: "ปรับเวลา",
+            label: "Adjust Time",
             icon: <FiEdit2 className="w-4 h-4" />,
             onClick: () => setAdjustTarget(order),
             variant: "warning",
         },
         {
-            label: "ยกเลิก",
+            label: "Cancel",
             icon: <FiX className="w-4 h-4" />,
             onClick: () => setCancelTarget(order),
             variant: "danger",
         },
     ];
 
-    const getReadyActions = (order: KdsOrder): CardAction[] => [
-        {
-            label: "ยกเลิก",
+    const getReadyActions = (order: KdsOrder): CardAction[] => {
+        const actions: CardAction[] = [];
+        if (order.paymentMethod === "CASH_ON_PICKUP" && !order.paidAt) {
+            actions.push({
+                label: "Confirm Payment",
+                icon: <FiDollarSign className="w-4 h-4" />,
+                onClick: () => handleAction(order.id, "CONFIRM_CASH_PAYMENT"),
+                variant: "primary",
+                isPending: updateStatus.isPending,
+            });
+        } else {
+            actions.push({
+                label: "Done",
+                icon: <FiCheck className="w-4 h-4" />,
+                onClick: () => handleAction(order.id, "CUSTOMER_PICKED_UP"),
+                variant: "primary",
+                isPending: updateStatus.isPending,
+            });
+        }
+        actions.push({
+            label: "Cancel",
             icon: <FiX className="w-4 h-4" />,
             onClick: () => setCancelTarget(order),
             variant: "danger",
-        },
-    ];
+        });
+        return actions;
+    };
 
     if (isLoading) {
         return (
@@ -521,7 +550,7 @@ export default function KDSPage() {
     if (!myStore) {
         return (
             <div className="flex items-center justify-center min-h-[80vh] text-gray-500">
-                ไม่พบข้อมูลร้านค้า
+                Store not found
             </div>
         );
     }
@@ -554,7 +583,7 @@ export default function KDSPage() {
                             <IoFastFoodOutline className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-extrabold text-gray-900 leading-tight">ครัว — {myStore.name}</h1>
+                            <h1 className="text-xl font-extrabold text-gray-900 leading-tight">Kitchen — {myStore.name}</h1>
                             <p className="text-sm text-gray-400">Kitchen Display System</p>
                         </div>
                     </div>
@@ -564,9 +593,9 @@ export default function KDSPage() {
                             : "bg-red-50 text-red-500 border-red-200"
                     }`}>
                         {isConnected ? (
-                            <><FiWifi className="w-4 h-4" /> เชื่อมต่อแล้ว</>
+                            <><FiWifi className="w-4 h-4" /> Connected</>
                         ) : (
-                            <><FiWifiOff className="w-4 h-4 animate-pulse" /> ไม่ได้เชื่อมต่อ</>
+                            <><FiWifiOff className="w-4 h-4 animate-pulse" /> Disconnected</>
                         )}
                     </div>
                 </div>
@@ -574,9 +603,9 @@ export default function KDSPage() {
                 {/* Summary */}
                 <div className="mt-4 grid grid-cols-3 gap-3">
                     {[
-                        { label: "รอคิว", count: pendingOrders.length, color: "text-slate-700", bg: "bg-slate-50 border-slate-200" },
-                        { label: "กำลังทำ", count: cookingOrders.length, color: "text-orange-600", bg: "bg-orange-50 border-orange-200" },
-                        { label: "พร้อมรับ", count: readyOrders.length, color: "text-green-600", bg: "bg-green-50 border-green-200" },
+                        { label: "Queue", count: pendingOrders.length, color: "text-slate-700", bg: "bg-slate-50 border-slate-200" },
+                        { label: "Cooking", count: cookingOrders.length, color: "text-orange-600", bg: "bg-orange-50 border-orange-200" },
+                        { label: "Ready", count: readyOrders.length, color: "text-green-600", bg: "bg-green-50 border-green-200" },
                     ].map(({ label, count, color, bg }) => (
                         <div key={label} className={`${bg} border rounded-2xl p-3 text-center`}>
                             <p className={`text-2xl font-extrabold ${color}`}>{count}</p>
@@ -589,7 +618,7 @@ export default function KDSPage() {
             {/* KDS Columns */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 flex-1 min-h-0" style={{ height: "calc(100vh - 260px)" }}>
                 <KdsColumn
-                    title="รอคิว"
+                    title="Queue"
                     icon={<FiClock className="w-5 h-5" />}
                     count={pendingOrders.length}
                     orders={pendingOrders}
@@ -597,11 +626,11 @@ export default function KDSPage() {
                     accentBorder="border-l-slate-400"
                     timerKey="createdAt"
                     warnAfterMin={15}
-                    emptyText="ไม่มีออเดอร์รอคิว"
+                    emptyText="No orders in queue"
                     renderActions={getPendingActions}
                 />
                 <KdsColumn
-                    title="กำลังทำอาหาร"
+                    title="Cooking"
                     icon={<MdRestaurant className="w-5 h-5" />}
                     count={cookingOrders.length}
                     orders={cookingOrders}
@@ -609,11 +638,11 @@ export default function KDSPage() {
                     accentBorder="border-l-orange-400"
                     timerKey="startCookingAt"
                     warnAfterMin={10}
-                    emptyText="ยังไม่มีออเดอร์ที่กำลังทำ"
+                    emptyText="No orders being prepared"
                     renderActions={getCookingActions}
                 />
                 <KdsColumn
-                    title="พร้อมรับ"
+                    title="Ready for Pickup"
                     icon={<FiPackage className="w-5 h-5" />}
                     count={readyOrders.length}
                     orders={readyOrders}
@@ -621,7 +650,7 @@ export default function KDSPage() {
                     accentBorder="border-l-emerald-400"
                     timerKey="startCookingAt"
                     warnAfterMin={999}
-                    emptyText="ยังไม่มีออเดอร์พร้อมรับ"
+                    emptyText="No orders ready yet"
                     renderActions={getReadyActions}
                 />
             </div>

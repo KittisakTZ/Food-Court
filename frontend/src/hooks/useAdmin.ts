@@ -36,11 +36,11 @@ export const useAdminApproveStore = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [ADMIN_STORES_QUERY_KEY] });
             queryClient.invalidateQueries({ queryKey: [ADMIN_STATS_QUERY_KEY] }); // รีเฟรช stats ด้วย
-            toastService.success("อนุมัติร้านค้าสำเร็จ!");
+            toastService.success("Store approved successfully!");
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถอนุมัติร้านค้าได้: ${errorMessage}`);
+            toastService.error(`Unable to approve store: ${errorMessage}`);
         }
     });
 };
@@ -53,11 +53,11 @@ export const useAdminRejectStore = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [ADMIN_STORES_QUERY_KEY] });
             queryClient.invalidateQueries({ queryKey: [ADMIN_STATS_QUERY_KEY] }); // รีเฟรช stats ด้วย
-            toastService.success("ยกเลิกการอนุมัติร้านค้าสำเร็จ!");
+            toastService.success("Store approval revoked successfully!");
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถยกเลิกการอนุมัติได้: ${errorMessage}`);
+            toastService.error(`Unable to revoke approval: ${errorMessage}`);
         }
     });
 };

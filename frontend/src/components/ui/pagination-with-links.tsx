@@ -247,7 +247,7 @@ function SelectRowsPerPage({
 }) {
   return (
     <div className="flex items-center gap-4">
-      <span className="whitespace-nowrap text-sm">จำนวนแถวต่อหน้า</span>
+      <span className="whitespace-nowrap text-sm">Rows per page</span>
 
       <Select
         value={String(pageSize)}

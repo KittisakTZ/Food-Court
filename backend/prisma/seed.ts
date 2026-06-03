@@ -1015,11 +1015,6 @@ async function main() {
     console.log(`  └─ 🏪 Created store: ${store.name}`)
 
 
-    // 🔹 Create Partitions for the new store
-    console.log(`  └─ 🗂️  Creating partitions for store: ${store.name}`);
-    await prisma.$executeRaw`SELECT create_store_partitions(${store.id})`;
-
-
     // 🔹 Create Categories and Menus for the store
     for (const categoryData of storeData.categories) {
       const category = await prisma.menuCategory.upsert({

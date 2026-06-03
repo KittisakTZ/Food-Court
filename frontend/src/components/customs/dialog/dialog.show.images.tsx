@@ -22,7 +22,7 @@ const DialogShowImages = (props: DialogShowImagesProps) => {
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Content className="fixed top-0 right-0 w-screen h-screen max-w-full bg-black bg-opacity-80 flex items-center justify-center">
         {/* Title for Accessibility */}
-        <Dialog.Title className="sr-only">แสดงรูปภาพ</Dialog.Title>
+        <Dialog.Title className="sr-only">Show Image</Dialog.Title>
 
         {/* Close Button */}
         <div className="absolute top-4 right-4 z-50">

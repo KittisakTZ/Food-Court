@@ -11,15 +11,15 @@ const ROLE_OPTIONS = [
   {
     value: "BUYER" as const,
     icon: <FaShoppingBag className="w-5 h-5" />,
-    label: "ลูกค้า",
-    desc: "สั่งอาหารจากร้านค้าต่างๆ",
+    label: "Customer",
+    desc: "Order food from various stores",
     accent: "orange",
   },
   {
     value: "SELLER" as const,
     icon: <FaStore className="w-5 h-5" />,
-    label: "ร้านค้า",
-    desc: "เปิดร้านและจัดการออเดอร์",
+    label: "Store",
+    desc: "Open a store and manage orders",
     accent: "amber",
   },
 ];
@@ -42,7 +42,7 @@ export default function RegisterFeature() {
   const passwordMatch = confirmPassword === "" || password === confirmPassword;
 
   const validateEmail = (val: string) => {
-    if (val && !EMAIL_REGEX.test(val)) return "รูปแบบอีเมลไม่ถูกต้อง เช่น name@email.com";
+    if (val && !EMAIL_REGEX.test(val)) return "Invalid email format, e.g. name@email.com";
     return "";
   };
 
@@ -58,10 +58,10 @@ export default function RegisterFeature() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !password) return toastService.error("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
-    if (username.trim().length < 4) return toastService.error("ชื่อผู้ใช้ต้องมีอย่างน้อย 4 ตัวอักษร");
-    if (password.length < 4) return toastService.error("รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร");
-    if (confirmPassword && password !== confirmPassword) return toastService.error("รหัสผ่านไม่ตรงกัน");
+    if (!username.trim() || !password) return toastService.error("Please enter username and password");
+    if (username.trim().length < 4) return toastService.error("Username must be at least 4 characters");
+    if (password.length < 4) return toastService.error("Password must be at least 4 characters");
+    if (confirmPassword && password !== confirmPassword) return toastService.error("Passwords do not match");
     if (email) {
       const err = validateEmail(email);
       if (err) { setEmailTouched(true); setEmailError(err); return toastService.error(err); }
@@ -71,15 +71,15 @@ export default function RegisterFeature() {
     try {
       const res = await postRegister({ username: username.trim(), password, email: email || undefined, role });
       if (res.statusCode === 201) {
-        toastService.success("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ");
+        toastService.success("Registration successful! Please sign in.");
         navigate("/login");
       } else {
-        toastService.error(res.message || "การสมัครสมาชิกล้มเหลว");
+        toastService.error(res.message || "Registration failed");
       }
     } catch (err: unknown) {
       toastService.error(
         (err as { response?: { data?: { message: string } } })?.response?.data?.message
-          || "เกิดข้อผิดพลาดในการสมัครสมาชิก"
+          || "An error occurred during registration"
       );
     } finally {
       setIsSubmitting(false);
@@ -100,17 +100,17 @@ export default function RegisterFeature() {
 
         <div>
           <h2 className="text-4xl font-black text-white leading-snug mb-4">
-            เริ่มต้นใช้งาน<br />วันนี้ฟรี!
+            Get Started<br />Today, Free!
           </h2>
           <p className="text-orange-100 text-sm leading-relaxed mb-6">
-            สมัครสมาชิกเพื่อเข้าถึงระบบจองอาหาร<br />
-            ของมหาวิทยาลัย ง่ายและสะดวก
+            Register to access the university<br />
+            food ordering system, easy and convenient
           </p>
           <div className="space-y-2.5">
             {[
-              "สมัครฟรี ไม่มีค่าใช้จ่าย",
-              "รองรับการสั่งอาหารออนไลน์",
-              "ติดตามออเดอร์แบบ realtime",
+              "Free registration, no cost",
+              "Supports online food ordering",
+              "Track orders in real-time",
             ].map(t => (
               <div key={t} className="flex items-center gap-2.5 text-orange-100 text-sm">
                 <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
@@ -139,14 +139,14 @@ export default function RegisterFeature() {
 
           {/* Heading */}
           <div className="mb-6">
-            <h1 className="text-2xl font-black text-slate-800">สมัครสมาชิก</h1>
-            <p className="text-sm text-slate-400 mt-1">สร้างบัญชีเพื่อเริ่มใช้งาน</p>
+            <h1 className="text-2xl font-black text-slate-800">Create Account</h1>
+            <p className="text-sm text-slate-400 mt-1">Create an account to get started</p>
           </div>
 
           {/* Role selector */}
           <div className="mb-5">
             <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
-              ประเภทบัญชี
+              Account Type
             </label>
             <div className="grid grid-cols-2 gap-2.5">
               {ROLE_OPTIONS.map(opt => (
@@ -186,13 +186,13 @@ export default function RegisterFeature() {
             {/* Username */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                ชื่อผู้ใช้ <span className="text-red-400 normal-case font-normal">*</span>
+                Username <span className="text-red-400 normal-case font-normal">*</span>
               </label>
               <div className="relative">
                 <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="อย่างน้อย 4 ตัวอักษร"
+                  placeholder="At least 4 characters"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:border-orange-400 focus:ring-3 focus:ring-orange-100 transition-all disabled:opacity-50"
@@ -206,7 +206,7 @@ export default function RegisterFeature() {
             {/* Email */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                อีเมล <span className="text-slate-400 normal-case font-normal">(ไม่บังคับ)</span>
+                Email <span className="text-slate-400 normal-case font-normal">(optional)</span>
               </label>
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -234,7 +234,7 @@ export default function RegisterFeature() {
               )}
               {emailTouched && email && !emailError && (
                 <p className="flex items-center gap-1.5 mt-1 text-xs font-medium text-emerald-600">
-                  <FiCheck className="w-3.5 h-3.5 shrink-0" /> รูปแบบอีเมลถูกต้อง
+                  <FiCheck className="w-3.5 h-3.5 shrink-0" /> Email format is valid
                 </p>
               )}
             </div>
@@ -242,13 +242,13 @@ export default function RegisterFeature() {
             {/* Password */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                รหัสผ่าน <span className="text-red-400 normal-case font-normal">*</span>
+                Password <span className="text-red-400 normal-case font-normal">*</span>
               </label>
               <div className="relative">
                 <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="อย่างน้อย 4 ตัวอักษร"
+                  placeholder="At least 4 characters"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   className="w-full pl-9 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:border-orange-400 focus:ring-3 focus:ring-orange-100 transition-all disabled:opacity-50"
@@ -264,13 +264,13 @@ export default function RegisterFeature() {
             {/* Confirm password */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                ยืนยันรหัสผ่าน
+                Confirm Password
               </label>
               <div className="relative">
                 <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   type={showConfirm ? "text" : "password"}
-                  placeholder="กรอกรหัสผ่านอีกครั้ง"
+                  placeholder="Enter password again"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   className={`w-full pl-9 pr-10 py-2.5 bg-white border rounded-xl text-slate-800 placeholder:text-slate-300 text-sm focus:outline-none focus:ring-3 transition-all disabled:opacity-50 ${
@@ -288,11 +288,11 @@ export default function RegisterFeature() {
                 </button>
               </div>
               {!passwordMatch && (
-                <p className="text-xs text-red-500 mt-1">รหัสผ่านไม่ตรงกัน</p>
+                <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
               )}
               {confirmPassword && passwordMatch && (
                 <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-                  <FiCheck className="w-3 h-3" /> รหัสผ่านตรงกัน
+                  <FiCheck className="w-3 h-3" /> Passwords match
                 </p>
               )}
             </div>
@@ -304,9 +304,9 @@ export default function RegisterFeature() {
               className="w-full mt-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
-                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> กำลังสมัคร...</>
+                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Registering...</>
               ) : (
-                <>สมัครสมาชิก <FiArrowRight className="w-4 h-4" /></>
+                <>Create Account <FiArrowRight className="w-4 h-4" /></>
               )}
             </button>
           </form>
@@ -314,7 +314,7 @@ export default function RegisterFeature() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-xs text-slate-400">มีบัญชีแล้ว?</span>
+            <span className="text-xs text-slate-400">Already have an account?</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
@@ -322,11 +322,11 @@ export default function RegisterFeature() {
             to="/login"
             className="flex items-center justify-center gap-2 w-full py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-all"
           >
-            เข้าสู่ระบบ
+            Sign In
           </Link>
 
           <p className="text-center text-xs text-slate-400 mt-5">
-            สำหรับนักศึกษาและร้านค้าในมหาวิทยาลัย
+            For students and stores in the university
           </p>
         </div>
       </div>

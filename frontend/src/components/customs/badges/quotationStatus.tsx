@@ -38,27 +38,27 @@ const QuotationStatus = (props: QuotationStatusType) => {
 
   switch (value) {
     case "pending":
-      textValue = "ระหว่างดำเนินการ";
+      textValue = "Processing";
       color = "sky";
       break;
     case "waiting_for_approve":
-      textValue = "รออนุมัติ";
+      textValue = "Pending Approval";
       color = "yellow";
       break;
     case "approved":
-      textValue = "อนุมัติ";
+      textValue = "Approved";
       color = "blue";
       break;
     case "reject_approve":
-      textValue = "ไม่อนุมัติ";
+      textValue = "Rejected";
       color = "red";
       break;
     case "close_deal":
-      textValue = "ปิดดีล";
+      textValue = "Closed Deal";
       color = "green";
       break;
     case "cancel":
-      textValue = "ยกเลิก";
+      textValue = "Cancelled";
       color = "gray";
       break;
 

@@ -35,9 +35,9 @@ export default function Error404() {
                         </g>
                     </svg>
                 </div>
-                <p className="mb-4 text-2xl font-bold text-gray-600">ไม่พบหน้าที่คุณค้นหา</p>
+                <p className="mb-4 text-2xl font-bold text-gray-600">The page you are looking for was not found</p>
                 <p className="mt-4 text-gray-600">
-                    คลิกเพื่อกลับไปที่{' '}
+                    Click to return to{' '}
                     <a href="/" className="text-blue-500">
                         home
                     </a>

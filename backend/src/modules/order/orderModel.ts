@@ -44,13 +44,14 @@ export const SellerUpdateOrderStatusSchema = z.object({
         action: z.enum([
             "APPROVE",
             "REJECT",
-            "CONFIRM_PAYMENT", // ยืนยันสลิป PromptPay
+            "CONFIRM_PAYMENT",      // Confirm PromptPay slip
+            "CONFIRM_CASH_PAYMENT", // Seller confirms cash received for CASH_ON_PICKUP orders
             "PREPARE_COMPLETE",
-            "CUSTOMER_PICKED_UP", // ลูกค้ารับของ (และอาจจะจ่ายเงินสด)
-            "REPORT_ISSUE",       // แจ้งปัญหาออเดอร์
-            "CLEAR_ISSUE",        // ล้างปัญหาออเดอร์
-            "CANCEL_BY_STORE",    // ร้านค้ายกเลิกออเดอร์กลางทาง
-            "FORCE_COOKING",      // ข้ามขั้นตอนการชำระเงิน → เข้าสู่การทำอาหารทันที
+            "CUSTOMER_PICKED_UP",
+            "REPORT_ISSUE",
+            "CLEAR_ISSUE",
+            "CANCEL_BY_STORE",
+            "FORCE_COOKING",
         ]),
         issueReason: z.string().optional(), // เหตุผลสำหรับ REPORT_ISSUE
         cancelReason: z.string().optional(), // เหตุผลสำหรับ CANCEL_BY_STORE

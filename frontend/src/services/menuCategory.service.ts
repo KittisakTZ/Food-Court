@@ -5,11 +5,11 @@ import { APIResponseType } from "@/types/response";
 export type MenuType = "MAIN" | "DRINK" | "DESSERT" | "SNACK" | "OTHER";
 
 export const MENU_TYPE_LABEL: Record<MenuType, string> = {
-    MAIN:    "อาหารจานหลัก",
-    DRINK:   "เครื่องดื่ม",
-    DESSERT: "ของหวาน",
-    SNACK:   "ของทานเล่น",
-    OTHER:   "อื่นๆ",
+    MAIN:    "Main Course",
+    DRINK:   "Drink",
+    DESSERT: "Dessert",
+    SNACK:   "Snack",
+    OTHER:   "Other",
 };
 
 export const MENU_TYPE_DEFAULT_COOKING_TIME: Record<MenuType, number> = {

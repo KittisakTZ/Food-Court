@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import {
   FiClock, FiCheckCircle, FiXCircle, FiPackage, FiDollarSign, FiUpload,
   FiChevronRight, FiChevronLeft, FiCalendar, FiShoppingBag, FiRefreshCw,
-  FiAlertTriangle, FiMapPin,
+  FiAlertTriangle, FiMapPin, FiLayers,
 } from "react-icons/fi";
 import { MdRestaurant, MdPayment } from "react-icons/md";
 import { Order } from "@/types/response/order.response";
@@ -29,7 +29,7 @@ const CountdownBadge = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => {
   const s = remaining % 60;
   const isDone = remaining === 0;
   const isAlmostReady = !isDone && remaining <= 120;
-  const readyTime = new Date(estimatedReadyAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+  const readyTime = new Date(estimatedReadyAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
   if (isDone) {
     return (
@@ -38,8 +38,8 @@ const CountdownBadge = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => {
           <FiClock className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-semibold text-green-700">เวลารับอาหาร</p>
-          <p className="text-sm font-bold text-green-800 animate-pulse">ใกล้พร้อมแล้ว!</p>
+          <p className="text-xs font-semibold text-green-700">Pickup Time</p>
+          <p className="text-sm font-bold text-green-800 animate-pulse">Almost Ready!</p>
         </div>
       </div>
     );
@@ -51,8 +51,8 @@ const CountdownBadge = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => {
         <FiClock className="w-5 h-5 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-xs font-semibold ${isAlmostReady ? "text-amber-700" : "text-orange-700"}`}>รับอาหารประมาณ {readyTime} น.</p>
-        <p className={`text-xs text-slate-500`}>เวลาที่เหลือ</p>
+        <p className={`text-xs font-semibold ${isAlmostReady ? "text-amber-700" : "text-orange-700"}`}>Ready approx. {readyTime}</p>
+        <p className={`text-xs text-slate-500`}>Time remaining</p>
       </div>
       <p className={`text-2xl font-black font-mono tabular-nums flex-shrink-0 ${isAlmostReady ? "text-amber-600 animate-pulse" : "text-orange-600"}`}>
         {String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
@@ -64,14 +64,14 @@ const CountdownBadge = ({ estimatedReadyAt }: { estimatedReadyAt: string }) => {
 // ── Status config ──────────────────────────────────────────────────────────────
 const getStatusConfig = (status: Order["status"]) => {
   const configs: Record<Order["status"], { color: string; bgColor: string; dotColor: string; icon: JSX.Element; text: string; description: string }> = {
-    PENDING: { color: "text-amber-800", bgColor: "bg-amber-100", dotColor: "bg-amber-500", icon: <FiClock className="w-4 h-4" />, text: "รอดำเนินการ", description: "ร้านค้ากำลังตรวจสอบ" },
-    AWAITING_PAYMENT: { color: "text-blue-800", bgColor: "bg-blue-100", dotColor: "bg-blue-500", icon: <FiDollarSign className="w-4 h-4" />, text: "รอชำระเงิน", description: "กรุณาชำระเงิน" },
-    AWAITING_CONFIRMATION: { color: "text-purple-800", bgColor: "bg-purple-100", dotColor: "bg-purple-500", icon: <MdPayment className="w-4 h-4" />, text: "รอตรวจสอบสลิป", description: "กำลังตรวจสอบ" },
-    COOKING: { color: "text-orange-800", bgColor: "bg-orange-100", dotColor: "bg-orange-500", icon: <MdRestaurant className="w-4 h-4" />, text: "กำลังเตรียมอาหาร", description: "กำลังปรุงอาหาร" },
-    READY_FOR_PICKUP: { color: "text-emerald-800", bgColor: "bg-emerald-100", dotColor: "bg-emerald-500", icon: <FiPackage className="w-4 h-4" />, text: "อาหารพร้อมแล้ว!", description: "มารับได้เลย" },
-    COMPLETED: { color: "text-slate-700", bgColor: "bg-slate-100", dotColor: "bg-slate-400", icon: <FiCheckCircle className="w-4 h-4" />, text: "เสร็จสิ้น", description: "ขอบคุณที่ใช้บริการ" },
-    CANCELLED: { color: "text-red-800", bgColor: "bg-red-100", dotColor: "bg-red-500", icon: <FiXCircle className="w-4 h-4" />, text: "ยกเลิกแล้ว", description: "คำสั่งซื้อถูกยกเลิก" },
-    REJECTED: { color: "text-red-800", bgColor: "bg-red-100", dotColor: "bg-red-500", icon: <FiXCircle className="w-4 h-4" />, text: "ถูกปฏิเสธ", description: "ร้านค้าปฏิเสธ" },
+    PENDING: { color: "text-amber-800", bgColor: "bg-amber-100", dotColor: "bg-amber-500", icon: <FiClock className="w-4 h-4" />, text: "Pending", description: "Store is reviewing your order" },
+    AWAITING_PAYMENT: { color: "text-blue-800", bgColor: "bg-blue-100", dotColor: "bg-blue-500", icon: <FiDollarSign className="w-4 h-4" />, text: "Awaiting Payment", description: "Please complete payment" },
+    AWAITING_CONFIRMATION: { color: "text-purple-800", bgColor: "bg-purple-100", dotColor: "bg-purple-500", icon: <MdPayment className="w-4 h-4" />, text: "Verifying Slip", description: "Store is verifying payment" },
+    COOKING: { color: "text-orange-800", bgColor: "bg-orange-100", dotColor: "bg-orange-500", icon: <MdRestaurant className="w-4 h-4" />, text: "Preparing", description: "Your food is being prepared" },
+    READY_FOR_PICKUP: { color: "text-emerald-800", bgColor: "bg-emerald-100", dotColor: "bg-emerald-500", icon: <FiPackage className="w-4 h-4" />, text: "Ready for Pickup!", description: "Please collect your order" },
+    COMPLETED: { color: "text-slate-700", bgColor: "bg-slate-100", dotColor: "bg-slate-400", icon: <FiCheckCircle className="w-4 h-4" />, text: "Completed", description: "Thank you for your order" },
+    CANCELLED: { color: "text-red-800", bgColor: "bg-red-100", dotColor: "bg-red-500", icon: <FiXCircle className="w-4 h-4" />, text: "Cancelled", description: "Order has been cancelled" },
+    REJECTED: { color: "text-red-800", bgColor: "bg-red-100", dotColor: "bg-red-500", icon: <FiXCircle className="w-4 h-4" />, text: "Rejected", description: "Store rejected the order" },
   };
   return configs[status] ?? configs["PENDING"];
 };
@@ -90,7 +90,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toastService.error("ไฟล์ใหญ่เกินไป! สูงสุด 5MB"); return; }
+    if (file.size > 5 * 1024 * 1024) { toastService.error("File too large! Maximum 5MB"); return; }
     setPreviewUrl(URL.createObjectURL(file));
     setSelectedFile(file);
   };
@@ -120,7 +120,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
               <FiDollarSign className="w-7 h-7" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">ชำระเงิน</h2>
+              <h2 className="text-xl font-bold">Payment</h2>
               <p className="text-blue-100 text-sm">#{order.id.substring(0, 8)}... · {order.store.name}</p>
             </div>
           </div>
@@ -128,7 +128,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
 
         <div className="p-5 space-y-5 overflow-y-auto flex-1">
           <div className="text-center py-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
-            <p className="text-slate-500 text-sm mb-1">ยอดชำระทั้งหมด</p>
+            <p className="text-slate-500 text-sm mb-1">Total Amount Due</p>
             <p className="text-5xl font-black text-blue-600">฿{order.totalAmount.toFixed(2)}</p>
           </div>
 
@@ -145,13 +145,13 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
           </div>
 
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-900 space-y-1">
-            <p className="font-bold mb-2">วิธีชำระเงิน</p>
-            <p>1. สแกน QR Code ด้วยแอปธนาคาร</p>
-            <p>2. ชำระเงินตามยอดที่แสดง</p>
-            <p>3. แนบสลิปการโอนเงินด้านล่าง</p>
+            <p className="font-bold mb-2">Payment Instructions</p>
+            <p>1. Scan the QR Code with your banking app</p>
+            <p>2. Transfer the exact amount shown above</p>
+            <p>3. Upload your payment slip below</p>
             {order.paymentExpiresAt && (
               <p className="text-amber-700 font-semibold mt-2">
-                QR หมดอายุ {new Date(order.paymentExpiresAt).toLocaleTimeString("th-TH")}
+                QR expires at {new Date(order.paymentExpiresAt).toLocaleTimeString("en-US")}
               </p>
             )}
           </div>
@@ -159,8 +159,8 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
           {previewUrl && (
             <div className="bg-slate-50 rounded-2xl p-4 border-2 border-blue-200">
               <div className="flex justify-between items-center mb-3">
-                <p className="font-semibold text-slate-700">ภาพตัวอย่างสลิป</p>
-                <button onClick={handleCancelPreview} className="text-red-500 text-sm font-semibold hover:text-red-600">ยกเลิก</button>
+                <p className="font-semibold text-slate-700">Slip Preview</p>
+                <button onClick={handleCancelPreview} className="text-red-500 text-sm font-semibold hover:text-red-600">Cancel</button>
               </div>
               <img src={previewUrl} alt="Preview" className="w-full rounded-xl max-h-72 object-contain bg-white" />
             </div>
@@ -169,7 +169,7 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
           {order.paymentSlip && !previewUrl && (
             <button onClick={() => window.open(normalizeUrl(order.paymentSlip)!, "_blank")}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-              <FiCheckCircle className="w-5 h-5" /> ดูสลิปที่อัปโหลดแล้ว
+              <FiCheckCircle className="w-5 h-5" /> View Uploaded Slip
             </button>
           )}
 
@@ -178,12 +178,12 @@ const PaymentModal = ({ order, onClose }: { order: Order | null; onClose: () => 
           {previewUrl ? (
             <button onClick={handleUpload} disabled={isUploading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-              {isUploading ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> กำลังอัปโหลด...</> : <><FiCheckCircle className="w-5 h-5" /> ยืนยันการอัปโหลด</>}
+              {isUploading ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> Uploading...</> : <><FiCheckCircle className="w-5 h-5" /> Confirm Upload</>}
             </button>
           ) : (
             <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || !!order.paymentSlip}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-              {order.paymentSlip ? <><FiCheckCircle className="w-5 h-5" /> อัปโหลดเรียบร้อยแล้ว</> : <><FiUpload className="w-5 h-5" /> แนบสลิปการโอนเงิน</>}
+              {order.paymentSlip ? <><FiCheckCircle className="w-5 h-5" /> Slip Uploaded</> : <><FiUpload className="w-5 h-5" /> Attach Payment Slip</>}
             </button>
           )}
         </div>
@@ -201,7 +201,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
   const showCountdown = ["COOKING", "AWAITING_PAYMENT", "AWAITING_CONFIRMATION"].includes(order.status) && !!order.estimatedReadyAt;
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("th-TH", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " น.";
+    new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   const handleReorder = async () => {
     try {
@@ -211,10 +211,10 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           addToCart({ menuId: item.menuId, quantity: item.quantity }, { onSuccess: () => { ok++; res(); }, onError: rej })
         );
       }
-      if (ok === order.orderItems.length) toastService.success(`เพิ่ม ${ok} รายการลงตะกร้าแล้ว`);
-      else if (ok > 0) toastService.warning(`เพิ่มได้ ${ok}/${order.orderItems.length} รายการ`);
+      if (ok === order.orderItems.length) toastService.success(`Added ${ok} items to cart`);
+      else if (ok > 0) toastService.warning(`Added ${ok}/${order.orderItems.length} items`);
     } catch {
-      toastService.error("ไม่สามารถสั่งซ้ำได้ กรุณาลองใหม่");
+      toastService.error("Unable to reorder. Please try again.");
     }
   };
 
@@ -259,9 +259,9 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           <FiAlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-bold text-red-700 uppercase tracking-wide">
-              {order.status === 'REJECTED' ? 'เหตุผลที่ปฏิเสธออเดอร์' :
-               order.status === 'CANCELLED' ? 'เหตุผลที่ยกเลิกออเดอร์' :
-               'ร้านค้าแจ้งปัญหา'}
+              {order.status === 'REJECTED' ? 'Rejection Reason' :
+               order.status === 'CANCELLED' ? 'Cancellation Reason' :
+               'Store Issue Notice'}
             </p>
             <p className="text-base text-red-700 mt-0.5">{order.issueReason}</p>
           </div>
@@ -290,8 +290,8 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
               <FiPackage className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-sm font-bold text-emerald-800">อาหารพร้อมรับแล้ว!</p>
-              <p className="text-xs text-emerald-600">กรุณามารับที่ร้าน</p>
+              <p className="text-sm font-bold text-emerald-800">Order Ready for Pickup!</p>
+              <p className="text-xs text-emerald-600">Please collect your order at the store.</p>
             </div>
           </div>
         )}
@@ -300,7 +300,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
         <div className="bg-slate-50 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3 text-slate-500 text-sm font-bold">
             <FiShoppingBag className="w-4 h-4" />
-            <span>รายการอาหาร ({order.orderItems.length})</span>
+            <span>Order Items ({order.orderItems.length})</span>
           </div>
           <div className="space-y-2.5">
             {order.orderItems.slice(0, 3).map((item, i) => (
@@ -312,7 +312,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
               </div>
             ))}
             {order.orderItems.length > 3 && (
-              <p className="text-sm text-slate-400 pt-1">+ อีก {order.orderItems.length - 3} รายการ</p>
+              <p className="text-sm text-slate-400 pt-1">+ {order.orderItems.length - 3} more items</p>
             )}
           </div>
         </div>
@@ -325,7 +325,7 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           <div className="flex items-center gap-2">
             <div className={`w-2.5 h-2.5 rounded-full ${isPaid ? "bg-emerald-500" : "bg-amber-400 animate-pulse"}`} />
             <span className={`text-sm font-semibold ${isPaid ? "text-emerald-700" : "text-amber-700"}`}>
-              {isPaid ? "ชำระแล้ว" : "ยังไม่ชำระ"} · {order.paymentMethod === "PROMPTPAY" ? "PromptPay" : "เงินสด"}
+              {isPaid ? "Paid" : "Unpaid"} · {order.paymentMethod === "PROMPTPAY" ? "PromptPay" : "Cash"}
             </span>
           </div>
           <span className="text-3xl font-black text-slate-900">฿{order.totalAmount.toFixed(2)}</span>
@@ -336,12 +336,12 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
           {order.status === "AWAITING_PAYMENT" ? (
             <button onClick={() => onPayClick(order)}
               className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-base">
-              <FiDollarSign className="w-5 h-5" /> ชำระเงินทันที
+              <FiDollarSign className="w-5 h-5" /> Pay Now
             </button>
           ) : (
             <Link to={`/my-orders/${order.id}`} className="block">
               <button className="w-full bg-slate-900 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-base">
-                ดูรายละเอียด <FiChevronRight className="w-5 h-5" />
+                View Details <FiChevronRight className="w-5 h-5" />
               </button>
             </Link>
           )}
@@ -350,8 +350,8 @@ const OrderCard = ({ order, onPayClick }: { order: Order; onPayClick: (order: Or
             <button onClick={handleReorder} disabled={isAddingToCart}
               className="w-full border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50 disabled:cursor-not-allowed">
               {isAddingToCart
-                ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-400 border-t-transparent" /> กำลังเพิ่มลงตะกร้า...</>
-                : <><FiRefreshCw className="w-5 h-5" /> สั่งซ้ำ</>}
+                ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-400 border-t-transparent" /> Adding to cart...</>
+                : <><FiRefreshCw className="w-5 h-5" /> Reorder</>}
             </button>
           )}
         </div>
@@ -376,6 +376,152 @@ const SkeletonCard = () => (
     </div>
   </div>
 );
+
+// ── Batch grouping ─────────────────────────────────────────────────────────────
+interface OrderBatch { orders: Order[]; isMultiStore: boolean; }
+
+const groupByBatch = (orders: Order[]): OrderBatch[] => {
+  if (orders.length === 0) return [];
+  const sorted = [...orders].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const batches: OrderBatch[] = [];
+  let current: Order[] = [sorted[0]];
+  for (let i = 1; i < sorted.length; i++) {
+    const gap = new Date(sorted[i].createdAt).getTime() - new Date(current[current.length - 1].createdAt).getTime();
+    if (gap <= 10_000) { current.push(sorted[i]); }
+    else { batches.push({ orders: current, isMultiStore: current.length > 1 }); current = [sorted[i]]; }
+  }
+  batches.push({ orders: current, isMultiStore: current.length > 1 });
+  return batches;
+};
+
+// ── Batch Order Card (multi-store single bill) ─────────────────────────────────
+const BatchOrderCard = ({ batch, onPayClick }: { batch: OrderBatch; onPayClick: (o: Order) => void }) => {
+  const { mutate: addToCart, isPending: isAddingToCart } = useAddItemToCart();
+  const total = batch.orders.reduce((sum, o) => sum + o.totalAmount, 0);
+  const awaitingPayment = batch.orders.find(o => o.status === "AWAITING_PAYMENT");
+  const allDone = batch.orders.every(o => ["COMPLETED", "CANCELLED", "REJECTED"].includes(o.status));
+  const hasIssue = batch.orders.some(o => o.hasIssue);
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
+  const handleReorderAll = async () => {
+    try {
+      let count = 0;
+      for (const order of batch.orders) {
+        for (const item of order.orderItems) {
+          await new Promise<void>((res, rej) =>
+            addToCart({ menuId: item.menuId, quantity: item.quantity }, { onSuccess: () => { count++; res(); }, onError: rej })
+          );
+        }
+      }
+      toastService.success(`Added ${count} items to cart!`);
+    } catch {
+      toastService.error("Could not reorder. Please try again.");
+    }
+  };
+
+  return (
+    <div className={`col-span-full bg-white rounded-2xl overflow-hidden transition-all duration-300
+      ${hasIssue ? "border-2 border-red-300 shadow-red-100 shadow-lg" : "border border-slate-200 shadow-md hover:shadow-xl"}`}>
+
+      {/* ── Header ── */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-5 text-white">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <FiLayers className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-black text-lg leading-tight">Multi-Store Order</p>
+              <p className="text-violet-200 text-sm">{batch.orders.length} stores · {formatDate(batch.orders[0].createdAt)}</p>
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <p className="text-violet-200 text-xs">Combined Total</p>
+            <p className="font-black text-2xl">฿{total.toFixed(2)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Store sections ── */}
+      <div className="p-5 space-y-3">
+        {batch.orders.map(order => {
+          const cfg = getStatusConfig(order.status);
+          const isActive = !["COMPLETED", "CANCELLED", "REJECTED"].includes(order.status);
+          return (
+            <div key={order.id} className="border border-slate-200 rounded-xl overflow-hidden">
+              {/* Store header row */}
+              <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between border-b border-slate-100">
+                <div className="flex items-center gap-2 min-w-0">
+                  <MdRestaurant className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <span className="font-bold text-slate-800 truncate">{order.store.name}</span>
+                </div>
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0 ml-2 ${cfg.bgColor} ${cfg.color}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${cfg.dotColor} ${isActive ? "animate-pulse" : ""}`} />
+                  {cfg.text}
+                </div>
+              </div>
+
+              {/* Issue notice */}
+              {order.issueReason && (
+                <div className="bg-red-50 border-b border-red-100 px-4 py-2 flex items-center gap-2">
+                  <FiAlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                  <p className="text-xs text-red-700 font-medium">{order.issueReason}</p>
+                </div>
+              )}
+
+              {/* Items list */}
+              <div className="px-4 py-3 space-y-1.5">
+                {order.orderItems.slice(0, 3).map((item, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm">
+                    <span className="text-slate-700 truncate flex-1 pr-2">
+                      {item.menu.name} <span className="text-slate-400">×{item.quantity}</span>
+                    </span>
+                    <span className="font-semibold text-slate-800 flex-shrink-0">฿{item.subtotal.toFixed(0)}</span>
+                  </div>
+                ))}
+                {order.orderItems.length > 3 && (
+                  <p className="text-xs text-slate-400">+{order.orderItems.length - 3} more items</p>
+                )}
+              </div>
+
+              {/* Store subtotal + detail link */}
+              <div className="px-4 pb-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
+                <span className="text-sm text-slate-500">
+                  Subtotal: <span className="font-bold text-slate-800">฿{order.totalAmount.toFixed(2)}</span>
+                  <span className="ml-2 text-slate-400">· {order.paymentMethod === "PROMPTPAY" ? "PromptPay" : "Cash"}</span>
+                </span>
+                <Link to={`/my-orders/${order.id}`}
+                  className="text-xs font-semibold text-violet-600 hover:text-violet-800 flex items-center gap-1 transition-colors">
+                  Details <FiChevronRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Footer actions ── */}
+      <div className="px-5 pb-5 space-y-2.5">
+        {awaitingPayment && (
+          <button onClick={() => onPayClick(awaitingPayment)}
+            className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold py-4 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+            <FiDollarSign className="w-5 h-5" /> Pay Now · {awaitingPayment.store.name}
+          </button>
+        )}
+        {allDone && (
+          <button onClick={handleReorderAll} disabled={isAddingToCart}
+            className="w-full border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            {isAddingToCart
+              ? <><div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-400 border-t-transparent" /> Adding to cart...</>
+              : <><FiRefreshCw className="w-5 h-5" /> Reorder All</>}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // ── Main Feature Component ─────────────────────────────────────────────────────
 const MyOrdersFeature = () => {
@@ -416,8 +562,8 @@ const MyOrdersFeature = () => {
           <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <FiXCircle className="w-8 h-8 text-red-500" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">เกิดข้อผิดพลาด</h2>
-          <p className="text-slate-500 text-sm">ไม่สามารถโหลดออเดอร์ได้ กรุณาลองใหม่</p>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">An Error Occurred</h2>
+          <p className="text-slate-500 text-sm">Unable to load orders. Please try again.</p>
         </div>
       </div>
     );
@@ -432,8 +578,8 @@ const MyOrdersFeature = () => {
 
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-2">ออเดอร์ของฉัน</h1>
-            <p className="text-slate-500 text-base">ติดตามสถานะและจัดการคำสั่งซื้อของคุณ</p>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-2">My Orders</h1>
+            <p className="text-slate-500 text-base">Track status and manage your orders.</p>
           </div>
 
           {ordersData && ordersData.data.length === 0 ? (
@@ -441,11 +587,11 @@ const MyOrdersFeature = () => {
               <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <FiShoppingBag className="w-10 h-10 text-slate-400" />
               </div>
-              <h2 className="text-xl font-bold text-slate-900 mb-2">ยังไม่มีออเดอร์</h2>
-              <p className="text-slate-500 text-sm mb-6">เริ่มสั่งอาหารที่คุณชื่นชอบกันเถอะ!</p>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">No Orders Yet</h2>
+              <p className="text-slate-500 text-sm mb-6">Start ordering your favourite food!</p>
               <Link to="/">
                 <button className="bg-slate-900 hover:bg-slate-700 text-white font-bold py-3 px-8 rounded-2xl transition-all inline-flex items-center gap-2">
-                  <MdRestaurant className="w-5 h-5" /> เริ่มสั่งอาหาร
+                  <MdRestaurant className="w-5 h-5" /> Browse Stores
                 </button>
               </Link>
             </div>
@@ -458,16 +604,18 @@ const MyOrdersFeature = () => {
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-1.5 h-8 bg-orange-500 rounded-full" />
                     <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                      ออเดอร์ปัจจุบัน
+                      Active Orders
                       <span className="text-sm font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full">
-                        {activeOrders.length} รายการ
+                        {activeOrders.length} orders
                       </span>
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {activeOrders.map(order => (
-                      <OrderCard key={order.id} order={order} onPayClick={setSelectedOrder} />
-                    ))}
+                    {groupByBatch(activeOrders).map((batch, i) =>
+                      batch.isMultiStore
+                        ? <BatchOrderCard key={i} batch={batch} onPayClick={setSelectedOrder} />
+                        : <OrderCard key={batch.orders[0].id} order={batch.orders[0]} onPayClick={setSelectedOrder} />
+                    )}
                   </div>
                 </section>
               )}
@@ -478,16 +626,18 @@ const MyOrdersFeature = () => {
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-1.5 h-8 bg-slate-300 rounded-full" />
                     <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                      ประวัติการสั่งซื้อ
+                      Order History
                       <span className="text-sm font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-                        {historyOrders.length} รายการ
+                        {historyOrders.length} orders
                       </span>
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {historyOrders.map(order => (
-                      <OrderCard key={order.id} order={order} onPayClick={setSelectedOrder} />
-                    ))}
+                    {groupByBatch(historyOrders).map((batch, i) =>
+                      batch.isMultiStore
+                        ? <BatchOrderCard key={i} batch={batch} onPayClick={setSelectedOrder} />
+                        : <OrderCard key={batch.orders[0].id} order={batch.orders[0]} onPayClick={setSelectedOrder} />
+                    )}
                   </div>
                 </section>
               )}
@@ -499,7 +649,7 @@ const MyOrdersFeature = () => {
                     onClick={() => setPage(p => Math.max(p - 1, 1))}
                     disabled={page === 1}
                     className="px-5 py-2.5 bg-white border-2 border-slate-200 rounded-xl font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
-                    <FiChevronLeft className="w-4 h-4" /> ก่อนหน้า
+                    <FiChevronLeft className="w-4 h-4" /> Previous
                   </button>
                   <div className="px-5 py-2.5 bg-slate-900 text-white font-bold rounded-xl">
                     {ordersData.currentPage} / {ordersData.totalPages}
@@ -508,7 +658,7 @@ const MyOrdersFeature = () => {
                     onClick={() => setPage(p => Math.min(p + 1, ordersData.totalPages))}
                     disabled={page === ordersData.totalPages}
                     className="px-5 py-2.5 bg-white border-2 border-slate-200 rounded-xl font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
-                    ถัดไป <FiChevronRight className="w-4 h-4" />
+                    Next <FiChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               )}

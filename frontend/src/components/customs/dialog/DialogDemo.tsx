@@ -21,55 +21,55 @@ export const DialogDemo = () => {
   // ตัวอย่างการใช้ Service
   const handleServiceConfirm = async () => {
     const confirmed = await dialogService.confirm({
-      title: 'ยืนยันการดำเนินการ',
-      description: 'คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?',
+      title: 'Confirm Action',
+      description: 'Are you sure you want to proceed?',
       type: 'confirm',
-      confirmText: 'ยืนยัน',
-      cancelText: 'ยกเลิก'
+      confirmText: 'Confirm',
+      cancelText: 'Cancel'
     });
 
     if (confirmed) {
-      await dialogService.success('สำเร็จ!', 'การดำเนินการเสร็จสมบูรณ์');
+      await dialogService.success('Success!', 'The action has completed successfully');
     }
   };
 
   const handleServiceError = async () => {
     await dialogService.error(
-      'เกิดข้อผิดพลาด',
-      'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง'
+      'An error occurred',
+      'Could not save data. Please try again.'
     );
   };
 
   const handleServiceWarning = async () => {
     await dialogService.warning(
-      'คำเตือน',
-      'การกระทำนี้อาจส่งผลกระทบต่อระบบ กรุณาตรวจสอบให้แน่ใจก่อนดำเนินการ'
+      'Warning',
+      'This action may affect the system. Please make sure before proceeding.'
     );
   };
 
   const handleServiceInfo = async () => {
     await dialogService.info(
-      'ข้อมูลสำคัญ',
-      'ระบบจะปิดปรับปรุงในวันที่ 25 ธันวาคม 2024 เวลา 02:00-04:00 น.'
+      'Important Info',
+      'The system will undergo maintenance on Dec 25, 2024 at 02:00-04:00 AM.'
     );
   };
 
   const titles = {
-    confirm: 'ยืนยันการดำเนินการ',
-    alert: 'ข้อความแจ้งเตือน',
-    success: 'สำเร็จ!',
-    error: 'เกิดข้อผิดพลาด',
-    warning: 'คำเตือน',
-    info: 'ข้อมูลสำคัญ',
+    confirm: 'Confirm Action',
+    alert: 'Alert Notification',
+    success: 'Success!',
+    error: 'An error occurred',
+    warning: 'Warning',
+    info: 'Important Info',
   };
 
   const descriptions = {
-    confirm: 'คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?',
-    alert: 'นี่คือข้อความแจ้งเตือนทั่วไป',
-    success: 'การดำเนินการเสร็จสมบูรณ์แล้ว',
-    error: 'ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง',
-    warning: 'การกระทำนี้อาจส่งผลกระทบต่อระบบ',
-    info: 'นี่คือข้อมูลสำคัญที่คุณควรทราบ',
+    confirm: 'Are you sure you want to proceed?',
+    alert: 'This is a general alert message',
+    success: 'The action has completed successfully',
+    error: 'Could not proceed. Please try again.',
+    warning: 'This action may affect the system.',
+    info: 'This is important information you should know.',
   };
 
   return (
@@ -130,13 +130,13 @@ export const DialogDemo = () => {
           <pre className="text-green-400 text-sm overflow-x-auto">
 {`// Using Service
 const confirmed = await dialogService.confirm({
-  title: 'ยืนยันการดำเนินการ',
-  description: 'คุณแน่ใจหรือไม่?',
+  title: 'Confirm Action',
+  description: 'Are you sure?',
   type: 'confirm'
 });
 
 if (confirmed) {
-  await dialogService.success('สำเร็จ!', 'เสร็จสิ้น');
+  await dialogService.success('Success!', 'Completed');
 }
 
 // Using Component
@@ -144,8 +144,8 @@ if (confirmed) {
   isOpen={isOpen}
   onClose={() => setIsOpen(false)}
   onConfirm={handleConfirm}
-  title="ยืนยันการลบ"
-  description="คุณแน่ใจหรือไม่?"
+  title="Confirm Delete"
+  description="Are you sure?"
   type="warning"
 />`}
           </pre>
@@ -160,8 +160,8 @@ if (confirmed) {
         title={titles[dialogType]}
         description={descriptions[dialogType]}
         type={dialogType}
-        confirmText="ยืนยัน"
-        cancelText="ยกเลิก"
+        confirmText="Confirm"
+        cancelText="Cancel"
         hideCancel={dialogType === 'alert' || dialogType === 'success' || dialogType === 'error'}
       />
     </div>

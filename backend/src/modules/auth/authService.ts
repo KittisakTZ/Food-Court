@@ -71,13 +71,14 @@ export const authService = {
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: env.NODE_ENV === 'production',
+                sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
                 maxAge: (10 * 60 * 60 * 1000) // 10 hours
             });
 
             return new ServiceResponse(
                 ResponseStatus.Success,
                 "User authenticated successfully.",
-                null,
+                { token },
                 StatusCodes.OK
             );
         } catch (ex) {
@@ -93,7 +94,7 @@ export const authService = {
             res.clearCookie('token', {
                 httpOnly: true,
                 secure: env.NODE_ENV === 'production',
-                sameSite: 'strict'
+                sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax'
             });
 
             return new ServiceResponse(
@@ -115,7 +116,13 @@ export const authService = {
 
     authStatus: (req: Request) => {
         try {
-            const token = req.cookies.token;
+            let token = req.cookies.token;
+            if (!token) {
+                const authHeader = req.headers.authorization;
+                if (authHeader && authHeader.startsWith("Bearer ")) {
+                    token = authHeader.substring(7);
+                }
+            }
             if (token) {
                 return new ServiceResponse(
                     ResponseStatus.Success,

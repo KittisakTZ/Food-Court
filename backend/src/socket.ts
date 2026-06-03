@@ -8,6 +8,7 @@ import { chatRepository } from "./modules/chat/chatRepository";
 const logger = pino({ name: "socket.io" });
 
 const MAX_MESSAGE_LENGTH = 2000;
+const activeRoomOrders = new Map<string, string>();
 
 interface SocketJwtPayload {
     uuid: string;
@@ -46,7 +47,10 @@ export const initializeSocket = (server: HttpServer) => {
                 cookies[name.trim()] = rest.join('=').trim();
             }
         });
-        const token = cookies.token;
+        let token = cookies.token;
+        if (!token) {
+            token = (socket.handshake.auth?.token || socket.handshake.query?.token) as string;
+        }
 
         if (!token) {
             return next(new Error("Authentication error: No token provided"));
@@ -79,6 +83,17 @@ export const initializeSocket = (server: HttpServer) => {
             if (typeof roomId !== "string" || !roomId.trim()) return;
             socket.join(roomId);
             logger.info(`User ${userId} joined room ${roomId}`);
+
+            const activeOrderId = activeRoomOrders.get(roomId);
+            if (activeOrderId) {
+                socket.emit("order_selected", { roomId, orderId: activeOrderId });
+            }
+        });
+
+        socket.on("select_order", (data: { roomId: string; orderId: string }) => {
+            if (!data || typeof data.roomId !== "string" || typeof data.orderId !== "string") return;
+            activeRoomOrders.set(data.roomId, data.orderId);
+            io.to(data.roomId).emit("order_selected", { roomId: data.roomId, orderId: data.orderId });
         });
 
         socket.on("join_kds", (storeId: string) => {

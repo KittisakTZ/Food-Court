@@ -7,12 +7,13 @@ const PromptPaySchema = z.string()
     .optional()
     .nullable();
 
-// Payload สำหรับการสร้างและอัปเดตร้านค้า
 export type StorePayload = {
     name: string;
     description?: string | null;
     location?: string | null;
-    image?: string | null; // <-- ไม่มีการเปลี่ยนแปลง
+    image?: string | null;
+    openTime?: string | null;
+    closeTime?: string | null;
 };
 
 // Schema สำหรับการสร้างร้านค้า
@@ -36,6 +37,8 @@ export const UpdateStoreSchema = z.object({
         location: z.string().optional().nullable(),
         promptPayId: PromptPaySchema,
         image: z.string().optional().nullable(),
+        openTime: z.string().regex(/^\d{2}:\d{2}$/).optional().nullable(),
+        closeTime: z.string().regex(/^\d{2}:\d{2}$/).optional().nullable(),
     }),
 });
 

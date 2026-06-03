@@ -25,8 +25,10 @@ type SalesForecastTableProps = {
 function isGroupHeader(label: string): boolean {
   const lower = label.toLowerCase();
   return !lower.includes("ยอดขาย") &&
+    !lower.includes("sales") &&
     !lower.includes("%") &&
     !lower.includes("ยอดต่างจากเป้าหมาย") &&
+    !lower.includes("variance") &&
     !/\d/.test(lower);
 }
 
@@ -57,7 +59,7 @@ const SalesForecastTable: React.FC<SalesForecastTableProps> = ({ header, rows })
           className="flex items-center gap-2"
         >
           <LuPencil style={{ fontSize: "18px" }} />
-          {editMode ? "บันทึก" : "ปรับ"}
+          {editMode ? "Save" : "Adjust"}
         </Buttons>
       </div>
 
@@ -69,13 +71,13 @@ const SalesForecastTable: React.FC<SalesForecastTableProps> = ({ header, rows })
                 rowSpan={2}
                 className="sticky left-0 z-[30] bg-blue-900 p-2 text-left border border-gray-300 w-[100px] min-w-[100px] max-w-[100px] sm:w-[200px] sm:min-w-[200px] sm:max-w-[200px]"
               >
-                เป้าหมายยอดขาย
+                Sales Target
               </th>
               <th
                 rowSpan={2}
                 className="sticky left-[99px] z-[20] bg-blue-900 p-2 border border-gray-300 w-[90px] min-w-[90px] max-w-[90px] sm:left-[200px] sm:w-[160px] sm:min-w-[160px] sm:max-w-[160px]"
               >
-                ทั้งปี {header.year}
+                Full Year {header.year}
               </th>
               {header.quartile.map((q, i) => (
                 <th
@@ -116,7 +118,7 @@ const SalesForecastTable: React.FC<SalesForecastTableProps> = ({ header, rows })
                     <span className="block lg:hidden text-xs font-normal">{row.label}</span>
                     <span className="hidden lg:inline">
                       {editMode && isHighlight && (
-                        <span className="mr-1 text-gray-500" title="สามารถแก้ไขได้">✏️</span>
+                        <span className="mr-1 text-gray-500" title="Editable">✏️</span>
                       )}
                       {row.label}
                     </span>

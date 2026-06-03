@@ -52,12 +52,12 @@ export const useUpdateMyStore = () => {
         onSuccess: (updatedStore) => {
             queryClient.setQueryData(['my-store'], updatedStore);
             // **Alert "Success" มาจากตรงนี้**
-            toastService.success("อัปเดตข้อมูลร้านค้าสำเร็จ!");
+            toastService.success("Store information updated successfully!");
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
             // **Console Error อาจจะมาจากตรงนี้**
-            toastService.error(`ไม่สามารถอัปเดตร้านค้าได้: ${errorMessage}`);
+            toastService.error(`Unable to update store: ${errorMessage}`);
         }
     });
 };
@@ -72,7 +72,7 @@ export const useToggleMyStoreStatus = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.response?.data?.message || error.message;
-            toastService.error(`ไม่สามารถเปลี่ยนสถานะร้านค้าได้: ${errorMessage}`);
+            toastService.error(`Unable to change store status: ${errorMessage}`);
         }
     });
 };

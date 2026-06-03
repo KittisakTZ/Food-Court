@@ -145,7 +145,7 @@ const TextArea: React.FC<TextAreaProps> = ({
               variant={listening ? "soft" : "outline"}
               color={listening ? "red" : "gray"}
               highContrast
-              title={listening ? "กำลังฟัง..." : "เริ่มพูด"}
+              title={listening ? "Listening..." : "Start Speaking"}
               className="rounded-full"
             >
               {listening ? <Mic size={15} /> : <MicOff size={15} />}
@@ -156,7 +156,7 @@ const TextArea: React.FC<TextAreaProps> = ({
               onChange={(e) => setLanguage(e.target.value as "th-TH" | "en-US")}
               className="text-xs border rounded"
             >
-              <option value="th-TH">ไทย</option>
+              <option value="th-TH">Thai</option>
               <option value="en-US">English</option>
             </select>
           </div>

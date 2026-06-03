@@ -37,7 +37,10 @@ app.use('/uploads', (req, res, next) => {
 });
 
 // เสิร์ฟ static files
-app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
+const uploadsPath = __dirname.includes('build') 
+    ? path.join(__dirname, '../../src/uploads') 
+    : path.join(__dirname, '../src/uploads');
+app.use('/uploads', express.static(uploadsPath));
 
 // Routes
 app.use("/v1/auth", authRouter);

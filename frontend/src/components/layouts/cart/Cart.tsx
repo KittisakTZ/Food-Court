@@ -4,7 +4,6 @@ import { useCartStore } from "@/zustand/useCartStore";
 import { useUpdateCartItem, useClearCart } from "@/hooks/useCart";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus, FiX, FiShoppingBag, FiArrowRight } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi';
-import { BiDish } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
@@ -18,15 +17,22 @@ export const Cart = () => {
     const [isConfirmOpen, setConfirmOpen] = useState(false);
     const { isMobile, isTablet } = useScreenSize();
 
-    // คำนวณค่า totals ด้วย useMemo
-    const { totalItems, totalPrice } = useMemo(() => {
-        if (!cart?.items) {
-            return { totalItems: 0, totalPrice: 0 };
-        }
+    const { totalItems, totalPrice, storeGroups } = useMemo(() => {
+        if (!cart?.items) return { totalItems: 0, totalPrice: 0, storeGroups: [] };
         const items = cart.items;
         const newTotalItems = items.reduce((total, item) => total + item.quantity, 0);
         const newTotalPrice = items.reduce((total, item) => total + item.menu.price * item.quantity, 0);
-        return { totalItems: newTotalItems, totalPrice: newTotalPrice };
+
+        const groupMap: Record<string, { storeId: string; storeName: string; items: typeof items }> = {};
+        for (const item of items) {
+            const sid = item.menu.storeId;
+            if (!groupMap[sid]) {
+                groupMap[sid] = { storeId: sid, storeName: item.menu.store?.name ?? sid, items: [] };
+            }
+            groupMap[sid].items.push(item);
+        }
+
+        return { totalItems: newTotalItems, totalPrice: newTotalPrice, storeGroups: Object.values(groupMap) };
     }, [cart]);
 
     const { mutate: updateItem, isPending: isUpdating } = useUpdateCartItem();
@@ -54,8 +60,8 @@ export const Cart = () => {
                 isOpen={isConfirmOpen}
                 onClose={() => setConfirmOpen(false)}
                 onConfirm={clearCart}
-                title="ยืนยันการล้างตะกร้า"
-                description="คุณต้องการล้างตะกร้าสินค้าทั้งหมดใช่หรือไม่? 🗑️"
+                title="Clear Cart"
+                description="Are you sure you want to remove all items from your cart?"
             />
             {/* Floating Cart Button */}
             <div className={`fixed z-[45] animate-fade-in ${
@@ -85,7 +91,7 @@ export const Cart = () => {
                         {!isMobile && (
                             <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                                 <div className="bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xl whitespace-nowrap">
-                                    ดูตะกร้า ({totalItems} รายการ)
+                                    View Cart ({totalItems} items)
                                     <div className="absolute top-full right-6 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
                                 </div>
                             </div>
@@ -117,10 +123,10 @@ export const Cart = () => {
                                         </div>
                                         <div>
                                             <h2 className="font-bold text-lg flex items-center gap-2">
-                                                ตะกร้าของคุณ
+                                                Your Cart
                                                 <HiSparkles className="animate-spin-slow w-4 h-4" />
                                             </h2>
-                                            <p className="text-orange-100 text-xs">{totalItems} รายการ</p>
+                                            <p className="text-orange-100 text-xs">{totalItems} items</p>
                                         </div>
                                     </div>
                                     
@@ -140,96 +146,79 @@ export const Cart = () => {
                                     className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                                 >
                                     <MdDelete className="w-4 h-4" />
-                                    ล้างตะกร้า
+                                    Clear Cart
                                 </button>
                             </div>
                         </div>
 
-                        {/* Cart Items — flex-1 ทำให้ scroll ในพื้นที่ที่เหลือระหว่าง header กับ footer */}
-                        <div className={`flex-1 overflow-y-auto space-y-3 bg-gradient-to-b from-orange-50/30 to-white min-h-0 ${
+                        {/* Cart Items grouped by store */}
+                        <div className={`flex-1 overflow-y-auto space-y-4 bg-gradient-to-b from-orange-50/30 to-white min-h-0 ${
                             isMobile ? 'p-3' : 'p-4'
                         }`}>
-                            {cart?.items.map((item, index) => (
-                                <div
-                                    key={item.id}
-                                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-3 border border-gray-100 hover:border-orange-200 group"
-                                    style={{ animationDelay: `${index * 0.1}s` }}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        {/* Menu Image */}
-                                        <div className="relative flex-shrink-0">
-                                            <div className="w-14 h-14 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
-                                                <img
-                                                    src={item.menu.image || NO_FOOD_IMAGE}
-                                                    alt={item.menu.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                                    onError={onImgError(NO_FOOD_IMAGE)}
-                                                />
-                                            </div>
-                                            {/* Quantity Badge */}
-                                            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md">
-                                                {item.quantity}
-                                            </div>
-                                        </div>
-
-                                        {/* Menu Info */}
-                                        <div className="flex-grow min-w-0">
-                                            <h3 className="font-bold text-gray-800 truncate text-sm group-hover:text-orange-600 transition-colors" title={item.menu.name}>
-                                                {item.menu.name}
-                                            </h3>
-                                            <p className="text-gray-500 text-xs mt-0.5">
-                                                ฿{item.menu.price.toFixed(0)} / ชิ้น
-                                            </p>
-
-                                            {/* Quantity Controls */}
-                                            <div className="flex items-center gap-2 mt-1.5">
-                                                <button
-                                                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                                                    disabled={isPending}
-                                                    className="w-7 h-7 bg-red-100 hover:bg-red-500 text-red-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                                                >
-                                                    <FiMinus className="w-3 h-3" />
-                                                </button>
-
-                                                <span className="w-6 text-center font-bold text-gray-800 text-sm">
-                                                    {item.quantity}
-                                                </span>
-
-                                                <button
-                                                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                                                    disabled={isPending}
-                                                    className="w-7 h-7 bg-green-100 hover:bg-green-500 text-green-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                                                >
-                                                    <FiPlus className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Item Total */}
-                                        <div className="text-right flex-shrink-0">
-                                            <div className="font-bold text-green-600 text-base">
-                                                ฿{(item.menu.price * item.quantity).toFixed(0)}
-                                            </div>
-                                            <button
-                                                onClick={() => handleUpdateQuantity(item.id, 0)}
-                                                disabled={isPending}
-                                                className="mt-1 text-red-400 hover:text-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                                                title="ลบออกจากตะกร้า"
+                            {storeGroups.map((group) => (
+                                <div key={group.storeId}>
+                                    {storeGroups.length > 1 && (
+                                        <p className="text-xs font-bold text-orange-600 uppercase tracking-wide mb-2 px-1">
+                                            {group.storeName}
+                                        </p>
+                                    )}
+                                    <div className="space-y-3">
+                                        {group.items.map((item, index) => (
+                                            <div
+                                                key={item.id}
+                                                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-3 border border-gray-100 hover:border-orange-200 group"
+                                                style={{ animationDelay: `${index * 0.1}s` }}
                                             >
-                                                <FiTrash2 className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="relative flex-shrink-0">
+                                                        <div className="w-14 h-14 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+                                                            <img
+                                                                src={item.menu.image || NO_FOOD_IMAGE}
+                                                                alt={item.menu.name}
+                                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                                onError={onImgError(NO_FOOD_IMAGE)}
+                                                            />
+                                                        </div>
+                                                        <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md">
+                                                            {item.quantity}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-grow min-w-0">
+                                                        <h3 className="font-bold text-gray-800 truncate text-sm group-hover:text-orange-600 transition-colors" title={item.menu.name}>
+                                                            {item.menu.name}
+                                                        </h3>
+                                                        <p className="text-gray-500 text-xs mt-0.5">
+                                                            ฿{item.menu.price.toFixed(0)} / item
+                                                        </p>
+                                                        <div className="flex items-center gap-2 mt-1.5">
+                                                            <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} disabled={isPending} className="w-7 h-7 bg-red-100 hover:bg-red-500 text-red-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                                                                <FiMinus className="w-3 h-3" />
+                                                            </button>
+                                                            <span className="w-6 text-center font-bold text-gray-800 text-sm">{item.quantity}</span>
+                                                            <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} disabled={isPending} className="w-7 h-7 bg-green-100 hover:bg-green-500 text-green-600 hover:text-white rounded-lg flex items-center justify-center font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                                                                <FiPlus className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right flex-shrink-0">
+                                                        <div className="font-bold text-green-600 text-base">฿{(item.menu.price * item.quantity).toFixed(0)}</div>
+                                                        <button onClick={() => handleUpdateQuantity(item.id, 0)} disabled={isPending} className="mt-1 text-red-400 hover:text-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Remove">
+                                                            <FiTrash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
+                                    {storeGroups.length > 1 && (
+                                        <div className="flex justify-end mt-1 pr-1">
+                                            <span className="text-xs text-gray-500 font-semibold">
+                                                Subtotal: ฿{group.items.reduce((s, i) => s + i.menu.price * i.quantity, 0).toFixed(0)}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
-
-                            {/* Empty State (จริงๆ จะไม่แสดงเพราะ component จะ return null) */}
-                            {cart?.items.length === 0 && (
-                                <div className="text-center py-12">
-                                    <BiDish className="w-20 h-20 text-gray-300 mx-auto mb-4" />
-                                    <p className="text-gray-500 font-semibold">ตะกร้าว่างเปล่า</p>
-                                </div>
-                            )}
                         </div>
 
                         {/* Footer - Total & Checkout — flex-shrink-0 ไม่ให้หดเมื่อของเยอะ */}
@@ -237,18 +226,18 @@ export const Cart = () => {
                             {/* Summary row */}
                             <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl px-4 py-3 mb-3 border border-orange-200">
                                 <div className="flex items-center justify-between text-sm mb-1">
-                                    <span className="text-gray-600">ค่าอาหาร</span>
+                                    <span className="text-gray-600">Food total</span>
                                     <span className="font-semibold text-gray-800">฿{totalPrice.toFixed(0)}</span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-600">ค่าจัดส่ง</span>
-                                    <span className="font-semibold text-green-600">ฟรี! 🎉</span>
+                                    <span className="text-gray-600">Delivery</span>
+                                    <span className="font-semibold text-green-600">Free!</span>
                                 </div>
                             </div>
 
                             {/* Total */}
                             <div className="flex justify-between items-center mb-3 pb-3 border-b-2 border-gray-100">
-                                <span className="text-base font-bold text-gray-800">ยอดรวมทั้งหมด</span>
+                                <span className="text-base font-bold text-gray-800">Total</span>
                                 <span className="text-2xl font-bold text-orange-600">฿{totalPrice.toFixed(0)}</span>
                             </div>
 
@@ -261,12 +250,12 @@ export const Cart = () => {
                                     {isPending ? (
                                         <>
                                             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                                            กำลังดำเนินการ...
+                                            Processing...
                                         </>
                                     ) : (
                                         <>
                                             <FiShoppingBag className="w-4 h-4 group-hover/checkout:animate-bounce" />
-                                            ไปชำระเงิน
+                                            Checkout
                                             <FiArrowRight className="w-4 h-4 group-hover/checkout:translate-x-1 transition-transform" />
                                         </>
                                     )}
@@ -278,7 +267,7 @@ export const Cart = () => {
                                 onClick={() => setIsExpanded(false)}
                                 className="w-full mt-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all text-sm"
                             >
-                                เลือกซื้อต่อ
+                                Continue Shopping
                             </button>
                         </div>
                     </div>

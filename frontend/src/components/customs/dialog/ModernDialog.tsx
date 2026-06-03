@@ -69,8 +69,8 @@ export const ModernDialog = ({
   title,
   description,
   type = 'confirm',
-  confirmText = 'ยืนยัน',
-  cancelText = 'ยกเลิก',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
   hideCancel = false,
 }: ModernDialogProps) => {
   const config = dialogConfig[type];

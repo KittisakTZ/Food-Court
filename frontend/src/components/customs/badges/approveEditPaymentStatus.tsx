@@ -40,19 +40,19 @@ const ApproveEditPaymentStatus = (props: ApproveEditPaymentStatusType) => {
 
   switch (value) {
     case "pending":
-      textValue = "ระหว่างดำเนินการ";
+      textValue = "Pending";
       color = "sky";
       break;
     case "approved":
-      textValue = "อนุมัติ";
+      textValue = "Approved";
       color = "blue";
       break;
     case "rejected":
-      textValue = "ไม่อนุมัติ";
+      textValue = "Rejected";
       color = "red";
       break;
     case "canceled":
-      textValue = "ยกเลิก";
+      textValue = "Cancelled";
       color = "gray";
       break;
 

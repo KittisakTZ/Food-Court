@@ -58,7 +58,7 @@ const SidebarItemFooter = ({
                   {user.name}
                 </span>
                 <span className="text-xs text-gray-500 group-hover:text-orange-500 transition-colors">
-                  ออนไลน์
+                  Online
                 </span>
               </div>
               <div className="ml-auto bg-orange-100 group-hover:bg-orange-200 rounded-full p-1.5 transition-all">

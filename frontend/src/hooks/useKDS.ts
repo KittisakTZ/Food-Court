@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useMyStoreOrders } from "./useOrders";
+import { toastService } from "@/services/toast.service";
 
 export interface KdsOrderItem {
     menuId: string;
@@ -15,6 +16,8 @@ export interface KdsOrder {
     queueNumber: number;
     status: string;
     totalAmount: number;
+    paymentMethod: string | null;
+    paidAt: string | null;
     createdAt: string;
     startCookingAt: string | null;
     estimatedReadyAt: string | null;
@@ -42,6 +45,8 @@ export const useKDS = (storeId: string | undefined) => {
                     queueNumber: o.queueNumber,
                     status: o.status,
                     totalAmount: o.totalAmount,
+                    paymentMethod: (o as any).paymentMethod ?? null,
+                    paidAt: (o as any).paidAt ?? null,
                     createdAt: o.createdAt,
                     startCookingAt: (o as any).startCookingAt ?? null,
                     estimatedReadyAt: (o as any).estimatedReadyAt ?? null,
@@ -62,10 +67,14 @@ export const useKDS = (storeId: string | undefined) => {
         const baseUrl =
             import.meta.env.VITE_API_BASE_URL?.replace("/v1", "") ||
             "http://localhost:5080";
+        const token = localStorage.getItem("token") || "";
 
         socketRef.current = io(baseUrl, {
             withCredentials: true,
             transports: ["websocket", "polling"],
+            auth: {
+                token: token.replace(/['"]+/g, "")
+            }
         });
 
         socketRef.current.on("connect", () => {
@@ -75,21 +84,21 @@ export const useKDS = (storeId: string | undefined) => {
 
         socketRef.current.on("disconnect", () => setIsConnected(false));
 
-        // order ใหม่เข้าคิว
+        // new order in queue
         socketRef.current.on("kds:new_order", (order: KdsOrder) => {
             setOrders((prev) => {
                 const exists = prev.find((o) => o.id === order.id);
                 if (exists) return prev;
                 return [...prev, order];
             });
+            toastService.success(`New order #${order.queueNumber} received!`);
         });
 
-        // สถานะ order เปลี่ยน
+        // order status changed
         socketRef.current.on(
             "kds:order_update",
-            (update: { id: string; status?: string; startCookingAt?: string; estimatedReadyAt?: string }) => {
+            (update: { id: string; status?: string; startCookingAt?: string; estimatedReadyAt?: string; paidAt?: string }) => {
                 setOrders((prev) => {
-                    // ถ้า COMPLETED / REJECTED / CANCELLED ให้เอาออกจาก KDS
                     if (update.status && ["COMPLETED", "REJECTED", "CANCELLED"].includes(update.status)) {
                         return prev.filter((o) => o.id !== update.id);
                     }
@@ -100,10 +109,19 @@ export const useKDS = (storeId: string | undefined) => {
                                   ...(update.status && { status: update.status }),
                                   ...(update.startCookingAt && { startCookingAt: update.startCookingAt }),
                                   ...(update.estimatedReadyAt !== undefined && { estimatedReadyAt: update.estimatedReadyAt }),
+                                  ...(update.paidAt !== undefined && { paidAt: update.paidAt }),
                               }
                             : o
                     );
                 });
+
+                if (update.status === "AWAITING_CONFIRMATION") {
+                    toastService.warning("A customer has uploaded a payment slip. Please verify.");
+                } else if (update.status === "CANCELLED") {
+                    toastService.error("An order was automatically cancelled due to payment timeout.");
+                } else if (update.status === "COMPLETED") {
+                    toastService.success("Order marked as completed.");
+                }
             }
         );
 

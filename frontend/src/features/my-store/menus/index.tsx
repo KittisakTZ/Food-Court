@@ -14,7 +14,7 @@ import { NO_FOOD_IMAGE, onImgError } from "@/utils/imageUtils";
 const MENU_TYPE_OPTIONS = (Object.keys(MENU_TYPE_LABEL) as MenuType[]).map(type => ({
   value: type,
   label: `${MENU_TYPE_EMOJI[type]} ${MENU_TYPE_LABEL[type]}`,
-  hint: `เวลาทำ ~${MENU_TYPE_DEFAULT_COOKING_TIME[type]} นาที`,
+  hint: `Cook ~${MENU_TYPE_DEFAULT_COOKING_TIME[type]} min`,
 }));
 
 const CategoryManager = ({ storeId }: { storeId: string }) => {
@@ -53,7 +53,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
     setDialogState({
       isOpen: true,
       title: "Confirm Deletion",
-      description: `คุณแน่ใจว่าต้องการลบหมวดหมู่ "${categoryName}" ใช่หรือไม่?`,
+      description: `Are you sure you want to delete the category "${categoryName}"?`,
       onConfirm: () => deleteCat({ storeId, categoryId }),
     });
   };
@@ -107,13 +107,13 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
           <div>
             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
               <MdCategory className="w-6 h-6" />
-              หมวดหมู่เมนู
+              Menu Categories
             </h2>
             <p className="text-orange-100 text-sm mt-1 flex items-center gap-2">
               <span className="bg-white/20 px-2 py-0.5 rounded-full font-semibold">
                 {categories?.length || 0}
               </span>
-              หมวดหมู่
+              {(categories?.length || 0) === 1 ? "category" : "categories"}
             </p>
           </div>
           <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
@@ -140,7 +140,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleCreate()}
-              placeholder="ชื่อหมวดหมู่..."
+              placeholder="Category name..."
               className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none text-sm bg-white shadow-sm"
             />
             <button
@@ -149,11 +149,11 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
               className="px-4 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-yellow-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md"
             >
               <FiPlus className="w-5 h-5" />
-              <span>{isCreating ? '...' : 'เพิ่ม'}</span>
+              <span>{isCreating ? '...' : 'Add'}</span>
             </button>
           </div>
           <p className="text-xs text-gray-400 pl-1">
-            เวลาทำเริ่มต้น: {MENU_TYPE_EMOJI[newCategoryType]} {MENU_TYPE_LABEL[newCategoryType]} = <span className="font-semibold text-orange-500">{MENU_TYPE_DEFAULT_COOKING_TIME[newCategoryType]} นาที</span>
+            Default cook time: {MENU_TYPE_EMOJI[newCategoryType]} {MENU_TYPE_LABEL[newCategoryType]} = <span className="font-semibold text-orange-500">{MENU_TYPE_DEFAULT_COOKING_TIME[newCategoryType]} min</span>
           </p>
         </div>
 
@@ -163,8 +163,8 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
               <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
                 <MdCategory className="w-8 h-8 text-orange-300" />
               </div>
-              <p className="text-gray-500 font-medium">ยังไม่มีหมวดหมู่</p>
-              <p className="text-gray-400 text-sm mt-1">เริ่มเพิ่มหมวดหมู่แรกของคุณ</p>
+              <p className="text-gray-500 font-medium">No categories yet</p>
+              <p className="text-gray-400 text-sm mt-1">Add your first category above</p>
             </div>
           ) : (
             categories?.map(cat => (
@@ -205,13 +205,13 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                     <span className="text-xl flex-shrink-0">{MENU_TYPE_EMOJI[cat.menuType]}</span>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-gray-800 text-sm truncate">{cat.name}</p>
-                      <p className="text-xs text-gray-400">{MENU_TYPE_LABEL[cat.menuType]} · {MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]} นาที</p>
+                      <p className="text-xs text-gray-400">{MENU_TYPE_LABEL[cat.menuType]} · {MENU_TYPE_DEFAULT_COOKING_TIME[cat.menuType]} min</p>
                     </div>
                     <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => handleEdit({ ...cat, menuType: cat.menuType as MenuType })}
                         className="p-1.5 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
-                        title="แก้ไข"
+                        title="Edit"
                       >
                         <FiEdit2 className="w-3.5 h-3.5" />
                       </button>
@@ -219,7 +219,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                         onClick={() => handleDelete(cat.id, cat.name)}
                         disabled={isDeleting}
                         className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 disabled:bg-gray-200 disabled:text-gray-400"
-                        title="ลบ"
+                        title="Delete"
                       >
                         <FiTrash2 className="w-3.5 h-3.5" />
                       </button>
@@ -236,7 +236,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
             onClick={() => setIsExpanded(!isExpanded)}
             className="w-full mt-3 text-sm text-orange-600 hover:text-orange-700 font-medium"
           >
-            {isExpanded ? 'แสดงน้อยลง' : `แสดงทั้งหมด (${categories.length})`}
+            {isExpanded ? 'Show less' : `Show all (${categories.length})`}
           </button>
         )}
       </div>
@@ -264,7 +264,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
       setDialogState({
         isOpen: true,
         title: "Confirm Deletion",
-        description: `คุณแน่ใจว่าต้องการลบเมนู "${menuName}" ใช่หรือไม่?`,
+        description: `Are you sure you want to delete the menu item "${menuName}"?`,
         onConfirm: () => deleteItem({ storeId, menuId }),
       });
     };
@@ -311,13 +311,13 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
             <div>
               <h2 className="text-3xl font-bold text-white flex items-center gap-3">
                 <MdRestaurant className="w-8 h-8" />
-                เมนูทั้งหมด
+                All Menu Items
               </h2>
               <p className="text-orange-100 text-sm mt-2 flex items-center gap-2">
                 <span className="bg-white/20 px-3 py-0.5 rounded-full font-semibold">
                   {filteredMenus?.length || 0}
                 </span>
-                รายการ
+                {(filteredMenus?.length || 0) === 1 ? "item" : "items"}
               </p>
             </div>
             <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl">
@@ -332,7 +332,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="ค้นหาเมนูที่ต้องการ..."
+              placeholder="Search menu items..."
               className="w-full pl-12 pr-12 py-3.5 rounded-xl border-2 border-white/50 focus:ring-2 focus:ring-white focus:border-white outline-none text-gray-700 font-medium placeholder-gray-400 shadow-sm bg-white"
             />
             {searchTerm && (
@@ -354,10 +354,10 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                 <MdRestaurant className="w-12 h-12 text-orange-500" />
               </div>
               <p className="text-gray-700 text-xl font-bold mb-2">
-                {searchTerm ? 'ไม่พบเมนูที่ค้นหา' : 'ยังไม่มีเมนู'}
+                {searchTerm ? 'No results found' : 'No menu items yet'}
               </p>
               <p className="text-gray-500 text-sm">
-                {searchTerm ? 'ลองค้นหาด้วยคำอื่น' : 'เริ่มสร้างเมนูแรกของคุณได้เลย'}
+                {searchTerm ? 'Try a different search term' : 'Start by adding your first menu item'}
               </p>
             </div>
           ) : (
@@ -387,16 +387,21 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                       <span className="inline-flex items-center gap-1.5 bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200">
                         <MdCategory className="w-4 h-4 text-orange-600" />
                         <span className="text-sm font-semibold text-orange-700">
-                          {menu.category?.name || 'ไม่มีหมวดหมู่'}
+                          {menu.category?.name || 'No Category'}
                         </span>
                       </span>
+                      {menu.stock != null && (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border ${menu.stock === 0 ? "bg-red-50 text-red-600 border-red-200" : menu.stock <= 5 ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-green-50 text-green-700 border-green-200"}`}>
+                          {menu.stock === 0 ? "Out of stock" : `Stock: ${menu.stock}`}
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {/* Price & Actions */}
                   <div className="flex items-center gap-5 flex-shrink-0">
                     <div className="text-right bg-gradient-to-br from-orange-50 to-yellow-50 px-5 py-3 rounded-xl border-2 border-orange-200">
-                      <p className="text-xs text-gray-500 font-medium mb-1">ราคา</p>
+                      <p className="text-xs text-gray-500 font-medium mb-1">Price</p>
                       <p className="text-3xl font-black text-orange-600">
                         ฿{menu.price.toFixed(0)}
                       </p>
@@ -406,7 +411,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                       <button
                         onClick={() => onEdit(menu)}
                         className="p-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 shadow-md hover:shadow-lg"
-                        title="แก้ไข"
+                        title="Edit"
                       >
                         <FiEdit2 className="w-5 h-5" />
                       </button>
@@ -414,7 +419,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                         onClick={() => handleDelete(menu.id, menu.name)}
                         disabled={isPending}
                         className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 disabled:bg-gray-300 shadow-md hover:shadow-lg"
-                        title="ลบ"
+                        title="Delete"
                       >
                         <FiTrash2 className="w-5 h-5" />
                       </button>
@@ -441,7 +446,7 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
               <div className="absolute inset-0 border-4 border-orange-200 rounded-full"></div>
               <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
             </div>
-            <p className="text-gray-600 font-medium">กำลังโหลดข้อมูล...</p>
+            <p className="text-gray-600 font-medium">Loading...</p>
           </div>
         </div>
       );
@@ -454,8 +459,8 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
             <div className="bg-orange-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
               <MdRestaurant className="w-10 h-10 text-orange-300" />
             </div>
-            <p className="text-xl text-gray-800 font-bold mb-2">คุณยังไม่มีร้านค้า</p>
-            <p className="text-gray-500 text-sm">กรุณาสร้างร้านค้าก่อนเพื่อจัดการเมนู</p>
+            <p className="text-xl text-gray-800 font-bold mb-2">You don't have a store yet</p>
+            <p className="text-gray-500 text-sm">Please create a store first to manage your menu</p>
           </div>
         </div>
       );
@@ -476,21 +481,21 @@ const CategoryManager = ({ storeId }: { storeId: string }) => {
                   <div>
                     <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
                       <MdRestaurant className="w-10 h-10" />
-                      จัดการเมนู
+                      Menu Management
                     </h1>
                     <p className="text-orange-100 text-lg">
-                      ร้าน <span className="font-semibold">{myStore.name}</span>
+                      Store: <span className="font-semibold">{myStore.name}</span>
                     </p>
                   </div>
                   <div className="hidden md:flex items-center gap-6 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-xl">
                     <div className="text-center">
                       <p className="text-3xl font-bold text-white">12</p>
-                      <p className="text-orange-100 text-sm">เมนู</p>
+                      <p className="text-orange-100 text-sm">Items</p>
                     </div>
                     <div className="w-px h-12 bg-white/30"></div>
                     <div className="text-center">
                       <p className="text-3xl font-bold text-white">5</p>
-                      <p className="text-orange-100 text-sm">หมวดหมู่</p>
+                      <p className="text-orange-100 text-sm">Categories</p>
                     </div>
                   </div>
                 </div>
